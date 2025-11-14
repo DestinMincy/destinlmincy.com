@@ -1,1827 +1,1570 @@
 # Portfolio Website - Project Plan
 
+## Executive Summary
+
+**Project**: Modern portfolio website with integrated customer portal, invoice management, and AI-powered features  
+**Tech Stack**: Refine + Next.js + TypeScript + Supabase (PostgreSQL) + Stripe + Google Ads  
+**Development Methodology**: **Test-Driven Development (TDD)** - Tests written before implementation  
+**Timeline**: 11 weeks (portfolio) | 12+ weeks (full launch)  
+**Status**: Planning Complete - Ready for Development
+
+---
+
 ## Project Overview
 
 ### Purpose
-Create a modern, professional portfolio website that showcases Destin L. Mincy's work as a Web Developer and AI Engineer. The site will highlight both traditional web development projects and AI-powered solutions, demonstrating expertise in Node.js, AI integration, and automation technologies.
+Professional portfolio showcasing Destin L. Mincy's work as a Web Developer and AI Engineer, with integrated customer portal for invoice management and payments.
 
-### Goals
-- Showcase professional work and personal projects
-- Demonstrate technical skills across web development and AI
-- Provide clear contact information and call-to-action
-- Create a modern, responsive, and performant user experience
-- Establish professional online presence
-- **Full content management system (WordPress-like, but custom-built)**
-- **Admin panel from day one** - manage all content without code changes
-- **Future-proof architecture for customer portal and invoice management**
-- Enable customer authentication and invoice payment functionality
-- **Payment system architected from the start** - not an afterthought
+### Core Goals
+- ✅ Full CMS (WordPress-like, custom-built) - **ALL content editable via admin**
+- ✅ Admin panel from day one
+- ✅ Customer portal with authentication
+- ✅ Invoice management & payment processing (Stripe)
+- ✅ AI chat assistant (Nora) with smart navigation
+- ✅ Future-proof architecture (blog-ready, scalable)
+- ✅ **Test-Driven Development (TDD)** - All features developed test-first
 
 ### Target Audience
-- Potential clients seeking web development services
-- Companies looking for AI integration and automation solutions
-- Recruiters and hiring managers
-- Fellow developers and tech community
-- **Existing customers (for portal access and invoice payments)**
+Potential clients, recruiters, tech community, **existing customers** (portal access)
 
 ---
 
-## Technical Architecture
+## Technology Stack
 
-### Technology Stack
+### Core Stack
+| Component | Technology | Purpose |
+|-----------|-----------|---------|
+| **Framework** | Refine + Next.js | Data-intensive apps + SSR/SEO |
+| **Language** | TypeScript | Type safety |
+| **UI Framework** | Ant Design | Admin/customer portals |
+| **Styling** | Tailwind CSS + Ant Design | Portfolio pages + dashboards |
+| **Database** | Supabase (PostgreSQL) | Data storage, auth, real-time |
+| **Payments** | Stripe | Invoice payments |
+| **AI** | OpenAI (GPT-3.5 Turbo / GPT-4 Turbo) | Nora chat widget |
+| **Contracts** | DocuSign API | Contract management |
 
-#### Primary Stack (Node.js + Refine Focus)
-- **Runtime**: Node.js (Latest LTS)
-- **Framework**: **Refine** (React-based framework for data-intensive applications)
-  - Built-in authentication providers
-  - Data providers for various backends
-  - Perfect for customer portal and invoice management
-  - Can be used with Next.js for SSR/SEO (Refine + Next.js)
-- **Language**: TypeScript (Recommended for Refine and type safety)
-- **UI Framework Options**:
-  - Ant Design (Recommended - Refine's default, comprehensive components)
-  - Material UI (MUI)
-  - Chakra UI
-  - Headless UI + Tailwind CSS (Custom design)
-- **Styling**: 
-  - Tailwind CSS (If using headless UI approach)
-  - Ant Design's built-in styling (if using Ant Design)
-  - CSS Modules (Alternative)
+### Supporting Libraries
+- **Charts**: Recharts (dashboard visualizations)
+- **Animations**: Framer Motion (portfolio pages)
+- **Icons**: Font Awesome / Heroicons
 
-#### AI Integration Capabilities
-- **AI Features to Demonstrate**:
-  - AI-powered contact form (spam detection, smart responses)
-  - AI-generated project descriptions (optional)
-  - Interactive AI chat widget (showcase AI capabilities)
-  - Automated content management
+### Testing Stack (TDD)
+- **Unit Testing**: Jest + React Testing Library
+- **Integration Testing**: Jest + React Testing Library
+- **E2E Testing**: Playwright (recommended) or Cypress
+- **API Testing**: Jest + Supertest (for API routes)
+- **Test Coverage**: Coverage tools (Jest coverage, Istanbul)
+- **TDD Workflow**: Red → Green → Refactor cycle
 
-#### Development Tools
-- **Package Manager**: npm or pnpm
-- **Build Tool**: Vite or Next.js built-in
-- **Version Control**: Git
-- **Code Quality**: ESLint, Prettier
-- **Testing**: Jest, React Testing Library (if React)
-- **Charting Library** (for dashboards):
-  - Recharts (Recommended - React-native, works with Ant Design)
-  - Chart.js with react-chartjs-2
-  - Victory (React charting library)
-  - Apache ECharts (via echarts-for-react)
-- **Animation Libraries** (for portfolio pages):
-  - Framer Motion (Recommended - React animation library, smooth and performant)
-  - GSAP (Advanced animations, timeline control)
-  - React Spring (Physics-based animations)
-  - AOS (Animate On Scroll) - Simple scroll-triggered animations
-
-#### Deployment & Hosting
-- **Frontend Options**:
-  - Vercel (Recommended if using Next.js + Refine)
-  - Netlify (Great for static sites)
-  - AWS Amplify
-  - DigitalOcean App Platform
-  - Self-hosted (Node.js server)
-- **Backend Options** (if custom backend):
-  - Railway (Easy PostgreSQL + Node.js deployment)
-  - Render (PostgreSQL + Node.js)
-  - DigitalOcean Droplets/App Platform
-  - AWS (EC2, RDS, Lambda)
-  - Heroku (if still using)
-
-#### Database (Required for Customer Portal & CMS)
-- **Supabase (PostgreSQL)** (Selected)
-  - Relational database - best for invoices, users, payments, content
-  - Structured data for invoices, customers, payments, projects, content
-  - ACID compliance for financial transactions
-  - Strong relationships between entities
-  - Perfect for content management (projects, pages, settings)
-  - Real-time subscriptions
-  - Row Level Security (RLS) for access control
-
-#### Backend/API Layer
-- **Supabase** (Selected - PostgreSQL + Auth + Storage + Real-time)
-  - Perfect integration with Refine
-  - Built-in authentication
-  - Row Level Security (RLS) for data access control
-  - PostgreSQL backend (as requested)
-  - Real-time capabilities
-  - Storage for images/files
-  - Auto-generated REST API
-
-#### Authentication
-- **Refine Auth Providers**:
-  - Supabase Auth (Recommended - if using Supabase)
-  - Auth0
-  - Keycloak
-  - Custom JWT-based auth
-  - NextAuth.js (if using Next.js)
-
-#### Payment Processing
-- **Stripe** (Selected)
-  - Payment processing
-  - Invoice generation
-  - Subscription management
-  - Webhook support for payment events
-  - **Must be architected from the start** - not an afterthought
-  - Integration planned from Phase 1 (foundation)
-- **PayPal** (Future consideration if needed)
-  - PayPal Checkout
-  - PayPal Invoicing API
+### Deployment
+- **Frontend**: Vercel (Next.js)
+- **Backend**: Supabase (managed PostgreSQL)
+- **Environment**: Node.js LTS
 
 ---
 
-## Site Structure & Pages
+## Site Structure
 
-### Core Pages
+### Public Pages
+| Page | Route | Key Features |
+|------|-------|--------------|
+| **Home** | `/` | Hero, services preview, featured projects, skills highlight |
+| **Projects** | `/projects` | Filterable grid, categories, search, project details |
+| **Skills** | `/skills` | Categorized skills, visual progress bars, tech badges |
+| **About** | `/about` | Professional bio, career timeline, headshot |
+| **Book a Meeting** | `/book` | Meeting booking page with availability calendar, time slots, operation hours |
+| **Contact** | `/contact` | Contact form (AI spam detection), contact info (optional - can be combined with booking) |
 
-#### 1. Home Page (`/`)
-- **Purpose**: First impression, overview of who you are
-- **Content** (Inspired by ZYAN template):
-  - **Hero Section** (Large, engaging):
-    - Name, title, and tagline with emphasis (e.g., "HI, I'M DESTIN! **Web Developer** **AI Engineer** **Problem Solver**")
-    - Brief introduction (2-3 sentences)
-    - Call-to-action buttons (Download CV, Watch Video, View Projects, Contact Me)
-    - Optional: Video background or animated background
-    - Smooth scroll indicator
-  - **Services/What I Do Section**:
-    - Key services with icons
-    - Brief descriptions
-    - Visual cards with hover effects
-  - **About Preview Section**:
-    - Brief about text
-    - Key statistics (projects completed, clients, etc.)
-    - Link to full About page
-  - **Featured Projects Preview** (3-4 projects):
-    - Interactive project cards
-    - Hover effects and animations
-    - Filter/category options
-  - **Skills Highlight**:
-    - Visual skill bars or icons
-    - Technology logos/badges
-  - **Testimonials Section** (if available):
-    - Client testimonials
-    - Carousel or grid layout
-- **Design**: Modern, clean, engaging hero with smooth animations (inspired by ZYAN and Drake templates)
-- **Animations**: Fade-in on scroll, parallax effects, hover interactions
-- **Note**: Final design will combine the most effective elements from both templates
+### Customer Portal Pages
+| Page | Route | Features |
+|------|-------|----------|
+| **Dashboard** | `/dashboard` | Balance summary, invoices/contracts overview, payment history, quick actions, notifications |
+| **Invoices** | `/invoices` | Invoice list, filters, payment status, PDF download, recurring invoices |
+| **Invoice Detail** | `/invoices/:id` | Full invoice, payment form (Stripe), payment history, partial payments, payment plans |
+| **Contracts** | `/contracts` | Contract list, signing status, DocuSign integration, request new contract |
+| **Contract Detail** | `/contracts/:id` | Contract view, embedded signing, download |
+| **Request Contract** | `/contracts/request` | New contract request form (or via Nora chat) |
+| **Projects** | `/projects` | View assigned projects, upload files (logos, assets), project files library |
+| **Project Detail** | `/projects/:id` | Project details, file upload interface, file library, project messages |
+| **Payments** | `/payments` | Payment history, receipts, filters, payment plans |
+| **Messages** | `/messages` | In-app messaging with admin, message threads, file attachments |
+| **Notifications** | `/notifications` | Notification center, mark as read/unread, preferences |
+| **Profile** | `/profile` | Account info, billing address, password change, 2FA setup, email preferences |
+| **Payment Methods** | `/payment-methods` | Saved cards, add/remove methods, set default |
 
-#### 2. Projects Page (`/projects`)
-- **Purpose**: Detailed showcase of work
-- **Content**:
-  - Filterable project grid/list
-  - Categories: Client Projects, Personal Projects, AI Projects
-  - Each project card includes:
-    - Project image/screenshot
-    - Project title
-    - Brief description
-    - Technologies used (tags)
-    - Links (Live demo, GitHub, Case study)
-    - Date/Year
-- **Features**:
-  - Filter by category
-  - Filter by technology
-  - Search functionality
-  - Project detail modal/page
-
-#### 3. Skills Page (`/skills`)
-- **Purpose**: Comprehensive skills showcase
-- **Content** (Inspired by ZYAN template):
-  - **Education & Experience Timeline** (optional):
-    - Timeline of education and career milestones
-    - Visual timeline with dates
-  - **Skills Organized by Category**:
-    - Core Technologies (Node.js focus)
-    - AI & Machine Learning (detailed breakdown)
-    - Frameworks & Libraries
-    - Tools & Platforms
-    - Soft Skills
-  - **Visual Representation**:
-    - Animated progress bars (fill on scroll)
-    - Skill icons/badges with hover effects
-    - Interactive skill cards
-    - Percentage indicators
-  - **Brief descriptions** of expertise level
-- **Design**: Interactive, visual, easy to scan with smooth animations
-- **Animations**: Progress bar animations, fade-in on scroll, hover effects
-
-#### 4. About Page (`/about`)
-- **Purpose**: Personal story and professional journey
-- **Content**:
-  - Professional background
-  - Career journey/timeline
-  - What drives you
-  - Current focus areas
-  - Professional photo
-  - Resume/CV download link
-- **Tone**: Professional yet personable
-
-#### 5. Contact Page (`/contact`)
-- **Purpose**: Multiple ways to get in touch
-- **Content**:
-  - Contact form (with AI-powered features)
-  - Direct contact information:
-    - Phone: 865-232-8702
-    - Email: dlmincy@destinlmincy.com
-    - Website: destinlmincy.com
-  - Social media links (if applicable)
-  - Availability status
-  - Response time expectations
-- **Features**:
-  - Form validation
-  - Spam protection (AI-powered)
-  - Success/error messaging
-  - Optional: Integration with email service (SendGrid, Resend, etc.)
-
-### Customer Portal Pages (Future Phase)
-
-#### 6. Login/Register (`/login`, `/register`)
-- **Purpose**: Customer authentication
-- **Content**:
-  - Login form (email/password, or OAuth)
-  - Registration form (for new customers)
-  - Password reset functionality
-  - "Remember me" option
-- **Features**:
-  - Secure authentication via Refine auth provider
-  - Session management
-  - Protected routes
-
-#### 7. Customer Dashboard (`/dashboard`)
-- **Purpose**: Customer portal home - comprehensive overview
-- **Design Inspiration**: [Refine MUI Admin Dashboard](https://example.mui.admin.refine.dev) and [Refine HR Dashboard](https://hr.refine.dev/login) - adapted for customer view
-- **Content** (Dashboard Widgets):
-  - **Balance Summary Widget** (Large):
-    - Total outstanding balance
-    - Recent balance changes
-    - Balance trend chart (line chart over time)
-  - **Invoices Overview** (Medium):
-    - Total invoices count
-    - Pending invoices count
-    - Paid invoices count
-    - Overdue invoices count
-    - Quick invoice list (recent 5)
-  - **Contracts Overview** (Medium):
-    - Active contracts count
-    - Contract status summary (draft/sent/signed/expired)
-    - Recent contracts list
-    - Contract expiration dates
-    - Pending signatures indicator
-  - **Payment Summary** (Medium):
-    - Total paid this month/year
-    - Payment history chart (bar chart)
-    - Recent payments list
-  - **Quick Actions** (Small):
-    - View All Invoices
-    - Make Payment
-    - View Contracts
-    - Sign Pending Contracts
-    - Update Profile
-  - **Recent Activity Feed** (Medium):
-    - Recent invoices created
-    - Payment confirmations
-    - Contract updates
-    - System notifications
-- **Features**:
-  - Protected route (authentication required)
-  - Real-time updates (if using Supabase real-time)
-  - Interactive charts and visualizations
-  - Responsive grid layout
-  - Modern, data-rich design (inspired by Refine dashboard examples and provided dashboard image)
-  - Follow Refine dashboard patterns for customer portal
-  - Consistent with Refine's design system
-
-#### 8. Contracts Page (`/contracts`)
-- **Purpose**: View and manage customer contracts
-- **Content**:
-  - List of all customer contracts
-  - Filter by status (Draft, Sent, Signed, Expired, Cancelled)
-  - Sort by date, status, title
-  - Search functionality
-  - Each contract shows:
-    - Contract number/title
-    - Status (with DocuSign status if applicable)
-    - Date sent
-    - Date signed (if signed)
-    - Expiration date
-    - Actions (View Details, Sign Contract, Download)
-- **Features**:
-  - Refine data provider for CRUD operations
-  - DocuSign embedded signing (if enabled)
-  - Contract status tracking
-  - Download signed contracts
-  - View contract history
-
-#### 9. Contract Detail Page (`/contracts/:id`)
-- **Purpose**: Detailed contract view and signing
-- **Content**:
-  - Full contract details
-  - Contract document preview
-  - Signing status
-  - Signing history
-  - Actions:
-    - Sign contract (via DocuSign embedded signing)
-    - Download contract
-    - View signing progress
-- **Features**:
-  - DocuSign embedded signing integration
-  - Contract document display
-  - Signing status updates
-  - Real-time status updates (via webhooks)
-
-#### 10. Invoices Page (`/invoices`)
-- **Purpose**: View and manage invoices
-- **Content**:
-  - List of all customer invoices
-  - Filter by status (Pending, Paid, Overdue, Cancelled)
-  - Sort by date, amount, status
-  - Search functionality
-  - Each invoice shows:
-    - Invoice number
-    - Date issued
-    - Due date
-    - Amount
-    - Status
-    - Actions (View Details, Pay Now)
-- **Features**:
-  - Refine data provider for CRUD operations
-  - Pagination
-  - Export to PDF
-  - Print functionality
-
-#### 11. Invoice Detail Page (`/invoices/:id`)
-- **Purpose**: Detailed invoice view and payment
-- **Content**:
-  - Full invoice details:
-    - Invoice number, dates
-    - Line items with descriptions
-    - Subtotal, taxes, total
-    - Payment terms
-    - Status and payment history
-  - Payment section:
-    - Pay Now button (Stripe/PayPal integration)
-    - Payment method selection
-    - Payment history
-- **Features**:
-  - Secure payment processing
-  - Invoice PDF download
-  - Email invoice option
-  - Payment confirmation
-
-#### 12. Payment History (`/payments`)
-- **Purpose**: View payment history
-- **Content**:
-  - List of all payments made
-  - Filter by date range, invoice, status
-  - Payment details:
-    - Date paid
-    - Amount
-    - Invoice reference
-    - Payment method
-    - Receipt download
-- **Features**:
-  - Receipt generation
-  - Export payment history
-
-#### 11. Profile/Settings (`/profile`)
-- **Purpose**: Customer account management
-- **Content**:
-  - Personal information (name, email, phone)
-  - Billing address
-  - Password change
-  - Notification preferences
-- **Features**:
-  - Update profile information
-  - Change password
-  - Account deletion (optional)
-
-#### 14. Payment Methods (`/payment-methods`)
-- **Purpose**: Manage saved payment methods
-- **Content**:
-  - List of saved payment methods (cards, bank accounts)
-  - Add new payment method
-  - Set default payment method
-  - Remove payment methods
-  - Payment method security indicators
-- **Features**:
-  - Stripe Elements integration for secure card entry
-  - PCI-compliant payment method storage
-  - Default payment method selection
-  - Payment method validation
-
-#### 15. Account Settings (`/account-settings`)
-- **Purpose**: Comprehensive account configuration
-- **Content**:
-  - Account information
-  - Billing preferences
-  - Notification settings
-  - Security settings
-  - Privacy settings
-- **Features**:
-  - All account settings in one place
-  - Save preferences
-  - Two-factor authentication (optional, future)
-
-### Optional Pages
-
-#### 12. Blog/Articles (`/blog`) - Future Enhancement (Architecture Ready)
-- **Note**: Blog architecture will be built from the start, but pages can be hidden until ready
-- Technical articles
-- Project case studies
-- AI/automation tutorials
-- Industry insights
-- **Admin Management**: Full blog CRUD via admin panel (when enabled)
-
-#### 15. Services (`/services`) - If offering services
-- Web Development Services
-- AI Integration Services
-- Automation Solutions
-- Consulting Services
-
-### Admin Pages (Required from Start - Content Management System)
-
-#### 14. Admin Dashboard (`/admin`)
-- **Purpose**: Central admin hub - comprehensive data overview
-- **Design Inspiration**: [Refine MUI Admin Dashboard](https://example.mui.admin.refine.dev) and [Refine HR Dashboard](https://hr.refine.dev/login)
-- **Content** (Dashboard Widgets - Data-Rich Layout):
-  - **Revenue Summary Widget** (Large):
-    - Total revenue (all-time, this month, this year)
-    - Revenue trends (line chart over time)
-    - Revenue by customer breakdown
-    - Growth indicators
-  - **Invoices Overview** (Medium):
-    - Total invoices count
-    - Pending invoices
-    - Paid invoices
-    - Overdue invoices
-    - Invoice status chart (donut/pie chart)
-    - Recent invoices list
-  - **Customers Summary** (Medium):
-    - Total customers count
-    - Active customers
-    - New customers (this month)
-    - Customer growth chart (bar chart)
-    - Recent customer activity
-  - **Projects Overview** (Medium):
-    - Total projects count
-    - Published projects
-    - Draft projects
-    - Featured projects
-    - Project views/engagement metrics
-  - **Payment Analytics** (Medium):
-    - Total payments received
-    - Payments this month/year
-    - Payment methods breakdown (chart)
-    - Average payment amount
-    - Payment success rate
-  - **Website Analytics** (Medium):
-    - Site visitors (if analytics integrated)
-    - Page views
-    - Popular pages
-    - Traffic sources
-  - **Quick Stats Cards** (Small Widgets):
-    - Outstanding invoices amount
-    - Pending payments
-    - Active contracts
-    - Recent activity count
-  - **Recent Activity Feed** (Medium):
-    - Recent invoices created
-    - Recent payments received
-    - New customer registrations
-    - Content updates
-    - System notifications
-  - **Quick Actions** (Small):
-    - Create Invoice
-    - Create Contract
-    - Add Project
-    - Create Customer
-    - View Reports
-- **Features**:
-  - Role-based access control (Admin only)
-  - Real-time data updates
-  - Interactive charts and visualizations
-  - Export data functionality
-  - Filter by date ranges
-  - Modern, data-rich design (inspired by Refine dashboard examples and provided dashboard image)
-  - Responsive grid layout
-  - Dark/light theme support
-  - Follow Refine dashboard patterns and component usage
-  - Consistent with Refine's design system (Ant Design or MUI)
-
-#### 15. Admin Projects (`/admin/projects`)
-- **Purpose**: Manage portfolio projects (CRUD operations)
-- **Content**:
-  - List all projects
-  - Create new projects
-  - Edit existing projects
-  - Delete projects
-  - Upload project images
-  - Set featured projects
-- **Features**:
-  - Rich text editor for descriptions
-  - Image upload and management
-  - Technology tags management
-  - Category management
-  - Preview before publishing
-  - Draft/Save functionality
-
-#### 16. Admin Content Management (`/admin/content`)
-- **Purpose**: Manage ALL website content (pages, sections, blog - future)
-- **Content**:
-  - Edit Home page content
-  - Edit About page content
-  - Edit Skills section
-  - Edit Contact page content
-  - Edit Projects page content (intro text, etc.)
-  - Manage site-wide settings
-  - Edit navigation menu
-  - **Blog Management** (prepared for future):
-    - Create/edit blog posts
-    - Manage blog categories and tags
-    - Blog settings (posts per page, etc.)
-- **Features**:
-  - WYSIWYG editor (like WordPress)
-  - Live preview
-  - Version history (optional)
-  - SEO meta tags editor
-  - Content blocks/sections management
-  - Media library integration
-  - **Blog-ready**: Structure prepared for blog posts when needed
-
-#### 17. Admin Invoices (`/admin/invoices`)
-- **Purpose**: Create and manage invoices
-- **Content**:
-  - Create new invoices
-  - Edit existing invoices
-  - Send invoices to customers
-  - Mark as paid
-  - Generate reports
-- **Features**:
-  - Refine's built-in CRUD pages
-  - Bulk operations
-  - Invoice templates
-  - Payment tracking
-
-#### 18. Admin Customers (`/admin/customers`)
-- **Purpose**: Customer management
-- **Content**:
-  - Customer list
-  - Customer details
-  - Create/edit customers
-  - View customer invoices
-- **Features**:
-  - Full customer management
-  - Customer communication history
-
-#### 19. Admin Settings (`/admin/settings`)
-- **Purpose**: Website configuration and settings
-- **Content**:
-  - Site information (name, description, contact info)
-  - Social media links
-  - Payment settings (Stripe keys, etc.)
-  - **DocuSign settings** (API keys, OAuth configuration)
-  - Email settings
-  - SEO settings
-  - Theme/color customization
-- **Features**:
-  - All configurable from admin panel
-  - No code changes needed for basic updates
-
-#### 20. Admin Contracts (`/admin/contracts`)
-- **Purpose**: Create and manage customer contracts via DocuSign
-- **Content**:
-  - List all contracts
-  - Create new contracts
-  - Edit contract details
-  - Send contracts via DocuSign
-  - View contract status
-  - Track signing progress
-  - Download signed contracts
-- **Features**:
-  - DocuSign integration for contract creation
-  - Contract templates management
-  - Send contracts via DocuSign API
-  - Embedded signing (optional - in-app signing)
-  - Contract status tracking
-  - Webhook integration for status updates
-  - Full CRUD operations using Refine
+### Admin Pages
+| Page | Route | Features |
+|------|-------|----------|
+| **Dashboard** | `/admin` | Revenue analytics, invoice/customer stats, project metrics, quick actions, notifications |
+| **Projects** | `/admin/projects` | CRUD operations, image upload, featured toggle |
+| **Content Management** | `/admin/content` | Edit ALL pages (Home, About, Skills, Contact, Projects) |
+| **Blog** | `/admin/blog` | Blog CRUD (architecture ready, can be hidden) |
+| **Invoices** | `/admin/invoices` | Create/edit invoices, send to customers, payment tracking, recurring invoices, invoice numbering |
+| **Contracts** | `/admin/contracts` | Create contracts, send via DocuSign, track status, review client-requested contracts, approve/reject |
+| **Customers** | `/admin/customers` | Customer management, view invoices/contracts, messaging |
+| **Messages** | `/admin/messages` | Customer messaging, message threads, file attachments |
+| **Email Templates** | `/admin/email-templates` | Manage email templates, preview, test |
+| **Activity Logs** | `/admin/activity-logs` | Audit trail, user actions, search/filter, export |
+| **Settings** | `/admin/settings` | Site config, payment keys, DocuSign settings, theme, tax rates, invoice numbering, email settings, security |
+| **Bookings** | `/admin/bookings` | View all bookings, manage status, operation hours, blocked times |
+| **Reports** | `/admin/reports` | Financial reports, exports (CSV, PDF, Excel), scheduled reports |
 
 ---
 
-## Features & Functionality
+## Key Features
 
-### Core Features
-
-#### 1. Responsive Design
-- Mobile-first approach
-- Breakpoints: Mobile (320px+), Tablet (768px+), Desktop (1024px+)
-- Touch-friendly interactions
-- Optimized images (WebP, lazy loading)
-- Refine's responsive components (if using Ant Design)
-
-#### 2. Performance Optimization
-- Fast page load times (< 3 seconds)
-- Code splitting
-- Image optimization
-- Lazy loading for images and components
-- Minimal JavaScript bundle size
-- SEO optimization (meta tags, structured data)
-- Refine's optimized data fetching
-
-#### 3. Accessibility
-- WCAG 2.1 AA compliance
-- Keyboard navigation
-- Screen reader support
-- Proper semantic HTML
-- ARIA labels where needed
-- Color contrast compliance
-- Ant Design components are accessible by default
-
-#### 4. Interactive Elements & Animations (Inspired by ZYAN and Drake Templates)
-- **Smooth scroll animations**:
-  - Fade-in on scroll
-  - Slide-in animations
-  - Stagger animations for lists
-  - Parallax scrolling effects
-- **Hover effects** on project cards:
-  - Scale transforms
-  - Shadow effects
-  - Color transitions
-- **Loading states** with animations
-- **Page transitions** (smooth, modern)
-- **Micro-interactions**:
-  - Button hover effects
-  - Form field focus animations
-  - Icon animations
-  - Progress indicators
-- **Video backgrounds** (optional, for hero sections)
-- **Parallax effects** for depth and engagement
-- **Nora AI Chat Widget** - Persistent floating chat bubble with smooth animations
-- **Animation Libraries**:
-  - Framer Motion (Recommended - React animation library)
-  - GSAP (Advanced animations)
-  - React Spring (Physics-based animations)
-  - AOS (Animate On Scroll) - Simple scroll animations
-
-#### 5. Authentication & Authorization
-- Secure user authentication
-- Role-based access control (Customer, Admin)
-- Protected routes
-- Session management
-- Password reset functionality
-- OAuth options (Google, GitHub, etc.)
-
-#### 6. Data Management
-- CRUD operations via Refine data providers
-- Real-time updates (if using Supabase)
-- Optimistic updates
-- Error handling and retry logic
-- Caching strategies
-- **Dashboard Data Aggregation**:
-  - Efficient data queries for dashboard widgets
-  - Cached summary statistics
-  - Real-time data refresh
-  - Chart data formatting
-  - Performance optimization for multiple widgets
-
-#### 7. Payment Processing (Architected from Start)
-- Secure payment integration (Stripe)
-- Payment system designed from Phase 1
-- Invoice generation
-- Payment confirmation
-- Receipt generation
-- Webhook handling for payment events
-- PCI compliance considerations
-- Payment status tracking in database
-
-#### 8. Content Management System (CMS) - Comprehensive
-- WordPress-like content management
-- **ALL content editable via admin panel** (no exceptions)
-- No code changes needed for ANY content updates
+### 1. Content Management System (CMS)
+- **ALL content editable** via admin panel (no code changes)
 - WYSIWYG editor for rich content
 - Image/media management
-- Project management via admin
-- **Complete page content management** (Home, About, Skills, Contact, Projects)
-- Settings management (all site settings)
-- **Blog-ready architecture** (tables and admin interface prepared)
-- Blog can be enabled/disabled via settings
-- Version control (optional, future)
-- Content blocks/sections for flexible page building
+- Page status (published/draft)
+- Blog architecture ready (can be hidden until needed)
 
-### AI-Powered Features (Showcase Your Skills)
+### 2. Nora AI Chat Widget ⭐
+- **Persistent chat bubble** (bottom-right, all pages)
+- **Hybrid AI Models**:
+  - Guest users: GPT-3.5 Turbo (cost-effective Q&A)
+  - Authenticated users: GPT-4 Turbo (function calling, data access)
+- **Smart Navigation**: Navigate users to pages/sections and highlight content
+- **Chat History**: Session-based (guests) | Persistent DB (authenticated)
+- **Account Access** (authenticated only): Query invoices, payments, contracts
+- **Meeting Booking**: When users request a meeting, Nora triggers n8n automation workflow
+- **Personality**: Warm, professional, intelligent, patient, proactive
 
-#### 1. Nora AI Chat Widget (Primary AI Feature) ⭐
-- **Persistent chat bubble** in bottom-right corner of all pages
-- **AI Assistant Name**: Nora
-- **Functionality**:
-  - Click to open chat interface
-  - Conversational AI assistant
-  - Answers questions about services, projects, skills
-  - Provides information about your work and expertise
-  - Demonstrates AI integration capabilities
-  - Can be minimized/maximized
-  - **Chat History (Authentication-Based)**:
-    - **Unauthenticated users**: Session-based chat history only (cleared on page refresh/close)
-    - **Authenticated customers**: Full persistent chat history (stored in database)
-    - **Authenticated customers**: Nora can access account information
-      - View invoice details
-      - Check payment status
-      - Access contract information
-      - Check contract status
-      - Answer account-specific questions
-- **Technical Implementation**:
-  - OpenAI API (GPT-4 or Claude) for conversational AI
-  - Custom prompt engineering for Nora's personality
-  - Context about your services, skills, and projects
-  - **For authenticated users**: Access to customer data via Refine data providers
-  - **For authenticated users**: Database storage for chat history
-  - Real-time streaming responses
-  - Error handling and fallback messages
-  - Security: Role-based access to customer data
-- **UI/UX**:
-  - Floating chat bubble (bottom-right)
-  - Smooth open/close animations
-  - Modern chat interface design
-  - Typing indicators
-  - Message history (session-based for guests, persistent for customers)
-  - Mobile-responsive
-  - Visual indicator when Nora has access to account info (for authenticated users)
+### 3. Customer Portal
+- **Authentication Options**:
+  - Email/password login
+  - OAuth providers: Google, Facebook, LinkedIn (GitHub optional)
+  - Supabase Auth via Refine
+- Dashboard with widgets (balance, invoices, contracts, payments)
+- Invoice management & payment processing
+- Contract viewing & signing (DocuSign)
+- **Client-Initiated Contract Requests** ⭐:
+  - Request new contract via form or Nora chat
+  - Two-way signing workflow (client signs first, then admin)
+  - Admin approval/rejection system
+  - Notifications for both parties
+  - Fully signed contract delivery
+- **Project File Uploads** ⭐:
+  - Upload files (logos, assets) to assigned projects
+  - File library per project
+  - File management (view, download, delete)
+  - File organization and categorization
+- Payment method management
+- Account settings
 
-#### 2. Smart Contact Form
-- AI-powered spam detection
-- Auto-categorization of inquiries
-- Suggested responses
-- Sentiment analysis
+### 3.5. AI Contract Generation ⭐
+- **n8n AI Agent**: Automated contract generation based on client and project information
+- **Input Data**: Client information, project details, scope, pricing, terms
+- **Output**: Fully formatted, ready-to-sign contract document
+- **Integration**: Seamless DocuSign workflow (generated contract → DocuSign → signing)
+- **Client-Initiated Requests**:
+  - Clients can request new contracts via form or Nora chat
+  - Two-way signing: Client signs first → Admin reviews & signs → Both notified
+  - Admin approval workflow (approve/reject contract requests)
+  - Automatic project creation upon contract approval
+- **Features**:
+  - Pulls client data from customer profiles
+  - Incorporates project scope and requirements
+  - Generates professional contract with all necessary clauses
+  - Saves contract to database
+  - Ready for immediate DocuSign sending
+- *See Phase 5 for detailed implementation*
 
-#### 3. Intelligent Project Recommendations (Future)
-- AI suggests relevant projects based on visitor behavior
-- Personalized content based on interests
+### 4. Payment Processing
+- Stripe integration (architected from start)
+- Payment Intents API
+- Stripe Elements (secure forms)
+- **Stripe Link** (one-click checkout - faster payment experience)
+- Webhook handling
+- Receipt generation
+- PCI-compliant
 
-#### 4. Automated Content Updates (Future)
-- Integration with n8n/Zapier for automated workflows
-- Auto-update project status
-- Social media integration
+### 5. Meeting Booking System
+- **Booking Page** (`/book`): Calendar view, time slot selection, real-time availability, booking form
+- **Availability Management**: Operation hours, blocked times, timezone support, double booking prevention
+- **Integration**: Unified API (UI + Nora), Google Calendar sync, n8n automation
+- **Admin Management**: View bookings, manage hours, block times, status management
+- **Enhancements**: Video call links, preparation notes, group bookings, templates
+- *See Phase 11 for detailed implementation*
 
----
+### 6. Design & UX
+- **Color Scheme**: Blue, Gold, Silver
+- **Design Inspiration**: 
+  - Portfolio: [ZYAN Template](https://codeefly.net/wp/zyan) + [Drake Template](https://preview.themeforest.net/item/drake-personal-portfolio-html/full_screen_preview/43789350)
+  - Dashboards: [Refine MUI Admin](https://example.mui.admin.refine.dev) + [Refine HR](https://hr.refine.dev/login)
+- Smooth animations (Framer Motion)
+- Responsive design (mobile-first)
+- Accessibility (WCAG 2.1 AA)
 
-## Design Considerations
+### 7. Marketing & Analytics
+- **Google Analytics**: Track website traffic and user behavior
+- **Google Ads Integration**:
+  - Conversion tracking (booking confirmations, contact form submissions)
+  - Remarketing tags for retargeting campaigns
+  - Google Tag Manager integration (optional - for easier tag management)
+  - Conversion events:
+    - Meeting booking completed
+    - Contact form submitted
+    - Invoice payment completed
+    - Customer portal sign-up
 
-### Design Inspiration
-- **Portfolio Template References**:
-  - [ZYAN Portfolio Template](https://codeefly.net/wp/zyan)
-  - [Drake Personal Portfolio Template](https://preview.themeforest.net/item/drake-personal-portfolio-html/full_screen_preview/43789350)
-- **Dashboard References** (Refine Examples):
-  - [Refine MUI Admin Dashboard](https://example.mui.admin.refine.dev) - Material UI admin panel example
-  - [Refine HR Dashboard](https://hr.refine.dev/login) - HR management dashboard example
-- **Design Philosophy**: 
-  - **Portfolio Pages**: Select the most efficient and appealing elements from ZYAN and Drake templates
-  - **Dashboards**: Follow Refine dashboard patterns and best practices from official examples
-  - Create a cohesive, modern design that best serves the portfolio's purpose while maintaining consistency with Refine's design patterns
-- **Key Elements to Incorporate** (Best of Both):
-  - **From ZYAN**:
-    - Modern, clean design aesthetic
-    - Smooth animations and transitions
-    - Interactive portfolio showcases
-    - Engaging hero sections with emphasis styling
-    - Skills visualization with animated progress bars
-    - Testimonials section design
-  - **From Drake** (to evaluate and incorporate best elements):
-    - Unique layout patterns and section arrangements
-    - Creative navigation approaches
-    - Effective use of whitespace and typography
-    - Portfolio presentation styles
-    - Contact form designs
-    - Any innovative UI patterns
-  - **Common Elements** (from both):
-    - Video background options
-    - Parallax scrolling effects
-    - Creative typography and layouts
-    - Modern card-based designs
-    - Smooth scroll animations
+### 8. Email Notifications System ⭐
+- **Automated Notifications**: Invoice reminders, payment confirmations, contract reminders, welcome emails
+- **Template Management**: Admin-managed templates, variables, preview/test
+- **Email Preferences**: Customer opt-in/opt-out, frequency settings
+- **Queue & Logs**: Delivery tracking, retry logic, audit trail
+- *Note: Email primarily handled via n8n workflows (see .env.example for fallback SMTP config)*
+- *See Phase 9 for detailed implementation*
 
-### Visual Identity
+### 9. Invoice Management Enhancements
+- **Invoice Numbering**: Customizable format (INV-YYYY-###), sequential numbering, reset options
+- **Recurring Invoices**: Templates, automatic generation, pause/resume
+- **Payment Plans**: Installments, partial payments, balance tracking
+- **Tax & Currency**: Multi-rate tax calculation, multi-currency support, exchange rates
+- **Invoice Templates**: Multiple templates, custom branding, preview
+- *See Phase 5 & 7 for detailed implementation*
 
-#### Color Scheme
-- **Primary Colors**: Blue, Gold, Silver
-  - Blue: Primary brand color (professional, trustworthy)
-  - Gold: Accent color (premium, achievement)
-  - Silver: Secondary accent (modern, sophisticated)
-- **Implementation**:
-  - Blue for primary actions, headers, links
-  - Gold for highlights, CTAs, achievements
-  - Silver for secondary elements, borders, backgrounds
-  - Consider dark mode support with these colors
-  - Ensure accessibility: High contrast ratios (WCAG AA)
-  - Create color palette variations (light/dark themes)
+### 10. Security & Compliance
+- **2FA**: TOTP-based (Google Authenticator, Authy), SMS optional, backup codes, admin enforcement
+- **Activity Logs**: Complete audit trail, search/filter, export
+- **Rate Limiting**: API limits, login attempt limiting, IP whitelisting, account lockout
+- **GDPR**: Privacy policy, data export/deletion, cookie consent, privacy settings
+- *See Phase 10 for detailed implementation*
 
-#### Typography
-- Clean, readable fonts
-- Heading hierarchy
-- Font pairing (e.g., Inter + Playfair Display)
+### 11. Customer Communication
+- **In-App Messaging**: Admin-customer messaging, threads per invoice/contract, file attachments, read receipts
+- **Notifications Center**: Real-time notifications, categories, preferences, email digest
+- *See Phase 9 for detailed implementation*
 
-#### Imagery
-- Professional photos
-- Project screenshots
-- Icons for technologies
-- Consistent style throughout
-
-#### Layout
-- Clean, uncluttered design
-- Generous white space
-- Grid-based layouts
-- Consistent spacing system
-- **Modern Design Patterns** (inspired by ZYAN and Drake templates):
-  - Hero sections with video/image backgrounds
-  - Parallax scrolling effects
-  - Creative section transitions
-  - Interactive hover states
-  - Smooth scroll animations
-  - Modern card-based layouts
-  - Effective use of whitespace
-  - Creative navigation patterns
-  - Unique layout arrangements (selecting best from both templates)
-
-### User Experience (UX)
-
-#### Navigation
-- Clear, intuitive menu
-- Sticky header (optional)
-- Breadcrumbs for deep pages
-- Mobile hamburger menu
-
-#### User Flow
-1. Land on Home → See overview
-2. Navigate to Projects → Browse work
-3. View Skills → Understand capabilities
-4. Read About → Connect personally
-5. Contact → Reach out
-
-#### Call-to-Actions
-- Clear, prominent CTAs
-- Strategic placement
-- Action-oriented language
+### 12. Additional Features
+- **Discount Codes**: Percentage/fixed discounts, expiration, usage limits, minimum amounts
+- **Credit Notes & Refunds**: Credit notes, Stripe refunds, partial refunds
+- **Export & Reporting**: CSV/PDF/Excel exports, scheduled reports, financial reports
+- **Bulk Operations**: Bulk invoice/payment/customer operations
+- **Global Search**: Cross-content search, autocomplete, filters, keyboard shortcut (Cmd/Ctrl + K)
+- **Dark Mode**: System preference detection, manual toggle, persistent selection
+- **Meeting Enhancements**: Video call links, preparation notes, group bookings, templates
+- *See Phase 12 for detailed implementation*
 
 ---
 
-## Content Strategy
+## Database Schema
 
-### Project Showcases
+### Authentication & Users
+- `users` - Authentication (Supabase auth.users)
+- `customers` - Customer profiles (linked to users)
 
-#### Client Projects
-- Project name
-- Client (if allowed)
-- Challenge/Problem
-- Solution
-- Technologies used
-- Results/Impact
-- Screenshots/demos
-- Links (if public)
+### Content Management
+- `projects` - Portfolio projects (admin-managed, can be assigned to customers)
+  - Fields: id, customer_id (optional - for client-assigned projects), title, description, status, featured, images, created_at, updated_at
+- `pages` - Website content (ALL pages editable)
+- `media` - Uploaded images/files (admin-managed)
+- `settings` - Site configuration
+- `blog_posts` - Blog articles (architecture ready)
+- `blog_categories` - Blog categories
+- `blog_tags` - Blog tags
+- `blog_post_categories` - Post-category relationships
+- `blog_post_tags` - Post-tag relationships
 
-#### Personal Projects
-- Project name
-- Inspiration/Motivation
-- Technologies explored
-- Key features
-- Learning outcomes
-- Live demo link
-- GitHub repository
+### Invoice & Payment System
+- `invoices` - Invoice records
+  - Fields: id, customer_id, invoice_number (custom format), currency, tax_rate_id, recurring_invoice_id, payment_plan_id, status, due_date, total_amount, created_at, updated_at
+- `invoice_items` - Invoice line items
+  - Fields: id, invoice_id, description, quantity, unit_price, total, created_at
+- `payments` - Payment transactions
+  - Fields: id, invoice_id, customer_id, amount, payment_method_id, partial_payment (flag), payment_plan_installment_id, stripe_payment_intent_id, status, created_at, updated_at
+- `recurring_invoices` - Recurring invoice templates
+  - Fields: id, customer_id, template_invoice_id, frequency (daily/weekly/monthly/yearly), start_date, end_date, next_generation_date, is_active, created_at, updated_at
+- `payment_plans` - Payment plan configurations
+  - Fields: id, invoice_id, customer_id, total_amount, number_of_installments, frequency, start_date, status, created_at, updated_at
+- `payment_plan_installments` - Payment plan schedule
+  - Fields: id, payment_plan_id, installment_number, due_date, amount, status (pending/paid/overdue), payment_id, created_at, updated_at
+- `tax_rates` - Tax rate configurations
+  - Fields: id, name, rate (percentage), type (federal/state/local), is_active, created_at, updated_at
+- `discount_codes` - Discount code management
+  - Fields: id, code, type (percentage/fixed), value, min_amount, max_uses, used_count, expires_at, is_active, created_at, updated_at
+- `discount_code_usage` - Discount code tracking
+  - Fields: id, discount_code_id, invoice_id, customer_id, used_at
+- `credit_notes` - Credit note records
+  - Fields: id, invoice_id, customer_id, amount, reason, status, applied_to_invoice_id, created_at, updated_at
+- `refunds` - Refund transactions
+  - Fields: id, payment_id, invoice_id, amount, reason, status, stripe_refund_id, created_at, updated_at
 
-#### AI Projects
-- Project name
-- AI technology used
-- Problem solved
-- Implementation details
-- Results/Impact
-- Technical deep-dive option
+### Contracts
+- `contracts` - Customer contracts (DocuSign integration)
+  - Fields: id, customer_id, invoice_id (optional), project_id (optional), contract_type, docusign_envelope_id, contract_content (text/JSON), generated_by_ai (boolean), ai_generation_data (JSON - stores input data used for generation), requested_by_client (boolean), client_signed_at, admin_signed_at, admin_approved_at, admin_rejected_at, rejection_reason, status (draft/pending_client_signature/pending_admin_approval/pending_admin_signature/completed/rejected), signed_at, created_at, updated_at
+- `contract_requests` - Client-initiated contract requests
+  - Fields: id, customer_id, project_id (optional), request_data (JSON - form data or Nora conversation), contract_id (after generation), status (pending/approved/rejected/contract_generated), created_at, updated_at
 
-### Skills Content
-- Organized by category
-- Proficiency indicators (optional)
-- Years of experience (optional)
-- Certifications (if any)
+### Projects & File Management
+- `projects` - Portfolio projects (admin-managed) - Enhanced for client access
+  - Fields: id, customer_id (optional - for client-assigned projects), title, description, status, featured, images, created_at, updated_at
+- `project_files` - Files uploaded by clients for projects
+  - Fields: id, project_id, customer_id, file_name, file_path, file_type, file_size, category (logo/assets/documentation/etc.), description, uploaded_by, created_at, updated_at
+
+### Booking System
+- `bookings` - Meeting bookings
+  - Fields: id, name, email, phone, company, purpose, meeting_date, meeting_time, duration, status (pending/confirmed/cancelled), timezone, notes, video_call_link, preparation_notes, source (ui/nora), created_at, updated_at
+- `booking_availability` - Operation hours and availability settings
+  - Fields: id, day_of_week (0-6), start_time, end_time, is_available, timezone, created_at, updated_at
+- `booking_blocks` - Blocked time slots (holidays, personal time, etc.)
+  - Fields: id, block_date, start_time, end_time, reason, is_recurring, created_at, updated_at
+
+### Communication & Notifications
+- `messages` - Customer-admin messaging
+  - Fields: id, thread_id, sender_id, recipient_id, message, attachments (JSON), is_read, created_at, updated_at
+- `message_threads` - Message organization
+  - Fields: id, customer_id, admin_id, subject, entity_type (invoice/contract/general), entity_id, last_message_at, created_at, updated_at
+- `notifications` - In-app notifications
+  - Fields: id, user_id, type, title, message, link, is_read, created_at
+- `email_templates` - Email template management
+  - Fields: id, name, subject, body, variables (JSON), type (invoice_reminder/payment_confirmation/etc.), is_active, created_at, updated_at
+- `email_logs` - Email delivery tracking
+  - Fields: id, template_id, recipient_email, subject, status (sent/failed), sent_at, error_message, created_at
+
+### Security & Audit
+- `activity_logs` - Audit trail
+  - Fields: id, user_id, action_type, entity_type, entity_id, details (JSON), ip_address, user_agent, created_at
+
+### AI Features
+- `chat_messages` - Nora chat history (authenticated users)
+  - Fields: id, user_id, message, role (user/assistant), created_at
+
+### User Preferences
+- `saved_filters` - User filter presets
+  - Fields: id, user_id, name, entity_type, filters (JSON), created_at, updated_at
+
+---
+
+## Development Methodology: Test-Driven Development (TDD)
+
+### TDD Principles
+**⚠️ CRITICAL: All development follows TDD methodology**
+
+1. **Red Phase**: Write failing test first
+2. **Green Phase**: Write minimal code to pass test
+3. **Refactor Phase**: Improve code while keeping tests green
+
+### TDD Workflow for Each Feature
+1. Write test (should fail initially)
+2. Run test (confirm it fails for the right reason)
+3. Write minimal implementation to pass test
+4. Run test (should pass)
+5. Refactor code (tests should still pass)
+6. Repeat for next feature
+
+### Testing Strategy
+- **Unit Tests**: Individual functions/components
+- **Integration Tests**: Component interactions, API integrations
+- **E2E Tests**: Critical user flows (authentication, payments, invoice creation)
+- **Test Coverage**: Aim for 80%+ coverage on business logic
+- **Continuous Testing**: Run tests on every commit (CI/CD)
+
+### What Gets Tested
+- ✅ All API endpoints
+- ✅ Authentication flows (email/password, OAuth, 2FA)
+- ✅ Payment processing (Stripe integration)
+- ✅ Invoice creation and management (including recurring, payment plans, partial payments)
+- ✅ Contract management (DocuSign)
+- ✅ AI contract generation (n8n AI Agent)
+- ✅ Client-initiated contract requests (form + Nora)
+- ✅ Two-way contract signing workflow
+- ✅ Client file uploads for projects
+- ✅ Nora AI chat widget functionality
+- ✅ Navigation and highlighting features
+- ✅ Admin panel CRUD operations
+- ✅ Customer portal features
+- ✅ Email notifications system
+- ✅ In-app messaging
+- ✅ Activity logs and audit trail
+- ✅ Tax calculation and multi-currency
+- ✅ Discount codes and credit notes
+- ✅ Export and reporting
+- ✅ Form validations
+- ✅ Error handling
+- ✅ Security features (rate limiting, 2FA, GDPR)
+
+### Testing Tools Setup
+- Jest configuration for Next.js
+- React Testing Library for component testing
+- Playwright for E2E testing
+- Mock Service Worker (MSW) for API mocking
+- Test database setup (Supabase test instance)
 
 ---
 
 ## Development Phases
 
 ### Phase 1: Foundation & Setup (Week 1)
-- [ ] Review [Refine Documentation](https://refine.dev/docs) and key concepts
-- [ ] Project initialization (Refine + Next.js)
-  - [ ] Follow [Refine Quick Start Guide](https://refine.dev/docs/getting-started/quickstart)
-  - [ ] Set up Refine with Next.js (see [Refine + Next.js guide](https://refine.dev/docs/guides-and-concepts/routing/nextjs))
-- [ ] Technology stack setup
-- [ ] Development environment configuration
-- [ ] Git repository setup
-- [ ] Basic project structure
-- [ ] Design system setup (Blue, Gold, Silver color palette)
-- [ ] Supabase project setup and configuration
-- [ ] Database schema design and initial migration
-- [ ] Refine data provider configuration (Supabase)
-  - [ ] Follow [Refine Supabase Data Provider guide](https://refine.dev/docs/data-provider/supabase)
-- [ ] Refine auth provider setup (Supabase Auth)
-  - [ ] Follow [Refine Authentication guide](https://refine.dev/docs/guides-and-concepts/authentication)
-- [ ] Environment variables configuration
+**Goal**: Establish development foundation with TDD infrastructure and core integrations
+
+**Prerequisites**: 
+- All accounts set up (Supabase, Stripe, OpenAI, etc.)
+- Environment variables configured (see `.env.example`)
+- Development environment ready
+
+**Tasks**:
+- [ ] Project initialization (Refine + Next.js + TypeScript)
+- [ ] **Testing infrastructure setup (TDD foundation)**:
+  - [ ] Jest + React Testing Library configuration
+  - [ ] Playwright setup for E2E testing
+  - [ ] Test utilities and helpers
+  - [ ] Mock Service Worker (MSW) setup
+  - [ ] Test database configuration (Supabase test instance)
+  - [ ] CI/CD pipeline with test automation
+- [ ] Supabase setup & database schema (core tables only)
+- [ ] Refine data provider (Supabase)
+- [ ] Refine auth provider (Supabase Auth)
+- [ ] Design system (Blue, Gold, Silver) - Tailwind + Ant Design
 - [ ] Stripe account setup (test mode)
-- [ ] Payment architecture planning (from the start)
-- [ ] Admin panel foundation structure
+- [ ] Environment configuration validation
 
-### Phase 2: Admin Panel & Core Portfolio Pages (Weeks 2-3)
-- [ ] Admin authentication and access control
-- [ ] Admin dashboard layout
-- [ ] Admin projects CRUD (Create, Read, Update, Delete)
-  - Project creation form with rich text editor
-  - Image upload functionality
-  - Technology tags management
-  - Featured project toggle
-- [ ] Admin content management (ALL pages editable)
-  - Home page editor
-  - About page editor
-  - Skills page editor
-  - Contact page editor
-  - Projects page editor (intro content)
-  - WYSIWYG editor integration
-  - Content preview functionality
-  - Page status (published/draft)
-- [ ] Admin blog management (structure ready, can be hidden)
-  - Blog posts CRUD interface
-  - Categories and tags management
-  - Blog settings
-  - Can be disabled/hidden until ready to use
-- [ ] Admin settings page (site configuration)
-  - All site settings editable
-  - Blog enable/disable toggle
-- [ ] Public Home page (reads from database)
-- [ ] Public Projects page (reads from database via Refine)
-- [ ] Skills page (reads from database)
-- [ ] About page (reads from database)
-- [ ] Contact page (reads from database + form)
-- [ ] Navigation and routing
-- [ ] Responsive design implementation
-- [ ] Public/portfolio routing setup
+**Deliverable**: Working development environment with TDD infrastructure, basic Supabase connection, and design system
 
-### Phase 3: Content & Projects (Week 4)
+### Phase 2: Admin Panel & CMS (Weeks 2-3)
+**Goal**: Build admin panel with full CMS capabilities
+
+**Prerequisites**: Phase 1 complete (Foundation ready)
+
+**Tasks**:
+- [ ] **TDD: Write tests first for each feature below**
+- [ ] Admin authentication & dashboard:
+  - [ ] Write tests → Implement → Refactor
+  - [ ] Admin login/logout
+  - [ ] Admin dashboard with basic stats
+- [ ] Admin Projects CRUD:
+  - [ ] Write tests → Implement → Refactor
+  - [ ] Create, read, update, delete projects
+  - [ ] Image upload functionality
+  - [ ] Featured project toggle
+- [ ] Admin Content Management (ALL pages editable):
+  - [ ] Write tests → Implement → Refactor
+  - [ ] WYSIWYG editor integration
+  - [ ] Page content CRUD (Home, About, Skills, Contact)
+  - [ ] Page status (published/draft)
+- [ ] Admin Blog structure (hidden until ready):
+  - [ ] Write tests → Implement → Refactor
+  - [ ] Database schema (blog tables)
+  - [ ] Basic CRUD (can be hidden via feature flag)
+- [ ] Admin Settings page:
+  - [ ] Write tests → Implement → Refactor
+  - [ ] Site configuration management
+  - [ ] Feature flags
+- [ ] Public portfolio pages (read from DB):
+  - [ ] Write tests → Implement → Refactor
+  - [ ] Home, Projects, Skills, About pages
+  - [ ] Dynamic content loading
+- [ ] Run full test suite and ensure all tests pass
+
+**Deliverable**: Fully functional admin panel with CMS, public portfolio pages displaying dynamic content
+
+### Phase 3: Content Creation (Week 4)
+**Prerequisites**: Phase 2 complete (Admin Panel & CMS functional)
 - [ ] Gather project information
-- [ ] Build projects via admin panel (test CMS functionality)
-- [ ] Create project cards/components (public-facing)
-- [ ] Add project images/screenshots via admin upload
-- [ ] Write project descriptions (via admin panel)
-- [ ] **Edit ALL page content via admin panel:**
-  - Home page content
-  - About page content
-  - Skills section content
-  - Contact page content
-  - Projects page intro content
-- [ ] Populate skills section (via admin panel)
-- [ ] Add contact information (via admin settings)
-- [ ] Test full content management workflow
-- [ ] Verify all content is editable without code changes
-- [ ] ✅ **Professional headshot**: Ready - located at `img/Destin-L-Mincy__HEADSHOT.png`
-- [ ] **Blog structure**: Database tables created, admin interface ready (can be hidden until needed)
+- [ ] Build projects via admin panel
+- [ ] Edit all page content via admin
+- [ ] Add professional headshot (`img/Destin-L-Mincy__HEADSHOT.png`)
+- [ ] Test full CMS workflow
+- [ ] **Deliverable**: Portfolio content ready for public viewing
 
-### Phase 4: Authentication & Customer Portal Foundation (Week 5)
-- [ ] Customer authentication setup (Supabase Auth via Refine)
-- [ ] Create login/register pages
-- [ ] Implement protected routes (customer vs admin)
-- [ ] **Build Customer Dashboard** (inspired by Refine examples):
-  - [ ] Review [Refine MUI Admin Dashboard](https://example.mui.admin.refine.dev) patterns (adapted for customer view)
-  - [ ] Review [Refine HR Dashboard](https://hr.refine.dev/login) patterns
-  - [ ] Dashboard layout with widget grid
-  - [ ] Balance summary widget with charts
-  - [ ] Invoices overview widget
-  - [ ] Contracts overview widget
-  - [ ] Payment summary widget
-  - [ ] Recent activity feed
-  - [ ] Quick actions panel
-  - [ ] Data aggregation queries
-  - [ ] Follow Refine dashboard component patterns
-  - [ ] Implement customer-friendly navigation and layout
-- [ ] **Build Admin Dashboard** (inspired by Refine examples):
-  - [ ] Review [Refine MUI Admin Dashboard](https://example.mui.admin.refine.dev) patterns
-  - [ ] Review [Refine HR Dashboard](https://hr.refine.dev/login) patterns
-  - [ ] Dashboard layout with comprehensive widget grid
-  - [ ] Revenue summary widget with charts
-  - [ ] Invoices overview widget
-  - [ ] Customers summary widget
-  - [ ] Projects overview widget
-  - [ ] Payment analytics widget
-  - [ ] Website analytics widget (if integrated)
-  - [ ] Quick stats cards
-  - [ ] Recent activity feed
-  - [ ] Quick actions panel
-  - [ ] Data aggregation queries
-  - [ ] Follow Refine dashboard component patterns
-  - [ ] Implement consistent navigation and layout structure
-- [ ] Database schema for customers and invoices
-- [ ] User role management (Customer, Admin)
-- [ ] Session management
-- [ ] Admin can create customer accounts (optional)
+### Phase 4: Authentication & Customer Portal (Week 5)
+**Goal**: Implement authentication system and customer portal foundation
 
-### Phase 5: Invoice & Contract Management System (Week 6)
-- [ ] Invoice data models in Supabase
-- [ ] Admin: Invoice creation interface (full CRUD)
-- [ ] Admin: Invoice templates and bulk operations
-- [ ] Customer: Invoices list page (Refine CRUD - filtered by customer)
-- [ ] Customer: Invoice detail page
-- [ ] Invoice filtering and search (both admin and customer)
-- [ ] Invoice PDF generation
-- [ ] Email invoice functionality (from admin panel)
-- [ ] Payment integration preparation (Stripe setup)
-- [ ] **Contract Management with DocuSign**:
-  - [ ] Review [DocuSign API Documentation](https://developers.docusign.com/docs)
-  - [ ] DocuSign account setup and OAuth configuration
-  - [ ] Contract data models in Supabase (with DocuSign fields)
-  - [ ] Admin: Contract creation interface (full CRUD)
-  - [ ] Admin: Contract templates management
-  - [ ] DocuSign integration:
-    - [ ] Send contracts via DocuSign API
-    - [ ] Embedded signing setup (optional)
-    - [ ] Webhook handlers for contract status updates
-    - [ ] Contract status tracking
-  - [ ] Customer: Contracts list page (Refine CRUD - filtered by customer)
-  - [ ] Customer: Contract detail page
-  - [ ] Customer: Contract signing interface (DocuSign embedded signing)
-  - [ ] Contract filtering and search
-  - [ ] Download signed contracts
-- [ ] **Customer Payment Methods Page**:
-  - [ ] Payment methods list
-  - [ ] Add payment method (Stripe Elements)
-  - [ ] Set default payment method
-  - [ ] Remove payment methods
-- [ ] **Customer Account Settings Page**:
-  - [ ] Account information form
-  - [ ] Billing preferences
-  - [ ] Notification settings
-  - [ ] Security settings
+**Prerequisites**: Phase 1 complete (Supabase Auth configured), Phase 2 complete (Admin panel ready)
+
+**Tasks**:
+- [ ] **TDD: Write tests first for authentication flows**
+- [ ] Customer authentication setup (Supabase Auth):
+  - [ ] Write tests for email/password auth → Implement → Refactor
+  - [ ] OAuth provider configuration:
+    - [ ] Write tests for Google OAuth → Implement → Refactor
+    - [ ] Write tests for Facebook OAuth → Implement → Refactor
+    - [ ] Write tests for LinkedIn OAuth → Implement → Refactor
+    - [ ] Write tests for GitHub OAuth (optional) → Implement → Refactor
+  - [ ] OAuth provider UI buttons/components (test UI interactions)
+  - [ ] Account linking (OAuth + email/password) - write tests first
+- [ ] Customer Dashboard (widgets: balance, invoices, contracts, payments):
+  - [ ] Write tests for each widget → Implement → Refactor
+  - [ ] Dashboard layout and navigation
+  - [ ] Widget data fetching (will be populated in Phase 5)
+- [ ] Admin Dashboard (comprehensive analytics):
+  - [ ] Write tests for analytics → Implement → Refactor
+  - [ ] Analytics widgets (revenue, customers, invoices)
+  - [ ] Charts integration (Recharts)
+- [ ] Protected routes & role-based access:
+  - [ ] Write tests for route protection → Implement → Refactor
+  - [ ] Middleware for route protection
+  - [ ] Role-based access control (admin/customer/guest)
+- [ ] User role management:
+  - [ ] Write tests for role management → Implement → Refactor
+  - [ ] Role assignment (admin panel)
+- [ ] E2E tests for authentication flows
+
+**Deliverable**: Working authentication system (email/password + OAuth), protected routes, customer/admin dashboards (structure ready for data)
+
+### Phase 5: Invoice & Contract Management (Week 6)
+**Goal**: Build core invoice and contract management system
+
+**Prerequisites**: Phase 4 complete (Authentication & customer portal ready)
+
+**Tasks**:
+- [ ] **TDD: Write tests first for all invoice/contract features**
+- [ ] Database schema setup:
+  - [ ] Write tests for schema → Implement → Refactor
+  - [ ] invoices, invoice_items, contracts tables
+  - [ ] Add invoice_number, currency fields
+- [ ] Invoice CRUD (admin & customer views):
+  - [ ] Write tests for invoice creation → Implement → Refactor
+  - [ ] Write tests for invoice updates → Implement → Refactor
+  - [ ] Write tests for invoice deletion → Implement → Refactor
+  - [ ] Write tests for invoice viewing (admin & customer) → Implement → Refactor
+- [ ] **Invoice Numbering System**:
+  - [ ] Write tests for invoice numbering → Implement → Refactor
+  - [ ] Customizable format configuration (admin settings)
+  - [ ] Sequential numbering logic
+  - [ ] Number format templates
+- [ ] Invoice PDF generation:
+  - [ ] Write tests for PDF generation → Implement → Refactor
+  - [ ] PDF template system
+  - [ ] Download functionality
+- [ ] **Invoice Templates**:
+  - [ ] Write tests for template management → Implement → Refactor
+  - [ ] Multiple template support
+  - [ ] Custom branding (logo, colors)
+  - [ ] Template preview
+- [ ] **AI Contract Generation (n8n Agent)**:
+  - [ ] Write tests for contract generation API → Implement → Refactor
+  - [ ] n8n AI Agent workflow setup:
+    - [ ] Create n8n AI Agent workflow for contract generation
+    - [ ] Set up `N8N_WEBHOOK_CONTRACT_GENERATION` webhook
+    - [ ] Configure AI Agent with contract templates and legal clauses
+    - [ ] Input data structure (client info, project details, scope, pricing, terms)
+    - [ ] Output formatting (PDF-ready contract document)
+  - [ ] Contract generation API endpoint:
+    - [ ] Write tests for API endpoint → Implement → Refactor
+    - [ ] Accept client_id, project_id (or project details), contract type
+    - [ ] Fetch client information from database
+    - [ ] Fetch project information (if exists) or use provided details
+    - [ ] Send data to n8n AI Agent webhook
+    - [ ] Receive generated contract
+    - [ ] Save contract to database (contracts table)
+    - [ ] Return contract document for review
+  - [ ] Admin UI for contract generation:
+    - [ ] Write tests for contract generation UI → Implement → Refactor
+    - [ ] Contract generation form (select client, project, contract type)
+    - [ ] Preview generated contract before sending
+    - [ ] Edit contract if needed (manual override)
+    - [ ] Save and send to DocuSign
+- [ ] **Client-Initiated Contract Requests**:
+  - [ ] Write tests for contract request system → Implement → Refactor
+  - [ ] Database schema setup:
+    - [ ] Write tests for schema → Implement → Refactor
+    - [ ] contract_requests table
+    - [ ] Update contracts table (add client request fields, two-way signing fields)
+  - [ ] Contract request form (customer portal):
+    - [ ] Write tests for request form → Implement → Refactor
+    - [ ] Form fields (project details, scope, pricing, terms, timeline)
+    - [ ] Validation and submission
+    - [ ] Save request to database
+  - [ ] Contract request via Nora (Phase 8 integration):
+    - [ ] Write tests for Nora contract request function → Implement → Refactor
+    - [ ] Add `request_contract` function to Nora (Phase 8)
+    - [ ] Nora collects project details via conversation
+    - [ ] Submit request to same API endpoint as form
+  - [ ] Contract generation from request:
+    - [ ] Write tests for auto-generation → Implement → Refactor
+    - [ ] Auto-generate contract when request submitted (via n8n AI Agent)
+    - [ ] Link contract to request
+  - [ ] Two-way signing workflow:
+    - [ ] Write tests for signing workflow → Implement → Refactor
+    - [ ] Client signs first (DocuSign embedded signing)
+    - [ ] Admin receives notification for review
+    - [ ] Admin approval/rejection UI
+    - [ ] If approved: Admin signs contract
+    - [ ] If rejected: Client notified with reason
+    - [ ] Both parties notified when fully signed
+    - [ ] Fully signed contract delivered to both parties
+  - [ ] Admin contract review UI:
+    - [ ] Write tests for review UI → Implement → Refactor
+    - [ ] View pending contract requests
+    - [ ] Review generated contract
+    - [ ] Approve/reject with comments
+    - [ ] Sign approved contracts
+- [ ] **Client File Uploads for Projects**:
+  - [ ] Write tests for file upload system → Implement → Refactor
+  - [ ] Database schema setup:
+    - [ ] Write tests for schema → Implement → Refactor
+    - [ ] project_files table
+    - [ ] Update projects table (add customer_id for client-assigned projects)
+  - [ ] File upload API endpoint:
+    - [ ] Write tests for upload endpoint → Implement → Refactor
+    - [ ] Accept file uploads (Supabase Storage)
+    - [ ] Validate file types and sizes
+    - [ ] Store file metadata in database
+    - [ ] Link files to projects and customers
+  - [ ] Customer portal file upload UI:
+    - [ ] Write tests for upload UI → Implement → Refactor
+    - [ ] File upload interface on project detail page
+    - [ ] Drag-and-drop or file picker
+    - [ ] File category selection (logo, assets, documentation, etc.)
+    - [ ] File description/notes
+    - [ ] Upload progress indicator
+  - [ ] Project file library (customer portal):
+    - [ ] Write tests for file library → Implement → Refactor
+    - [ ] Display all files for a project
+    - [ ] File filtering by category
+    - [ ] File preview/download
+    - [ ] File deletion (with permissions)
+  - [ ] Admin file management:
+    - [ ] Write tests for admin file management → Implement → Refactor
+    - [ ] View all client-uploaded files
+    - [ ] Download files
+    - [ ] Organize files by project
+- [ ] DocuSign integration:
+  - [ ] Write tests for contract creation → Implement → Refactor
+  - [ ] Write tests for contract sending → Implement → Refactor
+  - [ ] Write tests for embedded signing → Implement → Refactor
+  - [ ] Write tests for webhook handlers → Implement → Refactor
+  - [ ] DocuSign OAuth setup
+  - [ ] Contract status tracking
+  - [ ] Integration with AI-generated contracts (seamless flow)
+- [ ] Payment Methods page:
+  - [ ] Write tests for payment method CRUD → Implement → Refactor
+  - [ ] Stripe payment methods integration
+  - [ ] Add/remove/set default methods
+- [ ] Account Settings page:
+  - [ ] Write tests for settings updates → Implement → Refactor
+  - [ ] Profile management
+  - [ ] Billing address
+  - [ ] Password change
+- [ ] Integration tests for invoice → contract → payment flow
+
+**Deliverable**: Complete invoice and contract management system with AI contract generation, client-initiated contract requests, two-way signing workflow, and client file uploads for projects
 
 ### Phase 6: Payment Integration (Week 7)
-- [ ] Review [Stripe Documentation](https://docs.stripe.com)
-- [ ] Stripe account configuration (production ready setup)
-- [ ] Follow [Stripe development quickstart](https://docs.stripe.com/development/quickstart)
-- [ ] Payment architecture implementation (planned from Phase 1)
-- [ ] **Stripe Elements integration** (see [Stripe Elements docs](https://docs.stripe.com/payments/elements)):
-  - [ ] Payment form components
-  - [ ] Card element for secure card entry
-  - [ ] Payment method management
-  - [ ] Save payment methods for future use
-- [ ] **Payment Intent creation** (see [Payment Intents API](https://docs.stripe.com/payments/payment-intents)):
-  - [ ] Backend API endpoint
-  - [ ] Amount and currency handling
-  - [ ] Customer association
-  - [ ] Metadata for invoice tracking
-- [ ] Build payment flow (invoice → payment → confirmation)
-- [ ] **Stripe webhook handlers** (see [Webhooks guide](https://docs.stripe.com/webhooks)):
-  - [ ] Webhook endpoint setup
-  - [ ] Signature verification (see [Webhook signatures](https://docs.stripe.com/webhooks/signatures))
-  - [ ] Handle payment_intent.succeeded
-  - [ ] Handle payment_intent.payment_failed
-  - [ ] Idempotency key implementation
-- [ ] Payment status updates in database
-- [ ] Payment confirmation pages
-- [ ] Receipt generation and storage
-- [ ] Payment history page (customer view)
-- [ ] Admin payment tracking
-- [ ] Test payment flows (see [Stripe Testing guide](https://docs.stripe.com/testing))
-- [ ] Security audit for payment flow (see [Stripe Security guide](https://docs.stripe.com/security))
+**Goal**: Integrate Stripe payment processing with full security
 
-### Phase 7: AI Features Integration (Week 8)
-- [ ] Set up AI API integrations (OpenAI/Claude)
-- [ ] **Build Nora AI Chat Widget (Primary Feature)**
-  - [ ] Create floating chat bubble component (bottom-right)
-  - [ ] Design chat interface UI
-  - [ ] Implement chat open/close functionality
-  - [ ] Integrate OpenAI/Claude API
-  - [ ] Create Nora's personality prompt/context
-  - [ ] Add context about services, skills, projects
-  - [ ] Implement streaming responses
-  - [ ] Add typing indicators
-  - [ ] **Authentication-aware chat history**:
-    - [ ] Session-based storage for unauthenticated users (client-side only)
-    - [ ] Database storage for authenticated users (chat_messages table)
-    - [ ] Load chat history for authenticated users on login
-  - [ ] **Customer account access for authenticated users**:
-    - [ ] Integrate with Refine data providers to access customer data
-    - [ ] Nora can query invoices, payments, contracts
-    - [ ] Secure access control (only user's own data)
-    - [ ] Context injection for account-specific queries
-    - [ ] Visual indicator when Nora has account access
-  - [ ] Mobile responsiveness
-  - [ ] Error handling and fallbacks
-  - [ ] Security: Ensure customer data is only accessible to account owner
-- [ ] Implement smart contact form (AI spam detection)
-- [ ] Configure automation workflows (n8n) - optional
-- [ ] AI-powered invoice categorization (optional)
-- [ ] Test all AI features
-- [ ] Test Nora chat widget across all pages
+**Prerequisites**: Phase 5 complete (Invoices ready for payment)
 
-### Phase 8: Polish & Optimization (Week 9)
-- [ ] Performance optimization
-- [ ] SEO implementation (for public pages)
-- [ ] Accessibility audit and fixes
-- [ ] Cross-browser testing
-- [ ] Mobile device testing
-- [ ] Animation and transitions
-- [ ] Error handling
-- [ ] Security audit (authentication, payments, data protection)
-- [ ] Payment flow testing (end-to-end)
+**Tasks**:
+- [ ] **TDD: Write tests first for all payment features (CRITICAL for financial transactions)**
+- [ ] Stripe Elements integration:
+  - [ ] Write tests for payment form → Implement → Refactor
+  - [ ] Secure payment form UI
+  - [ ] Card validation
+- [ ] **Stripe Link setup** (one-click checkout):
+  - [ ] Write tests for Link integration → Implement → Refactor
+  - [ ] Enable Stripe Link in Stripe dashboard
+  - [ ] Configure Link in Stripe Elements
+  - [ ] E2E tests for Link checkout flow
+- [ ] Payment Intent creation:
+  - [ ] Write tests for payment intent creation → Implement → Refactor
+  - [ ] API route for payment intent
+  - [ ] Amount validation
+- [ ] Payment flow (invoice → payment → confirmation):
+  - [ ] Write tests for complete payment flow → Implement → Refactor
+  - [ ] Payment processing logic
+  - [ ] Success/failure handling
+  - [ ] E2E tests for payment process
+- [ ] Stripe webhook handlers:
+  - [ ] Write tests for webhook processing → Implement → Refactor
+  - [ ] Webhook signature verification
+  - [ ] Payment status webhooks
+  - [ ] Error handling
+- [ ] Payment status updates:
+  - [ ] Write tests for status updates → Implement → Refactor
+  - [ ] Database updates on payment
+  - [ ] Invoice status sync
+- [ ] Receipt generation:
+  - [ ] Write tests for receipt generation → Implement → Refactor
+  - [ ] Receipt PDF template
+  - [ ] Email receipt (via n8n or email system)
+- [ ] Security audit (including test coverage review)
+  - [ ] PCI compliance verification
+  - [ ] Webhook security review
+  - [ ] Payment flow security testing
 
-### Phase 9: Deployment & Launch (Week 10)
-- [ ] Set up hosting/deployment (Vercel for frontend)
-- [ ] Database migration to production
-- [ ] Configure production environment variables
-- [ ] Set up payment webhooks (production)
-- [ ] Configure domain
-- [ ] SSL certificate setup
-- [ ] Analytics integration (Google Analytics, etc.)
-- [ ] Final testing in production
-- [ ] Launch portfolio site!
-- [ ] Soft launch customer portal (invite-only initially)
+**Deliverable**: Fully functional payment system with Stripe integration, webhooks, and receipts
 
-### Phase 10: Customer Portal Launch (Week 11+)
-- [ ] Beta testing with 1 current client
-- [ ] Gather feedback from initial client
-- [ ] Fix bugs and issues
-- [ ] Documentation for customers
-- [ ] Onboard current client to portal
-- [ ] Full customer portal launch (ready for additional clients)
+### Phase 7: Invoice Enhancements (Week 7.5)
+**Goal**: Add advanced invoice features (recurring, payment plans, tax, discounts, credits)
 
-### Phase 11: Post-Launch (Ongoing)
-- [ ] Monitor performance
-- [ ] Gather user feedback (portfolio and portal)
-- [ ] Regular content updates (projects, blog)
-- [ ] Add new projects
-- [ ] Monitor payment processing
-- [ ] Customer support for portal
-- [ ] Security updates
-- [ ] Feature enhancements based on feedback
-- [ ] Admin panel improvements (if needed)
+**Prerequisites**: Phase 5 & 6 complete (Basic invoices and payments working)
+
+**Tasks**:
+- [ ] **TDD: Write tests first for invoice enhancements**
+- [ ] Database schema setup:
+  - [ ] Write tests for schema → Implement → Refactor
+  - [ ] recurring_invoices, payment_plans, payment_plan_installments tables
+  - [ ] tax_rates, discount_codes, discount_code_usage tables
+  - [ ] credit_notes, refunds tables
+- [ ] **Recurring Invoices**:
+  - [ ] Write tests for recurring invoice creation → Implement → Refactor
+  - [ ] Write tests for automatic generation → Implement → Refactor
+  - [ ] Database schema (recurring_invoices table)
+  - [ ] Cron job/scheduled task for generation
+  - [ ] Pause/resume functionality
+- [ ] **Partial Payments & Payment Plans**:
+  - [ ] Write tests for payment plans → Implement → Refactor
+  - [ ] Database schema (payment_plans, payment_plan_installments tables)
+  - [ ] Payment plan creation UI
+  - [ ] Partial payment tracking
+  - [ ] Remaining balance calculation
+- [ ] **Tax Calculation & Multi-Currency**:
+  - [ ] Write tests for tax calculation → Implement → Refactor
+  - [ ] Database schema (tax_rates table)
+  - [ ] Tax rate configuration (admin)
+  - [ ] Multi-currency support
+  - [ ] Currency conversion API integration
+  - [ ] Exchange rate management
+- [ ] **Discount Codes**:
+  - [ ] Write tests for discount codes → Implement → Refactor
+  - [ ] Database schema (discount_codes, discount_code_usage tables)
+  - [ ] Discount code creation/management
+  - [ ] Apply discount to invoices
+  - [ ] Usage tracking
+- [ ] **Credit Notes & Refunds**:
+  - [ ] Write tests for credit notes → Implement → Refactor
+  - [ ] Write tests for refunds → Implement → Refactor
+  - [ ] Database schema (credit_notes, refunds tables)
+  - [ ] Credit note creation
+  - [ ] Stripe refund integration
+  - [ ] Apply credit to invoices
+
+**Deliverable**: Enhanced invoice system with recurring invoices, payment plans, tax, discounts, and credits
+
+### Phase 8: AI Features Integration (Week 8)
+**Goal**: Implement Nora AI chat widget with smart navigation and function calling
+
+**Prerequisites**: Phase 4 complete (Authentication working for guest/authenticated distinction)
+
+**Tasks**:
+- [ ] **TDD: Write tests first for AI features**
+- [ ] **Nora Architecture Decision**: Direct OpenAI connection (recommended) ✅
+  - [ ] Confirm architecture choice (see "Nora AI Architecture Decision" below)
+- [ ] OpenAI API setup (hybrid: GPT-3.5/GPT-4):
+  - [ ] Write tests for API integration → Implement → Refactor
+  - [ ] Write tests for model routing (guest vs authenticated) → Implement → Refactor
+- [ ] Nora Chat Widget:
+  - [ ] Write tests for chat bubble UI → Implement → Refactor
+  - [ ] Write tests for streaming responses → Implement → Refactor
+  - [ ] **Smart Navigation & Highlighting**:
+    - [ ] Write tests for navigation functions → Implement → Refactor
+    - [ ] Write tests for highlighting effects → Implement → Refactor
+    - [ ] Site structure mapping (test data structure)
+    - [ ] Navigation functions (`navigate_to_page`, `highlight_section`)
+    - [ ] Scroll-to-element with animations
+    - [ ] Visual highlight effects
+  - [ ] Authentication-aware chat history:
+    - [ ] Write tests for session-based history → Implement → Refactor
+    - [ ] Write tests for persistent history → Implement → Refactor
+  - [ ] Function calling for customer data (authenticated users):
+    - [ ] Write tests for function calling → Implement → Refactor
+  - Meeting booking functionality:
+    - [ ] Write tests for meeting booking detection → Implement → Refactor
+    - [ ] Write tests for `book_meeting` function → Implement → Refactor
+    - [ ] n8n workflow setup for meeting booking automation:
+      - [ ] Create n8n workflow for meeting booking
+      - [ ] Set up `N8N_WEBHOOK_BOOKING` webhook
+      - [ ] Integrate with calendar service (Calendly, Google Calendar, etc.)
+      - [ ] Email confirmation setup (via Gmail connection)
+      - [ ] Test workflow end-to-end
+  - Contract request functionality (for authenticated customers):
+    - [ ] Write tests for contract request detection → Implement → Refactor
+    - [ ] Write tests for `request_contract` function → Implement → Refactor
+    - [ ] Function definition for contract requests:
+      - [ ] Collect project details via conversation
+      - [ ] Gather scope, pricing, timeline, requirements
+      - [ ] Submit request to contract request API
+      - [ ] Confirm request submission to user
+- [ ] Contact form AI spam detection:
+  - [ ] Write tests for spam detection → Implement → Refactor
+  - [ ] **Optional: Use n8n workflow** for complex spam detection/automation:
+    - [ ] Set up `N8N_WEBHOOK_CONTACT` webhook
+    - [ ] Configure contact form to trigger n8n workflow
+    - [ ] Set up email notifications via n8n Gmail connection
+- [ ] E2E tests for AI features
+- [ ] Test all AI features (comprehensive test suite)
+
+**Deliverable**: Fully functional Nora AI chat widget with navigation, highlighting, and function calling
+
+### Phase 9: Email Notifications & Communication (Week 8.5)
+**Goal**: Implement email notifications, in-app messaging, and notifications center
+
+**Prerequisites**: Phase 5 & 6 complete (Invoices and payments working)
+
+**Tasks**:
+- [ ] **TDD: Write tests first for email and communication features**
+- [ ] **Email Notifications System**:
+  - [ ] Write tests for email sending → Implement → Refactor
+  - [ ] Database schema (email_templates, email_logs tables)
+  - [ ] Email template management (admin panel)
+  - [ ] Template variables system
+  - [ ] Email queue system (Supabase Edge Functions or n8n)
+  - [ ] Automated invoice reminders (configurable schedule)
+  - [ ] Payment confirmations
+  - [ ] Invoice sent notifications
+  - [ ] Payment failed notifications
+  - [ ] Contract signing reminders
+  - [ ] Overdue invoice alerts
+  - [ ] Welcome emails
+  - [ ] Email preferences (customer opt-in/opt-out)
+  - [ ] Email delivery tracking
+- [ ] **In-App Messaging**:
+  - [ ] Write tests for messaging system → Implement → Refactor
+  - [ ] Database schema (messages, message_threads tables)
+  - [ ] Message UI (customer & admin)
+  - [ ] Message threads per invoice/contract
+  - [ ] File attachments
+  - [ ] Read receipts
+  - [ ] Email notifications for new messages
+- [ ] **Notifications Center**:
+  - [ ] Write tests for notifications → Implement → Refactor
+  - [ ] Database schema (notifications table)
+  - [ ] Real-time notifications (Supabase Realtime)
+  - [ ] Notification bell UI
+  - [ ] Mark as read/unread
+  - [ ] Notification preferences
+  - [ ] Email digest option
+
+**Deliverable**: Complete communication system (email notifications, messaging, notifications center)
+
+### Phase 10: Security & Audit (Week 8.75)
+**Goal**: Implement security features and compliance
+
+**Prerequisites**: Phase 4 complete (Authentication system in place)
+
+**Tasks**:
+- [ ] **TDD: Write tests first for security features**
+- [ ] **Two-Factor Authentication (2FA)**:
+  - [ ] Write tests for 2FA setup → Implement → Refactor
+  - [ ] TOTP-based 2FA (Google Authenticator, Authy)
+  - [ ] SMS-based 2FA (optional)
+  - [ ] Backup codes generation
+  - [ ] 2FA enforcement for admin
+  - [ ] 2FA optional for customers
+  - [ ] Recovery process
+- [ ] **Activity Logs & Audit Trail**:
+  - [ ] Write tests for activity logging → Implement → Refactor
+  - [ ] Database schema (activity_logs table)
+  - [ ] Log all user actions
+  - [ ] Log invoice/payment/contract actions
+  - [ ] Log admin actions
+  - [ ] Activity log UI (admin)
+  - [ ] Search/filter audit logs
+  - [ ] Export audit logs
+- [ ] **Rate Limiting & Security**:
+  - [ ] Write tests for rate limiting → Implement → Refactor
+  - [ ] API rate limiting (per user, per IP)
+  - [ ] Login attempt limiting
+  - [ ] IP whitelisting (admin)
+  - [ ] Suspicious activity detection
+  - [ ] Account lockout
+  - [ ] Session timeout configuration
+- [ ] **GDPR Compliance**:
+  - [ ] Write tests for GDPR features → Implement → Refactor
+  - [ ] Privacy policy acceptance
+  - [ ] Terms of service acceptance
+  - [ ] Data export functionality
+  - [ ] Data deletion (right to be forgotten)
+  - [ ] Cookie consent banner
+  - [ ] Privacy settings
+
+**Deliverable**: Complete security system with 2FA, audit logs, rate limiting, and GDPR compliance
+
+### Phase 11: Meeting Booking System (Week 9)
+**Goal**: Build complete meeting booking system with Google Calendar integration
+
+**Prerequisites**: Phase 4 complete (Authentication), Phase 8 complete (Nora AI for booking integration)
+
+**Tasks**:
+- [ ] **Database Schema Setup** (foundation for booking system):
+  - [ ] Write tests for database schema → Implement → Refactor
+  - [ ] Create bookings table
+  - [ ] Create booking_availability table
+  - [ ] Create booking_blocks table
+- [ ] **TDD: Write tests first for booking system**
+- [ ] **Booking Page Development**:
+  - [ ] Write tests for booking page UI → Implement → Refactor
+  - [ ] Calendar component with date selection
+  - [ ] Time slot display based on operation hours
+  - [ ] Real-time availability checking (blocks scheduled meetings)
+  - [ ] Booking form with validation
+  - [ ] Time zone detection and handling
+  - [ ] Confirmation flow
+- [ ] **Availability Management**:
+  - [ ] Write tests for availability logic → Implement → Refactor
+  - [ ] Operation hours configuration (admin panel)
+  - [ ] Availability rules (min/max advance booking, buffer times)
+  - [ ] Blocked time slots management
+  - [ ] Holiday/exception handling
+  - [ ] Double booking prevention
+- [ ] **Admin Booking Management**:
+  - [ ] Write tests for admin booking CRUD → Implement → Refactor
+  - [ ] View all bookings
+  - [ ] Manage booking status
+  - [ ] Operation hours management
+  - [ ] Block/unblock time slots
+  - [ ] Set holidays and exceptions
+- [ ] **Integration**:
+  - [ ] **Unified Booking API Endpoint**:
+    - [ ] Write tests for unified booking API → Implement → Refactor
+    - [ ] Create single API endpoint that both UI and Nora use
+    - [ ] Same data structure for both booking methods
+    - [ ] Validate booking data before sending to n8n
+  - [ ] **Google Calendar Integration**:
+    - [ ] Write tests for Google Calendar API integration → Implement → Refactor
+    - [ ] Google Cloud Console setup (OAuth 2.0 credentials)
+    - [ ] Google Calendar API authentication (Service Account or OAuth)
+    - [ ] Availability API endpoint (`/api/availability`):
+      - [ ] Write tests for availability endpoint → Implement → Refactor
+      - [ ] Fetch busy/free times from Google Calendar (freebusy.query)
+      - [ ] Combine with operation hours and blocked times
+      - [ ] Calculate available time slots
+      - [ ] Implement caching strategy (5-15 min cache)
+    - [ ] Frontend integration:
+      - [ ] Write tests for availability display → Implement → Refactor
+      - [ ] Fetch availability when calendar loads
+      - [ ] Display available/busy times on booking page
+      - [ ] Real-time availability updates
+    - [ ] Database sync:
+      - [ ] Sync bookings with Google Calendar
+      - [ ] Create calendar events on booking
+      - [ ] Update/delete events on cancellation
+  - [ ] **n8n Workflow** (shared by both UI and Nora):
+    - [ ] Create single n8n workflow for all bookings
+    - [ ] Workflow accepts standardized booking data
+    - [ ] Google Calendar event creation (via n8n or direct API)
+    - [ ] Email confirmation system (via n8n Gmail connection)
+    - [ ] Reminder system (24h before, 1h before) (via n8n Gmail connection)
+  - [ ] Cancellation/rescheduling functionality
+  - [ ] Test that UI booking and Nora booking both use same workflow
+- [ ] **Best Practices Implementation**:
+  - [ ] Minimum advance booking time (configurable)
+  - [ ] Maximum advance booking time (configurable)
+  - [ ] Buffer time between meetings (configurable)
+  - [ ] Meeting duration options (30 min, 60 min, etc.)
+  - [ ] Time zone support
+  - [ ] Real-time availability updates
+- [ ] E2E tests for booking flow
+- [ ] Test booking system comprehensively
+
+**Deliverable**: Complete booking system with Google Calendar sync, unified API (UI + Nora), and n8n automation
 
 ---
 
-## Technical Decisions
+## Architecture & Technical Details
 
-### Framework Choice: Refine (Primary Framework)
+### Nora AI Architecture Decision ✅
 
-**Why Refine?**
-- **Perfect for data-intensive applications** - Built for CRUD operations
-- **Built-in authentication** - Multiple auth providers out of the box
-- **Data providers** - Works with Supabase, REST APIs, GraphQL, etc.
-- **Admin panel ready** - Can build admin interfaces quickly
-- **TypeScript first** - Excellent type safety
-- **Component library integration** - Works with Ant Design, MUI, etc.
-- **Future-proof** - Easy to add customer portal, invoices, admin panel
-- **React-based** - Familiar if you know React
-- **Open source** - Active community and good documentation
+**Selected Approach**: Direct OpenAI Connection (Recommended)
 
-**Refine Architecture Options:**
+**Architecture**: Frontend → Next.js API Route → OpenAI API
 
-1. **Refine + Next.js** (Recommended for SEO + Customer Portal)
-   - Next.js for public pages (portfolio, blog)
-   - Refine for authenticated pages (customer portal, admin)
-   - Best of both worlds: SEO + data management
-   - Can use Next.js API routes for custom endpoints
+**Rationale**:
+- ✅ Lower latency for real-time chat widget
+- ✅ Better function calling support
+- ✅ Simpler architecture, easier testing
+- ✅ Real-time streaming responses
 
-2. **Refine + Vite** (Alternative - SPA approach)
-   - Faster development experience
-   - Simpler setup
-   - Good for internal/admin tools
-   - Less SEO-friendly (but can use pre-rendering)
+**n8n Integration**: Used for background automation only:
+- **AI Contract Generation** (`N8N_WEBHOOK_CONTRACT_GENERATION`):
+  - AI Agent workflow that generates contracts from client/project data
+  - Input: Client info, project details, scope, pricing, terms
+  - Output: Fully formatted contract ready for DocuSign
+- Meeting booking automation (`N8N_WEBHOOK_BOOKING`)
+- Contact form automation (`N8N_WEBHOOK_CONTACT`)
+- General automation workflows (`N8N_WEBHOOK_GENERAL`)
+- Scheduled tasks (invoice reminders, etc.)
 
-3. **Refine + Remix** (Alternative)
-   - Full-stack React framework
-   - Great data loading patterns
-   - Good SEO support
+*See "Technical Implementation Details" section below for full architecture*
 
-**Recommendation**: Refine + Next.js for this project
-- Public portfolio pages benefit from Next.js SSR/SSG
-- Customer portal uses Refine's powerful data management
-- Single codebase, unified routing
+### Phase 12: Additional Features (Week 9.5)
+**Goal**: Add polish features (export, bulk ops, search, dark mode, meeting enhancements)
 
-### UI Framework: Ant Design (Recommended with Refine)
+**Prerequisites**: Core features complete (Phases 1-11)
 
-**Why Ant Design?**
-- **Refine's default UI framework** - Seamless integration
-- **Comprehensive components** - Tables, forms, modals, etc. built-in
-- **Perfect for admin/customer portals** - Professional look out of the box
-- **Accessible** - WCAG compliant components
-- **Well-documented** - Extensive examples
-- **Enterprise-ready** - Used by many large companies
-- **Theming support** - Can customize to match brand
+**Tasks**:
+- [ ] **TDD: Write tests first for additional features**
+- [ ] Database schema setup:
+  - [ ] Write tests for schema → Implement → Refactor
+  - [ ] saved_filters table (if not already created)
+- [ ] **Export & Reporting**:
+  - [ ] Write tests for export functionality → Implement → Refactor
+  - [ ] Export invoices (CSV, PDF, Excel)
+  - [ ] Export payments (CSV, Excel)
+  - [ ] Export customers (CSV, Excel)
+  - [ ] Custom date range exports
+  - [ ] Scheduled reports (email)
+  - [ ] Report templates
+  - [ ] Financial reports
+- [ ] **Bulk Operations**:
+  - [ ] Write tests for bulk operations → Implement → Refactor
+  - [ ] Bulk invoice creation
+  - [ ] Bulk invoice sending
+  - [ ] Bulk payment processing
+  - [ ] Bulk customer updates
+  - [ ] Bulk export
+- [ ] **Global Search**:
+  - [ ] Write tests for global search → Implement → Refactor
+  - [ ] Search across all content
+  - [ ] Search suggestions/autocomplete
+  - [ ] Search filters
+  - [ ] Search history
+  - [ ] Keyboard shortcut (Cmd/Ctrl + K)
+- [ ] **Dark Mode**:
+  - [ ] Write tests for theme switching → Implement → Refactor
+  - [ ] System preference detection
+  - [ ] Manual toggle
+  - [ ] Persistent theme selection
+  - [ ] Smooth transitions
+- [ ] **Meeting Enhancements**:
+  - [ ] Write tests for meeting enhancements → Implement → Refactor
+  - [ ] Video call link generation (Zoom, Google Meet, Teams)
+  - [ ] Meeting preparation notes
+  - [ ] Post-meeting follow-up automation
+  - [ ] Multiple calendar support
+  - [ ] Group bookings
+  - [ ] Booking templates
 
-**Alternative Options:**
-- **Material UI (MUI)** - If prefer Material Design
-- **Chakra UI** - Modern, accessible components
-- **Headless UI + Tailwind** - Full design control, more work
-- **Mantine** - Modern React components
+**Deliverable**: Enhanced UX features (export, bulk ops, search, dark mode, meeting enhancements)
 
-**Recommendation**: Start with Ant Design, can customize theme to match portfolio aesthetic
+### Phase 13: Polish & Optimization (Week 10)
+**Goal**: Optimize performance, accessibility, SEO, and security
 
-### State Management
+**Prerequisites**: All feature phases complete (Phases 1-12)
 
-**Refine handles most state management:**
-- **Data fetching state** - Handled by Refine data providers
-- **Authentication state** - Handled by Refine auth provider
-- **Form state** - Ant Design Form or React Hook Form
-- **UI state** - React useState/useReducer
-- **Global state** (if needed): Zustand or Jotai (lightweight)
+**Tasks**:
+- [ ] **Test coverage review** (ensure 80%+ coverage on business logic)
+- [ ] Performance optimization (with performance tests)
+- [ ] SEO implementation (test meta tags, structured data)
+- [ ] Accessibility audit (automated + manual testing)
+- [ ] Cross-browser testing (E2E tests across browsers)
+- [ ] Security audit (including test coverage review)
+- [ ] Payment flow testing (comprehensive E2E tests)
+- [ ] Load testing for critical paths
+- [ ] Final test suite review and optimization
 
-**No need for Redux** - Refine's architecture reduces need for complex state management
+**Deliverable**: Optimized, tested, and production-ready application
 
-### Form Handling
+### Phase 14: Deployment & Launch (Week 11)
+**Goal**: Deploy to production and launch portfolio
 
-- **Ant Design Form** (Recommended - if using Ant Design)
-  - Built-in validation
-  - Works seamlessly with Refine
-- **React Hook Form** (Alternative - if prefer)
-  - Better performance for complex forms
-  - Can integrate with Ant Design components
-- **Form validation**: Zod (TypeScript-first) or Yup
-- **Email service**: Resend, SendGrid, or Nodemailer
+**Prerequisites**: Phase 13 complete (Polish & optimization done)
 
-### Database Schema Design
+**Tasks**:
+- [ ] Production deployment (Vercel)
+- [ ] Database migration
+- [ ] Environment configuration
+- [ ] Stripe webhooks (production)
+- [ ] Domain & SSL setup
+- [ ] Analytics integration:
+  - [ ] Google Analytics setup
+  - [ ] Google Ads conversion tracking
+  - [ ] Google Ads remarketing tags
+- [ ] **Portfolio Launch** 🚀
 
-**Core Tables Needed:**
+**Deliverable**: Live portfolio website with all public features
 
-1. **users** (if custom auth, or use Supabase auth.users)
-   - id, email, name, password_hash, role, created_at, updated_at
+### Phase 15: Customer Portal Launch (Week 12+)
+**Goal**: Launch customer portal with beta testing
 
-2. **customers**
-   - id, user_id (FK), company_name, contact_name, email, phone, billing_address, created_at, updated_at
+**Prerequisites**: Phase 14 complete (Portfolio launched)
 
-3. **invoices**
-   - id, customer_id (FK), invoice_number, issue_date, due_date, status (pending/paid/overdue/cancelled), subtotal, tax, total, notes, created_at, updated_at
+**Tasks**:
+- [ ] Beta testing with 1 current client
+- [ ] Feedback & bug fixes
+- [ ] Customer onboarding
+- [ ] **Full Customer Portal Launch**
 
-4. **invoice_items**
-   - id, invoice_id (FK), description, quantity, unit_price, amount, created_at
+**Deliverable**: Fully operational customer portal with all features
 
-5. **payments**
-   - id, invoice_id (FK), amount, payment_method, payment_date, transaction_id, status, receipt_url, created_at
+### Phase 16: Post-Launch (Ongoing)
+**Goal**: Monitor, maintain, and enhance the application
 
-6. **projects** (for portfolio - managed via admin)
-   - id, title, description, category, technologies (JSON array), image_url, live_url, github_url, featured, status (draft/published), created_at, updated_at
+**Prerequisites**: Phase 15 complete (Full launch)
 
-7. **pages** (for content management - ALL pages editable)
-   - id, slug, title, content (rich text), meta_title, meta_description, page_type (home/about/contact/projects/skills/custom), published, created_at, updated_at
+**Tasks**:
+- [ ] Monitor performance
+- [ ] Gather feedback
+- [ ] Content updates
+- [ ] Feature enhancements
 
-8. **blog_posts** (prepared for future blog functionality)
-   - id, title, slug, excerpt, content (rich text), featured_image, author_id (FK to users), status (draft/published/archived), published_at, meta_title, meta_description, created_at, updated_at
+**Deliverable**: Ongoing improvements based on feedback and usage
 
-9. **blog_categories** (for blog organization)
-   - id, name, slug, description, created_at
+---
 
-10. **blog_tags** (for blog tagging)
-    - id, name, slug, created_at
+## Nora AI System Message
 
-11. **blog_post_categories** (many-to-many relationship)
-    - id, post_id (FK), category_id (FK)
+```
+You are Nora, the friendly and professional AI assistant for Destin L. Mincy's portfolio website. You help visitors and customers learn about Destin's services, skills, and projects, and assist authenticated customers with their account information.
 
-12. **blog_post_tags** (many-to-many relationship)
-    - id, post_id (FK), tag_id (FK)
+**Your Personality:**
+- Warm and friendly: Be approachable and conversational, not robotic or overly formal
+- Professional yet personable: Maintain professionalism while being easy to talk to
+- Intelligent and knowledgeable: Speak with confidence about Destin's work and services
+- Patient and understanding: Take time to clarify questions and ensure you understand what users need
+- Proactive and helpful: Offer relevant information when appropriate, but don't be pushy
+- Reliable and trustworthy: Be consistent, honest, and transparent
 
-13. **settings** (site-wide configuration)
-    - id, key, value, type, description, created_at, updated_at
-    - Examples: site_name, contact_email, contact_phone, social_links (JSON), theme_colors (JSON), blog_enabled (boolean)
+**Your Communication Style:**
+- Use natural, conversational language - avoid jargon unless necessary
+- Be clear and concise, but don't rush
+- Show empathy when discussing account issues or concerns
+- Express genuine enthusiasm about Destin's work and services
+- Be supportive and encouraging
+- Ask clarifying questions when you need more information to help effectively
+- Acknowledge when you don't know something and offer to help find the answer
 
-14. **media** (for uploaded images/files)
-    - id, filename, url, file_type, file_size, alt_text, uploaded_by, created_at
+**Your Knowledge Base:**
+You have access to information about:
+- Destin L. Mincy's professional background and expertise
+- Services offered (Node.js development, AI engineering, AI automation, etc.)
+- Technical skills and technologies
+- Portfolio projects (when available)
+- General web development and AI topics
 
-15. **chat_messages** (for Nora chat history - authenticated users only)
-    - id, user_id (FK to users - nullable for session-based), session_id (for guests), message, role (user/assistant), context_data (JSON - for account queries), created_at
-    - Note: Only store messages for authenticated users; guests use session storage
+**For Authenticated Customers:**
+When a user is authenticated, you have additional capabilities:
+- You can access their account information, invoices, payments, and contracts
+- Use the available functions to query their data when they ask about:
+  - Their invoices (status, amounts, due dates)
+  - Payment history
+  - Contract details and status
+  - Account summary information
+- Always respect privacy - only access data for the authenticated user
+- Be helpful and clear when explaining account information
+- If there are issues (overdue invoices, payment problems), be empathetic and suggest next steps
 
-16. **contracts** (for customer contracts with DocuSign integration)
-    - id, customer_id (FK), contract_number, title, description, start_date, end_date, status (draft/sent/signed/expired/cancelled), document_url, docusign_envelope_id, docusign_status, signed_date, signed_by, created_at, updated_at
+**For Guest Users:**
+- Help them learn about Destin's services and skills
+- Answer questions about the portfolio and projects
+- Guide them to relevant information on the website
+- Be welcoming and helpful
+- If they ask about account-specific information, politely explain they need to log in
+- **Smart Navigation Feature**: If a user is having trouble finding something on the website, you can help them by:
+  - Identifying which page contains the information they're looking for
+  - Using the `navigate_to_page` function to take them directly to that page
+  - Using the `highlight_section` function to highlight the specific section or content they need
+  - This works for finding projects, skills, contact information, services, or any other content on the site
+  - Always offer to navigate them when they seem lost or are looking for something specific
+- **Meeting Booking**: If a user expresses interest in booking a meeting, scheduling a call, or wants to discuss working together:
+  - Gather necessary information (name, email, preferred date/time if mentioned, purpose of meeting)
+  - Use the `book_meeting` function to trigger the meeting booking automation
+  - Let them know you're starting the booking process and they'll receive confirmation details
+  - Be enthusiastic and helpful about connecting them with Destin
+- **Contract Requests** (authenticated customers only): If a customer wants to request a new contract for a project:
+  - Gather project details through conversation (title, description, scope, budget, timeline, requirements)
+  - Use the `request_contract` function to submit the contract request
+  - Explain the process: contract will be generated, they'll sign first, then Destin will review and sign if approved
+  - Be helpful in collecting all necessary information for the contract
 
-**Relationships:**
-- Customer → User (one-to-one)
-- Customer → Invoices (one-to-many)
-- Customer → Contracts (one-to-many)
-- Invoice → Invoice Items (one-to-many)
-- Invoice → Payments (one-to-many)
-- User → Media (one-to-many - who uploaded)
-- User → Chat Messages (one-to-many - for authenticated users)
-- User → Blog Posts (one-to-many - author)
-- Project → Media (many-to-many - project images)
-- Blog Post → Categories (many-to-many)
-- Blog Post → Tags (many-to-many)
+**Navigation & Highlighting Capabilities:**
+You have the ability to help users find content on the website by:
+- Understanding the site structure (pages: Home, Projects, Skills, About, Contact, etc.)
+- Identifying which page and section contains the information users are seeking
+- Using navigation functions to take users directly to relevant pages/sections
+- Highlighting specific content with visual effects to draw attention
+- This is especially helpful when users say things like:
+  - "Where can I find your Node.js projects?"
+  - "I'm looking for your contact information"
+  - "Show me your AI skills"
+  - "I can't find your portfolio projects"
+  - "Where are your services listed?"
+- When you navigate a user, let them know what you're doing: "Let me take you to the Projects page and highlight the Node.js projects for you!"
 
-### Refine Implementation Strategy
+**Important Guidelines:**
+- Always be respectful and professional
+- Never make promises about services or pricing without confirming details
+- If asked about something outside your knowledge, be honest and offer to help them contact Destin directly
+- Maintain a positive, helpful tone
+- Keep responses focused and relevant
+- For technical questions, provide accurate information but don't overcomplicate things
+- Remember: You represent Destin's brand, so be professional, warm, and helpful
+- Proactively offer navigation help when users seem to be looking for something specific
 
-#### Data Provider Setup
-- **Recommended**: Supabase Data Provider
-  - Native Refine integration (see [Refine Supabase documentation](https://refine.dev/docs/data-provider/supabase))
-  - Real-time subscriptions
-  - Row Level Security (RLS) for data access
-  - Automatic API generation
-  - Built-in support in Refine core
-- **Alternative**: Custom REST Data Provider
-  - Full control over API design
-  - Works with any backend (NestJS, Express, etc.)
-  - See [Refine REST Data Provider documentation](https://refine.dev/docs/data-provider/rest)
-
-#### Authentication Provider Setup
-- **Recommended**: Supabase Auth Provider
-  - Email/password authentication
-  - OAuth providers (Google, GitHub, etc.)
-  - Magic links
-  - Session management
-- **Alternative**: Custom Auth Provider
-  - JWT-based authentication
-  - Custom login flow
-  - Integration with existing auth system
-
-#### Refine Resources Configuration
-```typescript
-// Example resource structure
-resources: [
-  {
-    name: "projects", // Public portfolio projects
-    list: "/projects",
-    show: "/projects/:id",
-    // No auth required - public
-  },
-  {
-    name: "pages", // All website pages (editable via admin)
-    list: "/admin/pages",
-    create: "/admin/pages/create",
-    edit: "/admin/pages/edit/:id",
-    show: "/admin/pages/show/:id",
-    // Auth required - admin only
-  },
-  {
-    name: "blog-posts", // Blog posts (prepared for future)
-    list: "/admin/blog",
-    create: "/admin/blog/create",
-    edit: "/admin/blog/edit/:id",
-    show: "/admin/blog/show/:id",
-    // Auth required - admin only
-    // Can be hidden until blog is enabled
-  },
-  {
-    name: "invoices", // Customer invoices
-    list: "/invoices",
-    show: "/invoices/:id",
-    // Auth required - customer only
-  },
-  {
-    name: "contracts", // Customer contracts
-    list: "/contracts",
-    show: "/contracts/:id",
-    // Auth required - customer only
-  },
-  {
-    name: "payments", // Payment history
-    list: "/payments",
-    show: "/payments/:id",
-    // Auth required - customer only
-  },
-  {
-    name: "admin-invoices", // Admin invoice management
-    list: "/admin/invoices",
-    create: "/admin/invoices/create",
-    edit: "/admin/invoices/edit/:id",
-    show: "/admin/invoices/show/:id",
-    // Auth required - admin role only
-  },
-  {
-    name: "admin-contracts", // Admin contract management
-    list: "/admin/contracts",
-    create: "/admin/contracts/create",
-    edit: "/admin/contracts/edit/:id",
-    show: "/admin/contracts/show/:id",
-    // Auth required - admin role only
-  }
-]
+**Response Format:**
+- Write in a natural, conversational style
+- Use appropriate punctuation and formatting for readability
+- Break up long responses into paragraphs
+- Use bullet points when listing multiple items
+- Be concise but thorough
 ```
 
-#### Route Protection Strategy
-- **Public Routes**: Home, Projects, Skills, About, Contact, Blog (when enabled)
-- **Authenticated Routes**: Dashboard, Invoices, Contracts, Payments, Profile
-- **Admin Routes**: 
-  - Admin Dashboard
-  - Admin Projects
-  - Admin Pages (all content editing)
-  - Admin Blog (can be hidden until enabled)
-  - Admin Invoices
-  - Admin Contracts
-  - Admin Customers
-  - Admin Settings
-- Use Refine's `<Authenticated>` component for route protection (see [Refine Authentication docs](https://refine.dev/docs/guides-and-concepts/authentication))
-- Role-based access control using Refine's `<CanAccess>` component (see [Refine Authorization docs](https://refine.dev/docs/guides-and-concepts/access-control))
-- Blog routes can be conditionally rendered based on settings
-- See [Refine Routing documentation](https://refine.dev/docs/guides-and-concepts/routing) for Next.js integration
+### Function Definitions (GPT-4 Turbo)
 
-### Contract Management Architecture
+```typescript
+// Navigation function
+{
+  name: "navigate_to_page",
+  description: "Navigate user to a specific page or section on the website",
+  parameters: {
+    type: "object",
+    properties: {
+      page: {
+        type: "string",
+        enum: ["home", "projects", "skills", "about", "contact"],
+        description: "The page to navigate to"
+      },
+      sectionId: {
+        type: "string",
+        description: "Optional: Specific section ID or element selector to scroll to"
+      }
+    },
+    required: ["page"]
+  }
+}
 
-#### DocuSign Integration
-- **Documentation**: [DocuSign API Documentation](https://developers.docusign.com/docs)
-- **Key Resources**:
-  - [Getting Started](https://developers.docusign.com/docs) - Initial setup and authentication
-  - [Envelopes API](https://developers.docusign.com/docs/esign-rest-api/esign101/concepts/envelopes/) - For sending contracts
-  - [Templates API](https://developers.docusign.com/docs/esign-rest-api/esign101/concepts/templates/) - For contract templates
-  - [Embedded Signing](https://developers.docusign.com/docs/esign-rest-api/esign101/concepts/embedding/) - In-app signing experience
-  - [Webhooks](https://developers.docusign.com/docs/esign-rest-api/esign101/concepts/webhooks/) - Contract status updates
-  - [OAuth 2.0 Authentication](https://developers.docusign.com/docs/esign-rest-api/esign101/concepts/authentication/) - API authentication
+// Highlighting function
+{
+  name: "highlight_section",
+  description: "Highlight a specific section or element on the current page",
+  parameters: {
+    type: "object",
+    properties: {
+      elementSelector: {
+        type: "string",
+        description: "CSS selector or section ID of the element to highlight"
+      },
+      highlightType: {
+        type: "string",
+        enum: ["pulse", "glow", "border"],
+        description: "Type of highlight animation"
+      }
+    },
+    required: ["elementSelector"]
+  }
+}
 
-1. **Authentication**
-   - OAuth 2.0 setup for DocuSign API
-   - Store access tokens securely
-   - Token refresh handling
-   - Admin configuration in settings
+// Customer data functions (authenticated users only)
+{
+  name: "get_customer_invoices",
+  description: "Get list of customer invoices",
+  parameters: { type: "object", properties: { user_id: { type: "string" } }, required: ["user_id"] }
+},
+{
+  name: "get_invoice_details",
+  description: "Get detailed invoice information",
+  parameters: { type: "object", properties: { invoice_id: { type: "string" }, user_id: { type: "string" } }, required: ["invoice_id", "user_id"] }
+},
+{
+  name: "get_payment_history",
+  description: "Get customer payment history",
+  parameters: { type: "object", properties: { user_id: { type: "string" } }, required: ["user_id"] }
+},
+{
+  name: "get_contracts",
+  description: "Get customer contracts",
+  parameters: { type: "object", properties: { user_id: { type: "string" } }, required: ["user_id"] }
+},
+{
+  name: "get_account_summary",
+  description: "Get customer account summary",
+  parameters: { type: "object", properties: { user_id: { type: "string" } }, required: ["user_id"] }
+}
 
-2. **Contract Creation (Admin)**
-   - Create contract templates
-   - Generate contracts from templates
-   - Add recipients (customers)
-   - Send contracts via DocuSign API
-   - Store envelope ID in database
+// Meeting booking function (triggers n8n automation)
+// Note: This uses the same unified booking API endpoint as the UI booking page
+// Both methods trigger the same n8n workflow with the same data structure
+{
+  name: "book_meeting",
+  description: "Book a meeting with Destin L. Mincy. Uses the unified booking API endpoint (same as UI booking page) which triggers the n8n automation workflow to handle the booking process.",
+  parameters: {
+    type: "object",
+    properties: {
+      name: {
+        type: "string",
+        description: "Name of the person requesting the meeting"
+      },
+      email: {
+        type: "string",
+        description: "Email address of the person requesting the meeting"
+      },
+      preferred_date: {
+        type: "string",
+        description: "Preferred date for the meeting (if mentioned by user, format: YYYY-MM-DD)"
+      },
+      preferred_time: {
+        type: "string",
+        description: "Preferred time for the meeting (if mentioned by user, format: HH:MM or time range)"
+      },
+      purpose: {
+        type: "string",
+        description: "Purpose of the meeting or what they'd like to discuss"
+      },
+      company: {
+        type: "string",
+        description: "Company name (if mentioned)"
+      },
+      phone: {
+        type: "string",
+        description: "Phone number (if provided)"
+      },
+      notes: {
+        type: "string",
+        description: "Any additional notes or context from the conversation"
+      }
+    },
+    required: ["name", "email"]
+  }
+}
 
-3. **Contract Signing (Customer)**
-   - Embedded signing experience (optional)
-   - Or redirect to DocuSign signing page
-   - Track signing status
-   - Real-time status updates via webhooks
-
-4. **Webhook Handling**
-   - `envelope.completed` - Contract signed
-   - `envelope.declined` - Contract declined
-   - `envelope.voided` - Contract cancelled
-   - Update contract status in database
-   - Notify admin of status changes
-
-5. **Security Considerations**
-   - Secure OAuth token storage
-   - Webhook signature verification
-   - Access control (only contract recipients can sign)
-   - Audit trail for contract actions
-
-### Payment Integration Architecture
-
-#### Stripe Integration (Recommended)
-- **Documentation**: [Stripe Documentation](https://docs.stripe.com)
-- **Key Resources**:
-  - [Payment Intents API](https://docs.stripe.com/payments/payment-intents) - For invoice payments
-  - [Stripe Elements](https://docs.stripe.com/payments/elements) - Secure frontend UI components
-  - [Webhooks](https://docs.stripe.com/webhooks) - Payment event handling
-  - [Customer Portal](https://docs.stripe.com/billing/subscriptions/customer-portal) - Customer self-service (optional)
-  - [Invoicing API](https://docs.stripe.com/invoicing) - Automated invoice generation (optional)
-
-1. **Frontend (Refine Pages)**
-   - Stripe Elements for payment forms (see [Stripe Elements docs](https://docs.stripe.com/payments/elements))
-   - Create payment intent on invoice detail page
-   - Handle payment confirmation
-   - Payment method management (save cards for future use)
-
-2. **Backend (Next.js API Routes or Custom Backend)**
-   - Create payment intent endpoint (see [Payment Intents API](https://docs.stripe.com/payments/payment-intents))
-   - Handle Stripe webhooks (see [Webhooks guide](https://docs.stripe.com/webhooks))
-   - Update invoice status
-   - Generate receipts
-   - Store payment records
-   - Follow [Stripe development quickstart](https://docs.stripe.com/development/quickstart)
-
-3. **Webhook Handling** (see [Stripe Webhooks documentation](https://docs.stripe.com/webhooks))
-   - `payment_intent.succeeded` - Mark invoice as paid
-   - `payment_intent.payment_failed` - Handle failures
-   - `invoice.payment_succeeded` - If using Stripe Invoicing
-   - `customer.subscription.*` - If using subscriptions (future)
-   - Update database via Refine data provider
-   - Implement webhook signature verification
-
-4. **Security Considerations** (see [Stripe Security guide](https://docs.stripe.com/security))
-   - Never expose Stripe secret key to frontend
-   - Use Stripe's test mode during development (see [Testing](https://docs.stripe.com/testing))
-   - Implement idempotency keys for webhooks
-   - Validate webhook signatures (see [Webhook signatures](https://docs.stripe.com/webhooks/signatures))
-   - Store sensitive payment data securely
-   - Use Stripe's PCI-compliant components (Elements)
-
-#### Payment Flow
-1. Customer views invoice (`/invoices/:id`)
-2. Clicks "Pay Now" button
-3. Frontend calls API to create payment intent
-4. Redirect to Stripe Checkout or show payment form
-5. Customer completes payment
-6. Webhook updates invoice status in database
-7. Customer sees confirmation page
-8. Receipt generated and stored
+// Contract request function (authenticated customers only)
+// Allows customers to request a new contract via conversation with Nora
+{
+  name: "request_contract",
+  description: "Request a new contract for a project. Nora will collect project details through conversation and submit a contract request. The contract will be generated and sent for signing (client signs first, then admin reviews and signs if approved).",
+  parameters: {
+    type: "object",
+    properties: {
+      project_title: {
+        type: "string",
+        description: "Title or name of the project"
+      },
+      project_description: {
+        type: "string",
+        description: "Description of what the project entails"
+      },
+      project_scope: {
+        type: "string",
+        description: "Detailed scope of work for the project"
+      },
+      budget: {
+        type: "string",
+        description: "Project budget or pricing (if mentioned)"
+      },
+      timeline: {
+        type: "string",
+        description: "Expected timeline or deadline (if mentioned)"
+      },
+      requirements: {
+        type: "string",
+        description: "Specific requirements or deliverables"
+      },
+      additional_notes: {
+        type: "string",
+        description: "Any additional notes or context from the conversation"
+      }
+    },
+    required: ["project_title", "project_description"]
+  }
+}
+```
 
 ---
 
-## AI Integration Plan
+## Technical Implementation Details
 
-### Contact Form AI Features
+### Refine Configuration
+- **Data Provider**: Supabase Data Provider
+- **Auth Provider**: Supabase Auth Provider
+  - Email/password authentication
+  - OAuth providers: Google, Facebook, LinkedIn (GitHub optional)
+  - Supabase handles OAuth flow and token management
+- **UI Framework**: Ant Design (default)
+- **Routing**: Next.js App Router integration
 
-#### Spam Detection
-- Use OpenAI API to analyze form submissions
-- Detect spam patterns
-- Auto-flag suspicious submissions
+### Payment Architecture (Stripe)
+- **Frontend**: Stripe Elements (secure payment forms)
+- **Stripe Link**: One-click checkout (enabled for faster payments)
+- **Backend**: Payment Intents API
+- **Webhooks**: Payment event handling
+- **Security**: PCI-compliant, webhook signature verification
 
-#### Auto-Response
-- Generate personalized acknowledgment emails
-- Categorize inquiries (job opportunity, project inquiry, general)
+### Contract Management (DocuSign + AI Generation)
+- **AI Contract Generation**: n8n AI Agent workflow
+  - **Input**: Client information, project details, scope, pricing, terms
+  - **Process**: AI Agent generates professional contract with all necessary clauses
+  - **Output**: Fully formatted contract document (PDF-ready)
+  - **Integration**: Seamless flow from generation → database → DocuSign
+- **Client-Initiated Contract Requests**:
+  - **Request Methods**: Form (customer portal) or Nora chat conversation
+  - **Workflow**: Client requests → AI generates contract → Client signs first → Admin reviews → Admin approves/rejects → If approved: Admin signs → Both notified → Project begins
+  - **Admin Approval**: Review interface for pending contract requests
+  - **Notifications**: Both parties notified at each stage
+- **DocuSign Integration**:
+  - **Authentication**: OAuth 2.0
+  - **API**: Envelopes API (sending contracts)
+  - **Signing**: Embedded signing (two-way workflow)
+  - **Webhooks**: Contract status updates
+- **Workflows**: 
+  - **Admin-initiated**: Admin generates contract → Review/Edit → Send to DocuSign → Client signs
+  - **Client-initiated**: Client requests → AI generates → Client signs → Admin reviews & signs → Both notified
 
-#### Sentiment Analysis
-- Understand inquiry tone
-- Prioritize urgent requests
+### AI Integration (Nora)
+- **Architecture**: Direct OpenAI connection (see "Nora AI Architecture Decision" above)
+- **Guest Users**: GPT-3.5 Turbo (simple Q&A)
+- **Authenticated Users**: GPT-4 Turbo (function calling, data access)
+- **Context Injection**: Services, skills, projects, site structure, user info
+- **Function Calling**: Navigation, highlighting, customer data queries, meeting booking
+- **Implementation**: Next.js API route → OpenAI API (direct connection)
+- **n8n Integration**: Meeting booking triggers n8n webhook → automation workflow
 
-### Implementation Approach
+### Booking System Architecture
+- **Unified Booking Flow**: Both UI booking page and Nora chat widget use the same system
+- **Single API Endpoint**: `/api/bookings/create` - handles bookings from both sources
+- **Same Data Structure**: Both methods send identical booking data (see Phase 11 for details)
+- **Single n8n Workflow**: One workflow handles all bookings regardless of source
+- **Google Calendar Integration**: 
+  - Availability API endpoint (`/api/availability`)
+  - Fetches busy/free times via Google Calendar API (freebusy.query)
+  - Combines with operation hours and blocked times
+  - Caching strategy (5-15 min cache)
+  - Two-way sync (bookings ↔ Google Calendar)
+- *See Phase 11 for detailed implementation*
 
-1. **Backend API Route** (Next.js API route or Express endpoint)
-   - Receive form submission
-   - Call AI API (OpenAI/Claude)
-   - Process response
-   - Send email notification
-   - Store submission (optional)
+---
 
-2. **n8n/Zapier Workflow** (Alternative)
-   - Form submission triggers workflow
-   - AI processing step
-   - Email notification
-   - Database logging
+## Design Specifications
 
-3. **Nora AI Chat Widget** (Primary AI Feature)
-   - Persistent floating chat bubble (bottom-right corner)
-   - OpenAI/Claude API integration
-   - Custom prompt engineering for Nora's personality
-   - Context-aware responses about services, skills, projects
-   - Real-time streaming responses
-   - **Authentication-aware chat history**:
-     - Session-based for unauthenticated users (client-side only)
-     - Persistent database storage for authenticated customers
-   - **Customer account access** (authenticated users only):
-     - Nora can access customer invoices, payments, contracts
-     - Secure data access via Refine data providers
-     - Role-based access control
-   - Mobile-responsive design
+### Color Palette
+- **Primary**: Blue (professional, trustworthy)
+- **Accent**: Gold (premium, achievement)
+- **Secondary**: Silver (modern, sophisticated)
+- **Accessibility**: WCAG 2.1 AA compliance
+
+### Typography
+- Clean, readable fonts
+- Heading hierarchy
+- Font pairing (e.g., Inter + Playfair Display)
+
+### Animations
+- Framer Motion (portfolio pages)
+- Smooth scroll animations
+- Hover effects
+- Parallax effects (optional)
+- Highlight animations (Nora navigation)
 
 ---
 
 ## Content Requirements
 
-### Text Content Needed
+### Assets Ready
+- ✅ Professional headshot: `img/Destin-L-Mincy__HEADSHOT.png`
 
-1. **Home Page**
-   - Hero tagline
-   - Brief bio (2-3 sentences)
-   - Call-to-action text
-
-2. **About Page**
-   - Full professional bio
-   - Career timeline
-   - Personal interests (optional)
-
-3. **Projects**
-   - For each project:
-     - Title
-     - Description (2-3 paragraphs)
-     - Technologies list
-     - Challenges/solutions
-     - Results (if applicable)
-
-4. **Skills**
-   - Brief description for each skill category
-   - Proficiency levels (if showing)
-
-5. **Contact**
-   - Contact form labels
-   - Success/error messages
-   - Availability information
-
-### Media Assets Needed
-
-1. **Images**
-   - ✅ Professional headshot (ready - `img/Destin-L-Mincy__HEADSHOT.png`)
-   - Project screenshots (multiple per project)
-   - Technology icons/logos
-   - Background images (optional)
-   - Logo/branding elements (if available)
-
-2. **Optional**
-   - Video demos
-   - GIFs showing interactions
-   - Logo/branding elements
+### Content Needed
+- Project information & screenshots
+- Professional bio & career timeline
+- Skills descriptions
+- Contact information
+- Site copy (hero, CTAs, etc.)
 
 ---
 
-## SEO Strategy
+## Key Decisions Made ✅
 
-### On-Page SEO
-- Meta titles and descriptions for each page
-- Open Graph tags for social sharing
-- Structured data (JSON-LD)
-- Semantic HTML
-- Alt text for all images
-- Internal linking strategy
-
-### Technical SEO
-- Fast page load times
-- Mobile-friendly
-- HTTPS
-- XML sitemap
-- Robots.txt
-- Canonical URLs
-
-### Content SEO
-- Keyword optimization (natural)
-- Regular content updates
-- Blog posts (future)
+1. ✅ **Blog**: Architecture ready from start, can be hidden until needed
+2. ✅ **Color Scheme**: Blue, Gold, Silver
+3. ✅ **Headshot**: Ready in project folder
+4. ✅ **Timeline**: 10-11 weeks (flexible)
+5. ✅ **Payment Provider**: Stripe
+6. ✅ **Payment System**: Architected from start
+7. ✅ **Admin Panel**: Required from start, full CMS
+8. ✅ **Database**: Supabase (PostgreSQL)
+9. ✅ **ALL Content Editable**: Via admin panel
+10. ✅ **Primary AI Feature**: Nora AI Chat Widget
+11. ✅ **AI Model**: Hybrid (GPT-3.5 Turbo guests, GPT-4 Turbo authenticated)
+12. ✅ **Nora Personality**: Complete system message created
+13. ✅ **Nora Smart Navigation**: Navigate & highlight content
+14. ✅ **Current Clients**: 1 client for initial portal access
+15. ✅ **OAuth Authentication**: Google, Facebook, LinkedIn (GitHub optional) alongside email/password
+16. ✅ **Stripe Link**: One-click checkout enabled for faster payment experience
+17. ✅ **Test-Driven Development (TDD)**: All features developed test-first (Red → Green → Refactor)
 
 ---
 
-## Analytics & Monitoring
+## Resources & Documentation
 
-### Tools to Integrate
-- Google Analytics 4
-- Google Search Console
-- Vercel Analytics (if using Vercel)
-- Error tracking (Sentry, optional)
-
-### Metrics to Track
-- Page views
-- User engagement
-- Contact form submissions
-- Project page views
-- Bounce rate
-- Conversion rate
-
----
-
-## Security Considerations
-
-- Environment variables for API keys
-- Rate limiting on contact form
-- Input validation and sanitization
-- HTTPS/SSL
-- Secure headers
-- Regular dependency updates
-
----
-
-## Future Enhancements
-
-### Phase 2 Features (Post-Launch)
-- Blog section with technical articles
-- Project case studies in detail
-- Testimonials section
-- Interactive resume/CV viewer
-- Dark mode toggle
-- Multi-language support (if needed)
-- Newsletter signup
-- Social media feed integration
-
-### Advanced AI Features
-- AI-powered project recommendations
-- Personalized content based on visitor
-- Automated blog post generation
-- AI assistant for portfolio navigation
-
----
-
-## Success Metrics
-
-### Launch Goals
-- Site loads in < 3 seconds
-- Mobile-friendly (100% responsive)
-- Accessible (WCAG 2.1 AA)
-- Zero critical bugs
-- All pages functional
-
-### Post-Launch Goals (3 months)
-- Increase in contact form submissions
-- Positive feedback from visitors
-- Improved search rankings
-- Regular traffic growth
-- Professional appearance feedback
-
----
-
-## Resources & References
+### Primary Documentation
+- **Refine**: https://refine.dev/docs
+  - [Quick Start](https://refine.dev/docs/getting-started/quickstart)
+  - [Next.js Guide](https://refine.dev/docs/guides-and-concepts/guides/nextjs)
+  - [Supabase Data Provider](https://refine.dev/docs/data-provider/supabase)
+  - [Authentication](https://refine.dev/docs/guides-and-concepts/authentication)
+- **Refine Examples**:
+  - [MUI Admin Dashboard](https://example.mui.admin.refine.dev)
+  - [HR Dashboard](https://hr.refine.dev/login)
+- **Next.js**: https://nextjs.org/docs
+- **Ant Design**: https://ant.design
+- **Supabase**: https://supabase.com/docs
+  - [Authentication](https://supabase.com/docs/guides/auth)
+  - [OAuth Providers](https://supabase.com/docs/guides/auth/social-login)
+- **Stripe**: https://docs.stripe.com
+  - [Payment Intents](https://docs.stripe.com/payments/payment-intents)
+  - [Elements](https://docs.stripe.com/payments/elements)
+  - [Link](https://docs.stripe.com/payments/link) - One-click checkout
+  - [Webhooks](https://docs.stripe.com/webhooks)
+- **OpenAI**: https://platform.openai.com/docs
+- **DocuSign**: https://developers.docusign.com/docs
+- **n8n**: https://docs.n8n.io
+  - [Getting Started](https://docs.n8n.io/getting-started/)
+  - [AI Agents](https://docs.n8n.io/ai-agents/) - For contract generation workflow
+  - [Webhooks](https://docs.n8n.io/integrations/builtin/core-nodes/webhook/) - For receiving data from Next.js
+  - [Workflow Automation](https://docs.n8n.io/workflows/)
+- **Google Calendar API**: https://developers.google.com/calendar
+  - [Getting Started](https://developers.google.com/calendar/api/guides/overview)
+  - [Authentication](https://developers.google.com/calendar/api/auth)
+  - [Freebusy API](https://developers.google.com/calendar/api/v3/reference/freebusy/query) - For fetching availability
+  - [Events API](https://developers.google.com/calendar/api/v3/reference/events) - For creating calendar events
+  - [Push Notifications](https://developers.google.com/calendar/api/guides/push) - For real-time updates (optional)
+- **Google Ads**: https://ads.google.com
+  - [Google Ads API](https://developers.google.com/google-ads/api/docs/start) - For programmatic access
+  - [Conversion Tracking](https://support.google.com/google-ads/answer/1722054) - Track conversions
+  - [Remarketing Tags](https://support.google.com/google-ads/answer/2453998) - Remarketing pixel setup
+  - [Google Tag Manager](https://tagmanager.google.com) - Manage tracking tags
 
 ### Design Inspiration
-- Dribbble portfolio designs
-- Behance portfolio showcases
-- Awwwards portfolio sites
-
-### Technical Resources
-- **Refine Documentation**: https://refine.dev/docs
-  - Overview and key concepts
-  - Quick Start Guide
-  - Tutorials and Examples
-  - Templates
-  - Core hooks and components
-  - Data providers (including Supabase)
-  - Authentication providers
-  - Routing (Next.js, Remix, React Router)
-  - UI integrations (Ant Design, Material UI, Mantine, Chakra UI)
-  - Advanced features (Real-time, Audit Logs, i18n, etc.)
-- **Refine + Next.js Guide**: https://refine.dev/docs/guides-and-concepts/guides/nextjs
-- **Refine + Supabase Guide**: https://refine.dev/docs/data-provider/supabase
-- **Refine Examples**: 
-  - Official examples in documentation
-  - [Refine MUI Admin Dashboard](https://example.mui.admin.refine.dev)
-  - [Refine HR Dashboard](https://hr.refine.dev/login)
-- **Next.js Documentation**: https://nextjs.org/docs
-- **Ant Design Documentation**: https://ant.design
-- **Supabase Documentation**: https://supabase.com/docs
-- **Stripe Documentation**: https://docs.stripe.com
-  - Get started with payments
-  - API reference
-  - Development quickstart
-  - Sample projects
-  - Payment Intents (for invoice payments)
-  - Customer Portal (for customer self-service)
-  - Webhooks (for payment event handling)
-  - Stripe Elements (for secure payment forms)
-  - Invoicing API (optional, for automated invoices)
-- **OpenAI API Documentation**: https://platform.openai.com/docs
-- **n8n Documentation**: https://docs.n8n.io
-- **DocuSign API Documentation**: https://developers.docusign.com/docs
-  - Getting started with DocuSign API
-  - Authentication (OAuth 2.0)
-  - Envelopes API (for sending contracts)
-  - Templates API (for contract templates)
-  - Webhooks (for contract status updates)
-  - Embedded signing (for in-app signing)
-  - REST API reference
-
-### Tools
-- Figma (design mockups)
-- Canva (image editing)
-- Unsplash (stock photos)
-- Font Awesome / Heroicons (icons)
-
----
-
-## Timeline Summary
-
-- **Week 1**: Foundation & Setup (Refine + Next.js + Database)
-- **Weeks 2-3**: Core Portfolio Pages Development
-- **Week 4**: Content Creation
-- **Week 5**: Authentication & Customer Portal Foundation
-- **Week 6**: Invoice Management System
-- **Week 7**: Payment Integration (Stripe/PayPal)
-- **Week 8**: AI Features Integration
-- **Week 9**: Polish & Optimization
-- **Week 10**: Deployment & Portfolio Launch
-- **Week 11+**: Customer Portal Beta & Full Launch
-- **Ongoing**: Maintenance & Updates
-
-**Total Estimated Time**: 
-- **Portfolio Launch**: 10 weeks
-- **Customer Portal Launch**: 11+ weeks (with beta testing)
-- Timeline is adjustable based on availability and priorities
+- [ZYAN Portfolio Template](https://codeefly.net/wp/zyan)
+- [Drake Personal Portfolio](https://preview.themeforest.net/item/drake-personal-portfolio-html/full_screen_preview/43789350)
 
 ---
 
 ## Next Steps
 
-1. **Review and approve this plan**
-2. **Choose final technology stack** (Refine + Next.js recommended)
-3. **Set up Supabase account** (or choose database solution)
-4. **Set up Stripe account** (for payment processing)
-5. **Create design mockups** (Figma or similar)
-6. **Set up development environment**
-7. **Begin Phase 1: Foundation & Setup**
+### Immediate Actions
+1. ✅ Review and approve project plan
+2. ⏭️ Set up Supabase account & project
+3. ⏭️ Set up OAuth provider accounts (Google, Facebook, LinkedIn, GitHub optional)
+4. ⏭️ Set up Stripe account (test mode)
+5. ⏭️ Set up OpenAI API account
+6. ⏭️ Set up Google Calendar API credentials
+7. ⏭️ **Configure environment variables**:
+   - Copy `.env.example` to `.env`
+   - Fill in all API keys and credentials (see `.env.example` for complete list)
+   - Generate secure SESSION_SECRET (use: `openssl rand -base64 32`)
+8. ⏭️ Initialize Refine + Next.js project
+9. ⏭️ Begin Phase 1: Foundation & Setup
+
+### Pre-Development Checklist
+- [ ] Supabase project created
+- [ ] OAuth provider accounts configured (Google, Facebook, LinkedIn, GitHub optional)
+- [ ] Stripe account configured (test mode)
+- [ ] OpenAI API keys obtained
+- [ ] Google Calendar API credentials obtained
+- [ ] DocuSign API credentials obtained (if using)
+- [ ] n8n instance set up (if using)
+- [ ] Development environment ready
+- [ ] **Testing tools installed** (Jest, React Testing Library, Playwright)
+- [ ] Git repository initialized
+- [ ] CI/CD pipeline configured (with test automation)
+- [ ] **Environment variables configured**:
+  - [ ] Copy `.env.example` to `.env`
+  - [ ] Fill in all required environment variables (see `.env.example` for complete list)
+  - [ ] Generate SESSION_SECRET (use: `openssl rand -base64 32`)
+  - [ ] Verify `.env` is in `.gitignore`
+- [ ] Design mockups (optional, can iterate)
 
 ---
 
-## Decisions Made ✅
-
-1. ✅ **Blog**: Add later (not in initial launch) - **BUT architecture will be ready from start**
-2. ✅ **Color Scheme**: Blue, Gold, Silver
-3. ✅ **Projects**: Will gather/build projects during development
-4. ✅ **Headshot**: Ready and in project folder (`img/Destin-L-Mincy__HEADSHOT.png`)
-5. ✅ **Design**: Will provide design direction later
-6. ✅ **Timeline**: 10-11 weeks is acceptable (flexible if delays occur)
-7. ✅ **Payment Provider**: Stripe (unless better option found before coding)
-8. ✅ **Payment System**: Must be architected from the start (not an afterthought)
-9. ✅ **Admin Panel**: Required from the start - full CMS capabilities (WordPress-like)
-10. ✅ **Database**: Supabase (PostgreSQL backend)
-11. ✅ **ALL Content Editable**: Every piece of content must be editable via admin panel
-12. ✅ **Blog Architecture**: Blog structure prepared from start (tables, admin interface) - can be hidden until ready
-13. ✅ **Primary AI Feature**: Nora AI Chat Widget - persistent chat bubble (bottom-right corner) on all pages
-14. ✅ **Nora Chat History**: Session-based for guests, persistent for authenticated customers
-15. ✅ **Nora Account Access**: Authenticated customers can ask Nora about their invoices, payments, and contracts
-16. ✅ **Current Clients**: 1 client will need portal access initially
-
-## Remaining Questions
-
-1. ✅ **AI Features Priority**: Nora AI Chat Widget is the primary AI feature (persistent chat bubble, bottom-right corner)
-2. ✅ **Design Inspiration**: 
-   - **Portfolio Pages**: 
-     - [ZYAN Portfolio Template](https://codeefly.net/wp/zyan) - modern animations, clean design, interactive elements
-     - [Drake Personal Portfolio Template](https://preview.themeforest.net/item/drake-personal-portfolio-html/full_screen_preview/43789350) - additional layout patterns and design elements
-   - **Dashboards**:
-     - [Refine MUI Admin Dashboard](https://example.mui.admin.refine.dev) - Material UI admin panel patterns
-     - [Refine HR Dashboard](https://hr.refine.dev/login) - HR management dashboard patterns
-   - **Approach**: Select best elements from portfolio templates; follow Refine dashboard patterns for admin/customer portals
-3. ✅ **Existing Customers**: 1 current client will need portal access initially
-4. ✅ **Nora Chat Widget Details**: 
-   - ✅ Chat history: Session-based for guests, persistent for authenticated customers
-   - ✅ Authenticated customers: Nora can access account info (invoices, payments, contracts)
-   - Which AI model? (OpenAI GPT-4, Claude, or other?)
-   - Any specific personality traits for Nora?
-
----
-
-**Document Version**: 2.0  
+**Document Version**: 3.0 (Refactored & Streamlined)  
 **Last Updated**: [Current Date]  
-**Status**: Planning Phase - Updated for Refine + Customer Portal + Payment Integration
+**Status**: ✅ Planning Complete - Refactored for Better Organization - Ready for Development
 
+## Recent Updates (v3.0)
+- ✅ **Refactored**: Removed redundancies, improved organization
+- ✅ **Reorganized**: Database schema by feature area
+- ✅ **Sequential Phases**: Fixed phase numbering (1-16) with clear prerequisites
+- ✅ **Consolidated**: Feature descriptions, moved detailed architecture to appendices
+- ✅ **Enhanced Flow**: Each phase now has prerequisites and deliverables
+- ✅ **Streamlined**: Removed duplicate information, improved readability
