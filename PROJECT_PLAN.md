@@ -3,10 +3,10 @@
 ## Executive Summary
 
 **Project**: Modern portfolio website with integrated customer portal, invoice management, and AI-powered features  
-**Tech Stack**: Refine + Next.js + TypeScript + Supabase (PostgreSQL) + Stripe + Google Ads  
+**Tech Stack**: Refine + Next.js + TypeScript + AWS (RDS, Cognito, S3, Lambda, Amplify) + Stripe + Google Ads  
 **Development Methodology**: **Test-Driven Development (TDD)** - Tests written before implementation  
 **Timeline**: 11 weeks (portfolio) | 12+ weeks (full launch)  
-**Status**: Planning Complete - Ready for Development
+**Status**: Planning Complete - AWS Ecosystem - Ready for Development
 
 ---
 
@@ -38,7 +38,12 @@ Potential clients, recruiters, tech community, **existing customers** (portal ac
 | **Language** | TypeScript | Type safety |
 | **UI Framework** | Ant Design | Admin/customer portals |
 | **Styling** | Tailwind CSS + Ant Design | Portfolio pages + dashboards |
-| **Database** | Supabase (PostgreSQL) | Data storage, auth, real-time |
+| **Database** | AWS RDS (PostgreSQL) | Data storage, scalable relational database |
+| **Authentication** | AWS Cognito | User authentication, OAuth, MFA |
+| **Storage** | AWS S3 | File storage (client uploads, media, documents) |
+| **Real-time** | AWS AppSync / API Gateway WebSocket | Real-time notifications, messaging |
+| **Serverless** | AWS Lambda | API routes, background jobs, automation |
+| **CDN** | AWS CloudFront | Global content delivery, static assets |
 | **Payments** | Stripe | Invoice payments |
 | **AI** | OpenAI (GPT-3.5 Turbo / GPT-4 Turbo) | Nora chat widget |
 | **Contracts** | DocuSign API | Contract management |
@@ -56,10 +61,15 @@ Potential clients, recruiters, tech community, **existing customers** (portal ac
 - **Test Coverage**: Coverage tools (Jest coverage, Istanbul)
 - **TDD Workflow**: Red → Green → Refactor cycle
 
-### Deployment
-- **Frontend**: Vercel (Next.js)
-- **Backend**: Supabase (managed PostgreSQL)
+### Deployment (AWS Ecosystem)
+- **Frontend**: AWS Amplify (Next.js) or ECS/EC2
+- **Database**: AWS RDS (PostgreSQL) - managed, scalable
+- **Storage**: AWS S3 (file uploads, media)
+- **CDN**: AWS CloudFront (global content delivery)
+- **API**: AWS Lambda (serverless functions) or API Gateway
+- **Real-time**: AWS AppSync (GraphQL subscriptions) or API Gateway WebSocket
 - **Environment**: Node.js LTS
+- **Benefits**: Full AWS ecosystem, easier scaling, enterprise-ready
 
 ---
 
@@ -135,7 +145,7 @@ Potential clients, recruiters, tech community, **existing customers** (portal ac
 - **Authentication Options**:
   - Email/password login
   - OAuth providers: Google, Facebook, LinkedIn (GitHub optional)
-  - Supabase Auth via Refine
+  - AWS Cognito via Refine (custom data provider)
 - Dashboard with widgets (balance, invoices, contracts, payments)
 - Invoice management & payment processing
 - Contract viewing & signing (DocuSign)
@@ -252,7 +262,7 @@ Potential clients, recruiters, tech community, **existing customers** (portal ac
 ## Database Schema
 
 ### Authentication & Users
-- `users` - Authentication (Supabase auth.users)
+- `users` - Authentication (AWS Cognito User Pool - stored in Cognito, synced to RDS)
 - `customers` - Customer profiles (linked to users)
 
 ### Content Management
@@ -329,7 +339,7 @@ Potential clients, recruiters, tech community, **existing customers** (portal ac
 
 ### AI Features
 - `chat_messages` - Nora chat history (authenticated users)
-  - Fields: id, user_id, message, role (user/assistant), created_at
+  - Fields: id, user_id (Cognito user ID), message, role (user/assistant), created_at
 
 ### User Preferences
 - `saved_filters` - User filter presets
@@ -397,10 +407,11 @@ Potential clients, recruiters, tech community, **existing customers** (portal ac
 ## Development Phases
 
 ### Phase 1: Foundation & Setup (Week 1)
-**Goal**: Establish development foundation with TDD infrastructure and core integrations
+**Goal**: Establish development foundation with TDD infrastructure and AWS ecosystem setup
 
 **Prerequisites**: 
-- All accounts set up (Supabase, Stripe, OpenAI, etc.)
+- All accounts set up (AWS, Stripe, OpenAI, etc.)
+- AWS account with appropriate permissions
 - Environment variables configured (see `.env.example`)
 - Development environment ready
 
@@ -411,16 +422,34 @@ Potential clients, recruiters, tech community, **existing customers** (portal ac
   - [ ] Playwright setup for E2E testing
   - [ ] Test utilities and helpers
   - [ ] Mock Service Worker (MSW) setup
-  - [ ] Test database configuration (Supabase test instance)
-  - [ ] CI/CD pipeline with test automation
-- [ ] Supabase setup & database schema (core tables only)
-- [ ] Refine data provider (Supabase)
-- [ ] Refine auth provider (Supabase Auth)
+  - [ ] Test database configuration (AWS RDS test instance or local PostgreSQL)
+  - [ ] CI/CD pipeline with test automation (AWS CodePipeline or GitHub Actions)
+- [ ] **AWS Infrastructure Setup**:
+  - [ ] AWS RDS PostgreSQL instance (development)
+  - [ ] AWS Cognito User Pool setup:
+    - [ ] Create User Pool
+    - [ ] Configure OAuth providers (Google, Facebook, LinkedIn, GitHub):
+      - [ ] Google: Set up OAuth 2.0 credentials in Google Cloud Console
+      - [ ] Facebook: Create Facebook App and get App ID/Secret
+      - [ ] LinkedIn: Create LinkedIn App and get Client ID/Secret
+      - [ ] GitHub: Create GitHub OAuth App and get Client ID/Secret
+      - [ ] Add each provider in Cognito Console > User Pool > Sign-in experience > Federated identity provider sign-in
+      - [ ] Configure OAuth scopes and attributes for each provider
+    - [ ] Set up Cognito Hosted UI (optional, for OAuth redirects)
+    - [ ] Configure OAuth callback URLs
+  - [ ] AWS S3 buckets (media, client-uploads)
+  - [ ] AWS CloudFront distribution (for production)
+  - [ ] AWS Lambda functions structure
+  - [ ] AWS AppSync API (for real-time) or API Gateway WebSocket
+- [ ] Database schema setup (core tables only)
+- [ ] **Custom Refine Providers**:
+  - [ ] Custom AWS data provider (RDS PostgreSQL)
+  - [ ] Custom AWS Cognito auth provider
 - [ ] Design system (Blue, Gold, Silver) - Tailwind + Ant Design
 - [ ] Stripe account setup (test mode)
 - [ ] Environment configuration validation
 
-**Deliverable**: Working development environment with TDD infrastructure, basic Supabase connection, and design system
+**Deliverable**: Working development environment with TDD infrastructure, AWS ecosystem configured, and design system
 
 ### Phase 2: Admin Panel & CMS (Weeks 2-3)
 **Goal**: Build admin panel with full CMS capabilities
@@ -471,19 +500,22 @@ Potential clients, recruiters, tech community, **existing customers** (portal ac
 ### Phase 4: Authentication & Customer Portal (Week 5)
 **Goal**: Implement authentication system and customer portal foundation
 
-**Prerequisites**: Phase 1 complete (Supabase Auth configured), Phase 2 complete (Admin panel ready)
+**Prerequisites**: Phase 1 complete (AWS Cognito configured), Phase 2 complete (Admin panel ready)
 
 **Tasks**:
 - [ ] **TDD: Write tests first for authentication flows**
-- [ ] Customer authentication setup (Supabase Auth):
+- [ ] Customer authentication setup (AWS Cognito):
   - [ ] Write tests for email/password auth → Implement → Refactor
-  - [ ] OAuth provider configuration:
+  - [ ] AWS Cognito User Pool configuration
+  - [ ] Custom Refine Cognito auth provider implementation
+  - [ ] OAuth provider configuration (AWS Cognito Identity Pools):
     - [ ] Write tests for Google OAuth → Implement → Refactor
     - [ ] Write tests for Facebook OAuth → Implement → Refactor
     - [ ] Write tests for LinkedIn OAuth → Implement → Refactor
     - [ ] Write tests for GitHub OAuth (optional) → Implement → Refactor
   - [ ] OAuth provider UI buttons/components (test UI interactions)
   - [ ] Account linking (OAuth + email/password) - write tests first
+  - [ ] User sync from Cognito to RDS (customers table)
 - [ ] Customer Dashboard (widgets: balance, invoices, contracts, payments):
   - [ ] Write tests for each widget → Implement → Refactor
   - [ ] Dashboard layout and navigation
@@ -599,7 +631,7 @@ Potential clients, recruiters, tech community, **existing customers** (portal ac
     - [ ] Update projects table (add customer_id for client-assigned projects)
   - [ ] File upload API endpoint:
     - [ ] Write tests for upload endpoint → Implement → Refactor
-    - [ ] Accept file uploads (Supabase Storage)
+    - [ ] Accept file uploads (AWS S3)
     - [ ] Validate file types and sizes
     - [ ] Store file metadata in database
     - [ ] Link files to projects and customers
@@ -801,7 +833,11 @@ Potential clients, recruiters, tech community, **existing customers** (portal ac
   - [ ] Database schema (email_templates, email_logs tables)
   - [ ] Email template management (admin panel)
   - [ ] Template variables system
-  - [ ] Email queue system (Supabase Edge Functions or n8n)
+  - [ ] Email queue system (AWS Lambda + SQS or n8n workflows):
+    - [ ] AWS Lambda function for email processing
+    - [ ] AWS SQS queue for email jobs (optional)
+    - [ ] n8n workflows for complex email automation
+  - [ ] AWS SES integration for email sending
   - [ ] Automated invoice reminders (configurable schedule)
   - [ ] Payment confirmations
   - [ ] Invoice sent notifications
@@ -810,19 +846,20 @@ Potential clients, recruiters, tech community, **existing customers** (portal ac
   - [ ] Overdue invoice alerts
   - [ ] Welcome emails
   - [ ] Email preferences (customer opt-in/opt-out)
-  - [ ] Email delivery tracking
+  - [ ] Email delivery tracking (SES delivery events)
 - [ ] **In-App Messaging**:
   - [ ] Write tests for messaging system → Implement → Refactor
   - [ ] Database schema (messages, message_threads tables)
   - [ ] Message UI (customer & admin)
   - [ ] Message threads per invoice/contract
-  - [ ] File attachments
+  - [ ] File attachments (AWS S3)
   - [ ] Read receipts
+  - [ ] Real-time messaging (AWS AppSync or WebSocket)
   - [ ] Email notifications for new messages
 - [ ] **Notifications Center**:
   - [ ] Write tests for notifications → Implement → Refactor
   - [ ] Database schema (notifications table)
-  - [ ] Real-time notifications (Supabase Realtime)
+  - [ ] Real-time notifications (AWS AppSync subscriptions or API Gateway WebSocket)
   - [ ] Notification bell UI
   - [ ] Mark as read/unread
   - [ ] Notification preferences
@@ -1357,11 +1394,18 @@ You have the ability to help users find content on the website by:
 ## Technical Implementation Details
 
 ### Refine Configuration
-- **Data Provider**: Supabase Data Provider
-- **Auth Provider**: Supabase Auth Provider
-  - Email/password authentication
-  - OAuth providers: Google, Facebook, LinkedIn (GitHub optional)
-  - Supabase handles OAuth flow and token management
+- **Data Provider**: Custom AWS Data Provider (RDS PostgreSQL via Prisma/TypeORM)
+  - Direct PostgreSQL connection (AWS RDS)
+  - Custom data hooks for CRUD operations
+  - Real-time subscriptions via AWS AppSync or WebSocket
+- **Auth Provider**: Custom AWS Cognito Provider
+  - Email/password authentication (AWS Cognito User Pools)
+  - **OAuth providers**: Google, Facebook, LinkedIn, GitHub (optional) via Cognito User Pool OAuth
+    - ✅ **Fully supported** - All major OAuth providers work seamlessly
+    - Configured in AWS Cognito Console > User Pool > Sign-in experience > Federated identity provider sign-in
+    - AWS Cognito handles OAuth flow, token management, and user profile sync
+    - Users can link multiple OAuth accounts to the same user profile
+  - MFA support (TOTP, SMS)
 - **UI Framework**: Ant Design (default)
 - **Routing**: Next.js App Router integration
 
@@ -1461,16 +1505,18 @@ You have the ability to help users find content on the website by:
 5. ✅ **Payment Provider**: Stripe
 6. ✅ **Payment System**: Architected from start
 7. ✅ **Admin Panel**: Required from start, full CMS
-8. ✅ **Database**: Supabase (PostgreSQL)
-9. ✅ **ALL Content Editable**: Via admin panel
-10. ✅ **Primary AI Feature**: Nora AI Chat Widget
-11. ✅ **AI Model**: Hybrid (GPT-3.5 Turbo guests, GPT-4 Turbo authenticated)
-12. ✅ **Nora Personality**: Complete system message created
-13. ✅ **Nora Smart Navigation**: Navigate & highlight content
-14. ✅ **Current Clients**: 1 client for initial portal access
-15. ✅ **OAuth Authentication**: Google, Facebook, LinkedIn (GitHub optional) alongside email/password
-16. ✅ **Stripe Link**: One-click checkout enabled for faster payment experience
-17. ✅ **Test-Driven Development (TDD)**: All features developed test-first (Red → Green → Refactor)
+8. ✅ **Database**: AWS RDS (PostgreSQL) - Scalable, enterprise-ready
+9. ✅ **Infrastructure**: AWS Ecosystem (Cognito, S3, Lambda, Amplify, CloudFront)
+10. ✅ **ALL Content Editable**: Via admin panel
+11. ✅ **Primary AI Feature**: Nora AI Chat Widget
+12. ✅ **AI Model**: Hybrid (GPT-3.5 Turbo guests, GPT-4 Turbo authenticated)
+13. ✅ **Nora Personality**: Complete system message created
+14. ✅ **Nora Smart Navigation**: Navigate & highlight content
+15. ✅ **Current Clients**: 1 client for initial portal access
+16. ✅ **OAuth Authentication**: Google, Facebook, LinkedIn (GitHub optional) alongside email/password
+17. ✅ **Stripe Link**: One-click checkout enabled for faster payment experience
+18. ✅ **Test-Driven Development (TDD)**: All features developed test-first (Red → Green → Refactor)
+19. ✅ **AWS Ecosystem**: Full AWS infrastructure for scalability and enterprise growth
 
 ---
 
@@ -1480,16 +1526,14 @@ You have the ability to help users find content on the website by:
 - **Refine**: https://refine.dev/docs
   - [Quick Start](https://refine.dev/docs/getting-started/quickstart)
   - [Next.js Guide](https://refine.dev/docs/guides-and-concepts/guides/nextjs)
-  - [Supabase Data Provider](https://refine.dev/docs/data-provider/supabase)
+  - [Custom Data Provider](https://refine.dev/docs/data-provider/custom-data-provider) - For AWS RDS
+  - [Custom Auth Provider](https://refine.dev/docs/guides-and-concepts/authentication) - For AWS Cognito
   - [Authentication](https://refine.dev/docs/guides-and-concepts/authentication)
 - **Refine Examples**:
   - [MUI Admin Dashboard](https://example.mui.admin.refine.dev)
   - [HR Dashboard](https://hr.refine.dev/login)
 - **Next.js**: https://nextjs.org/docs
 - **Ant Design**: https://ant.design
-- **Supabase**: https://supabase.com/docs
-  - [Authentication](https://supabase.com/docs/guides/auth)
-  - [OAuth Providers](https://supabase.com/docs/guides/auth/social-login)
 - **Stripe**: https://docs.stripe.com
   - [Payment Intents](https://docs.stripe.com/payments/payment-intents)
   - [Elements](https://docs.stripe.com/payments/elements)
@@ -1524,21 +1568,41 @@ You have the ability to help users find content on the website by:
 
 ### Immediate Actions
 1. ✅ Review and approve project plan
-2. ⏭️ Set up Supabase account & project
+2. ⏭️ Set up AWS account & configure services:
+   - AWS RDS PostgreSQL instance
+   - AWS Cognito User Pool
+   - AWS S3 buckets (media, client-uploads, public)
+   - AWS CloudFront distribution
+   - AWS Lambda functions
+   - AWS AppSync API (or API Gateway WebSocket)
+   - AWS SES (email service)
+   - AWS ElastiCache Redis (optional, for caching)
 3. ⏭️ Set up OAuth provider accounts (Google, Facebook, LinkedIn, GitHub optional)
-4. ⏭️ Set up Stripe account (test mode)
-5. ⏭️ Set up OpenAI API account
-6. ⏭️ Set up Google Calendar API credentials
-7. ⏭️ **Configure environment variables**:
+4. ⏭️ Configure OAuth in AWS Cognito Identity Pools
+5. ⏭️ Set up Stripe account (test mode)
+6. ⏭️ Set up OpenAI API account
+7. ⏭️ Set up Google Calendar API credentials
+8. ⏭️ **Configure environment variables**:
    - Copy `.env.example` to `.env`
-   - Fill in all API keys and credentials (see `.env.example` for complete list)
+   - Fill in all AWS credentials and API keys (see `.env.example` for complete list)
    - Generate secure SESSION_SECRET (use: `openssl rand -base64 32`)
-8. ⏭️ Initialize Refine + Next.js project
-9. ⏭️ Begin Phase 1: Foundation & Setup
+9. ⏭️ Initialize Refine + Next.js project
+10. ⏭️ Begin Phase 1: Foundation & Setup
 
 ### Pre-Development Checklist
-- [ ] Supabase project created
+- [ ] **AWS Infrastructure Setup**:
+  - [ ] AWS account created with appropriate IAM roles
+  - [ ] AWS RDS PostgreSQL instance created
+  - [ ] AWS Cognito User Pool created
+  - [ ] AWS Cognito Identity Pool created (for OAuth)
+  - [ ] AWS S3 buckets created (media, client-uploads, public)
+  - [ ] AWS CloudFront distribution configured
+  - [ ] AWS Lambda functions structure created
+  - [ ] AWS AppSync API created (or API Gateway WebSocket)
+  - [ ] AWS SES configured (email service)
+  - [ ] AWS ElastiCache Redis cluster (optional, for caching)
 - [ ] OAuth provider accounts configured (Google, Facebook, LinkedIn, GitHub optional)
+- [ ] OAuth providers linked in AWS Cognito
 - [ ] Stripe account configured (test mode)
 - [ ] OpenAI API keys obtained
 - [ ] Google Calendar API credentials obtained
@@ -1547,10 +1611,11 @@ You have the ability to help users find content on the website by:
 - [ ] Development environment ready
 - [ ] **Testing tools installed** (Jest, React Testing Library, Playwright)
 - [ ] Git repository initialized
-- [ ] CI/CD pipeline configured (with test automation)
+- [ ] CI/CD pipeline configured (AWS CodePipeline or GitHub Actions with test automation)
 - [ ] **Environment variables configured**:
   - [ ] Copy `.env.example` to `.env`
-  - [ ] Fill in all required environment variables (see `.env.example` for complete list)
+  - [ ] Fill in all AWS credentials (RDS, Cognito, S3, Lambda, etc.)
+  - [ ] Fill in all API keys (Stripe, OpenAI, DocuSign, Google Calendar, etc.)
   - [ ] Generate SESSION_SECRET (use: `openssl rand -base64 32`)
   - [ ] Verify `.env` is in `.gitignore`
 - [ ] Design mockups (optional, can iterate)
