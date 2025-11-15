@@ -116,13 +116,25 @@ pnpm install
 ### 4. AWS Infrastructure Setup
 
 1. **AWS RDS**: Create PostgreSQL database instance
+   - Configure security groups and VPC settings
+   - Set up automated backups
 2. **AWS Cognito**: Create User Pool and Identity Pool
+   - Configure OAuth providers (Google, Facebook, LinkedIn, GitHub)
+   - Set up hosted UI (optional)
 3. **AWS S3**: Create buckets (media, client-uploads, public)
+   - Configure bucket policies and CORS
+   - Set up CloudFront distribution for CDN
 4. **AWS CloudFront**: Create distribution (for production)
-5. **AWS Lambda**: Set up function structure (optional)
+   - Link to S3 buckets
+   - Configure custom domain and SSL
+5. **AWS Lambda**: Set up function structure (optional, for serverless API routes)
 6. **AWS AppSync**: Create GraphQL API (for real-time) or API Gateway WebSocket
+   - Configure authentication and authorization
 7. **AWS SES**: Configure email service
-8. Run database migrations (schema will be provided)
+   - Verify domain or email addresses
+   - Set up SMTP credentials
+8. **AWS ElastiCache**: Set up Redis cluster (optional, for caching)
+9. Run database migrations (schema will be provided)
 
 ### 5. Run Development Server
 
@@ -163,16 +175,26 @@ npm run test:coverage
 
 ```
 destinlmincy.com/
-├── app/                    # Next.js App Router pages
+├── app/                    # Next.js App Router (pages & routes)
 │   ├── (public)/          # Public pages (Home, Projects, Skills, About, Contact)
 │   ├── dashboard/         # Customer portal pages
-│   ├── admin/             # Admin panel pages
-│   └── api/               # API routes
-├── components/            # React components
-├── lib/                   # Utilities and helpers
-├── hooks/                 # Custom React hooks
-├── types/                 # TypeScript type definitions
+│   ├── admin/             # Admin panel pages (Refine-powered)
+│   ├── api/               # API routes
+│   ├── layout.tsx          # Root layout
+│   └── page.tsx            # Home page
+├── src/                    # Main application code (Refine structure)
+│   ├── components/        # React components
+│   ├── providers/         # Refine providers (data, auth, access control)
+│   │   ├── dataProvider.ts    # Custom AWS RDS data provider
+│   │   ├── authProvider.ts     # Custom AWS Cognito auth provider
+│   │   └── accessControlProvider.ts
+│   ├── hooks/             # Custom React hooks
+│   ├── lib/               # Utilities and helpers
+│   └── types/             # TypeScript type definitions
 ├── tests/                 # Test files
+│   ├── unit/              # Unit tests
+│   ├── integration/       # Integration tests
+│   └── e2e/               # Playwright E2E tests
 ├── config/                # Configuration files
 │   └── nora-system-message.txt  # Nora AI system message
 ├── public/                # Static assets
@@ -180,6 +202,11 @@ destinlmincy.com/
 ├── PROJECT_PLAN.md        # Comprehensive project plan
 └── README.md              # This file
 ```
+
+**Note**: This structure combines:
+- **Next.js App Router** (`app/` directory) for routing and pages
+- **Refine structure** (`src/` directory) for providers, components, and business logic
+- This is a **hybrid approach** that leverages both frameworks' strengths
 
 ## 🎯 Development Phases
 
@@ -211,7 +238,7 @@ See `PROJECT_PLAN.md` for complete development roadmap. Summary:
 ## 🔐 Security
 
 - All API endpoints are rate-limited
-- Authentication uses Supabase Auth with OAuth support
+- Authentication uses AWS Cognito with OAuth support
 - Two-factor authentication (2FA) available
 - PCI-compliant payment processing (Stripe)
 - GDPR compliance features

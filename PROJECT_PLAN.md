@@ -400,7 +400,7 @@ Potential clients, recruiters, tech community, **existing customers** (portal ac
 - React Testing Library for component testing
 - Playwright for E2E testing
 - Mock Service Worker (MSW) for API mocking
-- Test database setup (Supabase test instance)
+- Test database setup (AWS RDS test instance or local PostgreSQL)
 
 ---
 
@@ -1091,11 +1091,25 @@ Potential clients, recruiters, tech community, **existing customers** (portal ac
 **Prerequisites**: Phase 13 complete (Polish & optimization done)
 
 **Tasks**:
-- [ ] Production deployment (Vercel)
-- [ ] Database migration
-- [ ] Environment configuration
-- [ ] Stripe webhooks (production)
-- [ ] Domain & SSL setup
+- [ ] Production deployment (AWS Amplify or ECS/EC2):
+  - [ ] AWS Amplify app creation and configuration
+  - [ ] Or ECS/EC2 instance setup with Docker
+  - [ ] Environment variables configuration in AWS
+  - [ ] Build and deployment pipeline setup
+- [ ] Database migration (AWS RDS):
+  - [ ] Run production database migrations
+  - [ ] Verify database schema
+  - [ ] Set up database backups
+- [ ] Environment configuration:
+  - [ ] Production environment variables in AWS
+  - [ ] AWS Secrets Manager for sensitive credentials
+- [ ] Stripe webhooks (production):
+  - [ ] Configure production webhook endpoints
+  - [ ] Test webhook delivery
+- [ ] Domain & SSL setup:
+  - [ ] AWS Route 53 for DNS (if using)
+  - [ ] SSL certificate via AWS Certificate Manager (ACM)
+  - [ ] CloudFront distribution with custom domain
 - [ ] Analytics integration:
   - [ ] Google Analytics setup
   - [ ] Google Ads conversion tracking
