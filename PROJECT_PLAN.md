@@ -3,7 +3,7 @@
 ## Executive Summary
 
 **Project**: Modern portfolio website with integrated customer portal, invoice management, and AI-powered features  
-**Tech Stack**: Refine + Next.js + TypeScript + AWS (RDS, Cognito, S3, Lambda, Amplify) + Stripe + Google Ads  
+**Tech Stack**: Refine + Next.js + TypeScript + AWS (RDS, Cognito, S3, Lambda, Amplify) + Polar (MoR) + Google Ads  
 **Development Methodology**: **Test-Driven Development (TDD)** - Tests written before implementation  
 **Timeline**: 11 weeks (portfolio) | 12+ weeks (full launch)  
 **Status**: Planning Complete - AWS Ecosystem - Ready for Development
@@ -19,7 +19,7 @@ Professional portfolio showcasing Destin L. Mincy's work as a Web Developer and 
 - ✅ Full CMS (WordPress-like, custom-built) - **ALL content editable via admin**
 - ✅ Admin panel from day one
 - ✅ Customer portal with authentication
-- ✅ Invoice management & payment processing (Stripe)
+- ✅ Invoice management & payment processing (Polar - Merchant of Record)
 - ✅ AI chat assistant (Nora) with smart navigation
 - ✅ Future-proof architecture (blog-ready, scalable)
 - ✅ **Test-Driven Development (TDD)** - All features developed test-first
@@ -44,9 +44,10 @@ Potential clients, recruiters, tech community, **existing customers** (portal ac
 | **Real-time** | AWS AppSync / API Gateway WebSocket | Real-time notifications, messaging |
 | **Serverless** | AWS Lambda | API routes, background jobs, automation |
 | **CDN** | AWS CloudFront | Global content delivery, static assets |
-| **Payments** | Stripe | Invoice payments |
+| **Payments** | Polar (MoR) | Invoice payments, tax compliance |
 | **AI** | OpenAI (GPT-3.5 Turbo / GPT-4 Turbo) | Nora chat widget |
 | **Contracts** | DocuSign API | Contract management |
+| **Repository Hosting** | AWS CodeCommit | Client project repository hosting (100% AWS, closed-source, managed Git service) |
 
 ### Supporting Libraries
 - **Charts**: Recharts (dashboard visualizations)
@@ -88,15 +89,23 @@ Potential clients, recruiters, tech community, **existing customers** (portal ac
 ### Customer Portal Pages
 | Page | Route | Features |
 |------|-------|----------|
-| **Dashboard** | `/dashboard` | Balance summary, invoices/contracts overview, payment history, quick actions, notifications |
+| **Dashboard** | `/dashboard` | Balance summary, invoices/contracts/quotes overview, payment history, quick actions, notifications |
+| **Quotes** | `/quotes` | Quote list, filters, approval status, PDF download, initial/final quotes |
+| **Quote Detail** | `/quotes/:id` | Full quote view, approve/reject, convert to contract, download PDF |
 | **Invoices** | `/invoices` | Invoice list, filters, payment status, PDF download, recurring invoices |
-| **Invoice Detail** | `/invoices/:id` | Full invoice, payment form (Stripe), payment history, partial payments, payment plans |
+| **Invoice Detail** | `/invoices/:id` | Full invoice, payment form (Polar), payment history, partial payments, payment plans |
 | **Contracts** | `/contracts` | Contract list, signing status, DocuSign integration, request new contract |
 | **Contract Detail** | `/contracts/:id` | Contract view, embedded signing, download |
 | **Request Contract** | `/contracts/request` | New contract request form (or via Nora chat) |
 | **Projects** | `/projects` | View assigned projects, upload files (logos, assets), project files library |
-| **Project Detail** | `/projects/:id` | Project details, file upload interface, file library, project messages |
+| **Project Detail** | `/projects/:id` | Project details, milestones view, file upload interface, file library, project messages |
+| **Project Milestones** | `/projects/:id/milestones` | Milestone list, status tracking, deliverables linked to repository files/commits, approval workflow, milestone-based collaboration (comments/requests) |
+| **Project Repository** | `/projects/:id/repository` | Repository browser, file system view, git commit history, code visibility control, milestone-linked deliverables |
+| **Project Certificate** | `/projects/:id/certificate` | View completion certificate, download certificate PDF, view certificate in repository |
+| **Project Activity** | `/projects/:id/activity` | Project activity feed, status updates, timeline view |
+| **Submit Testimonial** | `/testimonials/submit` | Submit testimonial form (or via Nora chat) |
 | **Payments** | `/payments` | Payment history, receipts, filters, payment plans |
+| **Subscriptions** | `/subscriptions` | Active subscriptions, subscription management, upgrade/downgrade, cancel/pause, billing history, usage tracking |
 | **Messages** | `/messages` | In-app messaging with admin, message threads, file attachments |
 | **Notifications** | `/notifications` | Notification center, mark as read/unread, preferences |
 | **Profile** | `/profile` | Account info, billing address, password change, 2FA setup, email preferences |
@@ -105,16 +114,24 @@ Potential clients, recruiters, tech community, **existing customers** (portal ac
 ### Admin Pages
 | Page | Route | Features |
 |------|-------|----------|
-| **Dashboard** | `/admin` | Revenue analytics, invoice/customer stats, project metrics, quick actions, notifications |
+| **Dashboard** | `/admin` | Revenue analytics, invoice/customer/quote stats, project metrics, quick actions, notifications |
 | **Projects** | `/admin/projects` | CRUD operations, image upload, featured toggle |
+| **Project Milestones** | `/admin/projects/:id/milestones` | Create/edit milestones, link deliverables to repository files/commits, track completion, client approval workflow, review milestone comments/requests |
+| **Project Repositories** | `/admin/projects/:id/repository` | Create/manage AWS repositories, configure settings, view all files, set open-source licensing |
+| **Project Certificates** | `/admin/projects/:id/certificate` | Generate completion certificates, view certificate history, manage certificate templates |
 | **Content Management** | `/admin/content` | Edit ALL pages (Home, About, Skills, Contact, Projects) |
 | **Blog** | `/admin/blog` | Blog CRUD (architecture ready, can be hidden) |
+| **Quotes** | `/admin/quotes` | Create/edit quotes, initial/final quote workflow, hourly rate management, convert to contracts, quote numbering |
 | **Invoices** | `/admin/invoices` | Create/edit invoices, send to customers, payment tracking, recurring invoices, invoice numbering |
-| **Contracts** | `/admin/contracts` | Create contracts, send via DocuSign, track status, review client-requested contracts, approve/reject |
+| **Contracts** | `/admin/contracts` | Create contracts, send via DocuSign, track status, review client-requested contracts, approve/reject, generate from quotes |
 | **Customers** | `/admin/customers` | Customer management, view invoices/contracts, messaging |
 | **Messages** | `/admin/messages` | Customer messaging, message threads, file attachments |
 | **Email Templates** | `/admin/email-templates` | Manage email templates, preview, test |
 | **Activity Logs** | `/admin/activity-logs` | Audit trail, user actions, search/filter, export |
+| **Expenses** | `/admin/expenses` | Track project expenses, receipt upload, categorize, mark billable/non-billable, link to invoices |
+| **Testimonials** | `/admin/testimonials` | View testimonials, approve/reject, feature testimonials, manage display |
+| **Subscriptions** | `/admin/subscriptions` | Manage subscription tiers, view all subscriptions, subscription analytics, manage customer subscriptions, pause/cancel/activate |
+| **Subscription Tiers** | `/admin/subscription-tiers` | Create/edit subscription tiers, pricing, features, billing frequency, Polar product/price integration |
 | **Settings** | `/admin/settings` | Site config, payment keys, DocuSign settings, theme, tax rates, invoice numbering, email settings, security |
 | **Bookings** | `/admin/bookings` | View all bookings, manage status, operation hours, blocked times |
 | **Reports** | `/admin/reports` | Financial reports, exports (CSV, PDF, Excel), scheduled reports |
@@ -146,7 +163,12 @@ Potential clients, recruiters, tech community, **existing customers** (portal ac
   - Email/password login
   - OAuth providers: Google, Facebook, LinkedIn (GitHub optional)
   - AWS Cognito via Refine (custom data provider)
-- Dashboard with widgets (balance, invoices, contracts, payments)
+- Dashboard with widgets (balance, quotes, invoices, contracts, payments)
+- **Quote Management** ⭐:
+  - View quotes (initial and final)
+  - Approve/reject quotes
+  - Download quote PDFs
+  - Convert approved quotes to contracts
 - Invoice management & payment processing
 - Contract viewing & signing (DocuSign)
 - **Client-Initiated Contract Requests** ⭐:
@@ -162,6 +184,24 @@ Potential clients, recruiters, tech community, **existing customers** (portal ac
   - File organization and categorization
 - Payment method management
 - Account settings
+- **Project Milestones** ⭐:
+  - View project milestones with status tracking and payment status
+  - See deliverables linked to repository files/commits
+  - Payment required before milestone begins (full upfront or per-milestone payment)
+  - Code released per milestone after payment received and deliverables completed
+  - Approve/reject completed milestones (after code is released)
+  - Timeline view of milestone progress
+  - Click deliverables to view linked files/commits in repository (if code is released)
+- **Project Repository Access** ⭐:
+  - Access to project repository (100% AWS-hosted, closed-source by default)
+  - File system browser (explore project structure)
+  - Code visibility control (code released per milestone after payment received and milestone completed)
+  - Git commit history as project activity log (commits made directly to AWS repository)
+  - Real-time updates (notifications when commits are made)
+  - Milestone indicators on files/commits (shows which deliverables are linked)
+  - Download final product on completion
+  - File preview and download (based on visibility rules)
+  - Open-source licensing (if contractually specified)
 
 ### 3.5. AI Contract Generation ⭐
 - **n8n AI Agent**: Automated contract generation based on client and project information
@@ -182,13 +222,13 @@ Potential clients, recruiters, tech community, **existing customers** (portal ac
 - *See Phase 5 for detailed implementation*
 
 ### 4. Payment Processing
-- Stripe integration (architected from start)
-- Payment Intents API
-- Stripe Elements (secure forms)
-- **Stripe Link** (one-click checkout - faster payment experience)
+- Polar integration (Merchant of Record - architected from start)
+- Polar Payment API
+- Polar secure payment forms
 - Webhook handling
 - Receipt generation
-- PCI-compliant
+- Tax compliance handled by Polar (MoR)
+- PCI-compliant (handled by Polar)
 
 ### 5. Meeting Booking System
 - **Booking Page** (`/book`): Calendar view, time slot selection, real-time availability, booking form
@@ -227,29 +267,101 @@ Potential clients, recruiters, tech community, **existing customers** (portal ac
 - *Note: Email primarily handled via n8n workflows (see .env.example for fallback SMTP config)*
 - *See Phase 9 for detailed implementation*
 
-### 9. Invoice Management Enhancements
+### 9. Quotes/Estimates System ⭐
+- **Initial vs. Final Quote Workflow**: Initial estimate → Planning session → Final quote with exact pricing
+- **Hourly Rate Management**: Base rates, project type rates, complexity multipliers (Low/Medium/High)
+- **32-Hour Work Week Calculation**: Timeline based on 32-hour weeks
+- **Automatic Price Calculation**: Hourly rate × estimated hours = total price
+- **Quote Numbering**: Customizable format (QUOTE-YYYY-###), sequential numbering
+- **Quote Templates**: Multiple templates, custom branding, preview
+- **Planning Session Tracking**: Schedule, complete, and link to final quote
+- **Quote → Contract Workflow**: Approved final quote triggers contract generation
+- **Quote PDF Generation**: Professional quote documents
+- *See Phase 5 for detailed implementation*
+
+### 10. Invoice Management Enhancements
 - **Invoice Numbering**: Customizable format (INV-YYYY-###), sequential numbering, reset options
 - **Recurring Invoices**: Templates, automatic generation, pause/resume
 - **Payment Plans**: Installments, partial payments, balance tracking
 - **Tax & Currency**: Multi-rate tax calculation, multi-currency support, exchange rates
 - **Invoice Templates**: Multiple templates, custom branding, preview
-- *See Phase 5 & 7 for detailed implementation*
+- **Automated Invoice Follow-ups** ⭐: Escalating reminders for overdue invoices, configurable reminder schedule (e.g., 3 days, 7 days, 14 days), late fee automation (optional), payment plan offers, grace period settings
+- *See Phase 5.5 & 8 for detailed implementation*
 
-### 10. Security & Compliance
+### 10. Recurring Service Subscriptions ⭐
+- **Subscription Tiers/Packages**: Create subscription plans with pricing, features, billing frequency (monthly, quarterly, yearly)
+- **Subscription Management**: Customer subscriptions, lifecycle management (active, paused, cancelled, expired)
+- **Polar Subscriptions Integration**: Full integration with Polar Subscriptions API for automatic billing
+- **Subscription Portal**: Customer self-service portal for managing subscriptions, upgrades/downgrades, cancellations
+- **Usage Tracking**: Track subscription usage (optional, for usage-based billing)
+- **Subscription Analytics**: Revenue analytics, churn tracking, subscription metrics
+- **Automatic Billing**: Automatic invoice generation and payment processing via Polar (MoR)
+- **Subscription Renewals**: Automatic renewal management, renewal reminders
+- *See Phase 9 for detailed implementation*
+
+### 11. Security & Compliance
 - **2FA**: TOTP-based (Google Authenticator, Authy), SMS optional, backup codes, admin enforcement
 - **Activity Logs**: Complete audit trail, search/filter, export
 - **Rate Limiting**: API limits, login attempt limiting, IP whitelisting, account lockout
 - **GDPR**: Privacy policy, data export/deletion, cookie consent, privacy settings
 - *See Phase 10 for detailed implementation*
 
-### 11. Customer Communication
+### 12. Customer Communication
 - **In-App Messaging**: Admin-customer messaging, threads per invoice/contract, file attachments, read receipts
 - **Notifications Center**: Real-time notifications, categories, preferences, email digest
 - *See Phase 9 for detailed implementation*
 
-### 12. Additional Features
+### 13. Enhanced Project Collaboration ⭐
+- **Milestone-Based Collaboration**: Clients can make comments and requests only on visible milestone deliverables
+- **One-Time Submission Per Milestone**: Once comments/suggestions are submitted and acceptance/request is pushed through, client must wait until next milestone release
+- **Milestone-Scoped Comments**: Comments and requests are tied to specific milestones and their released deliverables
+- **Request Workflow**: Client submits feedback → Admin reviews → Admin responds/addresses → Next milestone release unlocks new collaboration
+- **Visibility Control**: Clients can only collaborate on milestones that have been released (payment received + deliverables completed)
+- *See Phase 9.5 for detailed implementation*
+
+### 14. Project Completion Certificates ⭐
+- **Notice of Completion**: Official certificate representing that contractor has no further obligation to the project
+- **Repository Storage**: Certificate stored in final project repository alongside the project files
+- **Certificate Generation**: Automated generation when project is marked complete
+- **Digital Signatures**: Certificate includes digital signatures (admin signature, completion date)
+- **Certificate Download**: Client can download certificate from project repository
+- **Legal Documentation**: Serves as formal documentation of project completion and release of obligations
+- *See Phase 9.75 for detailed implementation*
+
+### 15. Project Milestones & Deliverables ⭐
+- **Milestone Tracking**: Break projects into milestones with due dates, status tracking, and completion percentages
+- **Payment-First Model**: Payment required upfront before milestone begins (supports both full upfront payment and per-milestone payment)
+- **Code Release Per Milestone**: Files/code for a milestone are released to client only after:
+  1. Milestone deliverables are completed
+  2. Payment for that milestone is received in full
+- **Deliverables Integration**: Link deliverables to repository files/commits (deliverables are files/features in the GitHub-like repository)
+- **Client Approval Workflow**: Client can approve/reject completed milestones (after code is released)
+- **Repository Linking**: Each deliverable can link to specific files or git commits in the repository
+- **Milestone-Based Payments**: Invoice generation per milestone (or full upfront payment option)
+- **Code Visibility Control**: Milestone-specific code visibility (code released per milestone after payment)
+- **Timeline View**: Visual timeline/Gantt chart showing milestone progress
+- **Status Workflow**: `pending` → `payment_required` → `in_progress` → `completed` → `code_released` → `approved`/`rejected`
+- **Auto-Detection**: Automatically mark deliverables as completed when linked files/commits are created
+- *See Phase 6 for detailed implementation*
+
+### 14. Client Project Repository & Git Integration ⭐
+- **Repository Hosting**: AWS CodeCommit (managed Git service) - 100% AWS-hosted, closed-source by default
+- **Private Repositories**: All projects hosted privately on AWS CodeCommit, not publicly accessible
+- **Open-Source Exception**: If project uses your open-source code, can be made available with proper licensing (specified in contract)
+- **File System Browser**: Client-accessible file tree with code visibility control
+- **Code Visibility**: Code files released per milestone after payment received and milestone completed (milestone-based code release)
+- **Git Commit History**: Real-time commit log as project activity feed (commits made directly to CodeCommit)
+- **Milestone Indicators**: Files/commits show which milestones/deliverables they're linked to
+- **Milestone Code Release**: Code for each milestone becomes visible after that milestone is paid and completed
+- **Client Notifications**: Notify clients of repository updates (commits, file changes, milestone code releases)
+- **Download System**: Final product download on completion
+- **Security**: IAM access control, signed URLs, backend validation, private repositories by default
+- **Integration**: CodeCommit API for file browser, commit history, and repository management
+- *See Phase 5.75 for detailed implementation*
+
+### 15. Additional Features
 - **Discount Codes**: Percentage/fixed discounts, expiration, usage limits, minimum amounts
-- **Credit Notes & Refunds**: Credit notes, Stripe refunds, partial refunds
+- **Credit Notes & Refunds**: Credit notes, Polar refunds, partial refunds
 - **Export & Reporting**: CSV/PDF/Excel exports, scheduled reports, financial reports
 - **Bulk Operations**: Bulk invoice/payment/customer operations
 - **Global Search**: Cross-content search, autocomplete, filters, keyboard shortcut (Cmd/Ctrl + K)
@@ -277,13 +389,21 @@ Potential clients, recruiters, tech community, **existing customers** (portal ac
 - `blog_post_categories` - Post-category relationships
 - `blog_post_tags` - Post-tag relationships
 
+### Quotes & Estimates System
+- `quotes` - Quote/estimate records
+  - Fields: id, customer_id, quote_number, quote_type (initial/final), status, expiration_date, hourly_rate, estimated_hours, total_amount, currency, tax_rate_id, project_scope (text), timeline_weeks (integer), complexity_level (low/medium/high), planning_session_completed (boolean), planning_session_notes (text), terms (text), notes, approved_at, rejected_at, contract_id (when contract created), initial_payment_invoice_id, converted_to_invoice_id (optional), parent_quote_id (for revisions), created_at, updated_at
+- `quote_items` - Quote line items
+  - Fields: id, quote_id, description, quantity, unit_price, total, created_at
+- `hourly_rates` - Hourly rate configuration
+  - Fields: id, project_type, complexity_level, hourly_rate, is_default, is_active, created_at, updated_at
+
 ### Invoice & Payment System
 - `invoices` - Invoice records
-  - Fields: id, customer_id, invoice_number (custom format), currency, tax_rate_id, recurring_invoice_id, payment_plan_id, status, due_date, total_amount, created_at, updated_at
+  - Fields: id, customer_id, quote_id (optional, for tracking), invoice_number (custom format), currency, tax_rate_id, recurring_invoice_id, payment_plan_id, status, due_date, total_amount, created_at, updated_at
 - `invoice_items` - Invoice line items
   - Fields: id, invoice_id, description, quantity, unit_price, total, created_at
 - `payments` - Payment transactions
-  - Fields: id, invoice_id, customer_id, amount, payment_method_id, partial_payment (flag), payment_plan_installment_id, stripe_payment_intent_id, status, created_at, updated_at
+  - Fields: id, invoice_id, customer_id, amount, payment_method_id, partial_payment (flag), payment_plan_installment_id, polar_payment_id, status, created_at, updated_at
 - `recurring_invoices` - Recurring invoice templates
   - Fields: id, customer_id, template_invoice_id, frequency (daily/weekly/monthly/yearly), start_date, end_date, next_generation_date, is_active, created_at, updated_at
 - `payment_plans` - Payment plan configurations
@@ -296,14 +416,28 @@ Potential clients, recruiters, tech community, **existing customers** (portal ac
   - Fields: id, code, type (percentage/fixed), value, min_amount, max_uses, used_count, expires_at, is_active, created_at, updated_at
 - `discount_code_usage` - Discount code tracking
   - Fields: id, discount_code_id, invoice_id, customer_id, used_at
+- `invoice_reminders` - Invoice reminder tracking
+  - Fields: id, invoice_id, reminder_type, sent_at, next_reminder_date, created_at
+- `invoice_reminder_rules` - Escalation rules for invoice reminders
+  - Fields: id, days_overdue, reminder_type, email_template_id, late_fee_percentage (optional), is_active, created_at
 - `credit_notes` - Credit note records
   - Fields: id, invoice_id, customer_id, amount, reason, status, applied_to_invoice_id, created_at, updated_at
 - `refunds` - Refund transactions
-  - Fields: id, payment_id, invoice_id, amount, reason, status, stripe_refund_id, created_at, updated_at
+  - Fields: id, payment_id, invoice_id, amount, reason, status, polar_refund_id, created_at, updated_at
+
+### Recurring Service Subscriptions
+- `subscription_tiers` - Subscription plan definitions
+  - Fields: id, name, description, price, billing_frequency (monthly/quarterly/yearly), currency, features (JSON), polar_product_id, polar_price_id, is_active, trial_days (optional), created_at, updated_at
+- `subscriptions` - Customer subscription records
+  - Fields: id, customer_id, subscription_tier_id, status (active/paused/cancelled/expired/trialing), start_date, end_date (optional), next_billing_date, current_period_start, current_period_end, cancel_at_period_end (boolean), cancelled_at, polar_subscription_id, polar_customer_id, trial_start, trial_end, created_at, updated_at
+- `subscription_usage` - Usage tracking for subscriptions (optional, for usage-based billing)
+  - Fields: id, subscription_id, usage_type, quantity, period_start, period_end, created_at
+- `subscription_invoices` - Link subscriptions to invoices (for tracking)
+  - Fields: id, subscription_id, invoice_id, billing_period_start, billing_period_end, created_at
 
 ### Contracts
 - `contracts` - Customer contracts (DocuSign integration)
-  - Fields: id, customer_id, invoice_id (optional), project_id (optional), contract_type, docusign_envelope_id, contract_content (text/JSON), generated_by_ai (boolean), ai_generation_data (JSON - stores input data used for generation), requested_by_client (boolean), client_signed_at, admin_signed_at, admin_approved_at, admin_rejected_at, rejection_reason, status (draft/pending_client_signature/pending_admin_approval/pending_admin_signature/completed/rejected), signed_at, created_at, updated_at
+  - Fields: id, customer_id, quote_id (when generated from quote), invoice_id (optional), project_id (optional), contract_type, docusign_envelope_id, contract_content (text/JSON), generated_by_ai (boolean), ai_generation_data (JSON - stores input data used for generation), requested_by_client (boolean), client_signed_at, admin_signed_at, admin_approved_at, admin_rejected_at, rejection_reason, status (draft/pending_client_signature/pending_admin_approval/pending_admin_signature/completed/rejected), signed_at, created_at, updated_at
 - `contract_requests` - Client-initiated contract requests
   - Fields: id, customer_id, project_id (optional), request_data (JSON - form data or Nora conversation), contract_id (after generation), status (pending/approved/rejected/contract_generated), created_at, updated_at
 
@@ -312,6 +446,38 @@ Potential clients, recruiters, tech community, **existing customers** (portal ac
   - Fields: id, customer_id (optional - for client-assigned projects), title, description, status, featured, images, created_at, updated_at
 - `project_files` - Files uploaded by clients for projects
   - Fields: id, project_id, customer_id, file_name, file_path, file_type, file_size, category (logo/assets/documentation/etc.), description, uploaded_by, created_at, updated_at
+- `project_milestones` - Project milestones for tracking progress
+  - Fields: id, project_id, name, description, due_date, start_date, status (pending/payment_required/in_progress/completed/approved/rejected), completion_percentage, order (integer for sequencing), payment_required (boolean), payment_received (boolean), payment_received_at, invoice_id (for milestone-based payments), approved_at, approved_by, rejected_at, rejection_reason, code_released (boolean), code_released_at, created_at, updated_at
+- `milestone_deliverables` - Deliverables linked to milestones (files/commits in repository)
+  - Fields: id, milestone_id, name, description, deliverable_type (file/commit/feature), repository_file_path (for file deliverables), git_commit_hash (for commit deliverables), status (pending/completed/verified), completed_at, verified_at, created_at, updated_at
+- `milestone_comments` - Client comments on milestone deliverables
+  - Fields: id, milestone_id, customer_id, comment_text, file_path (optional, for file-specific comments), line_number (optional, for code comments), created_at, updated_at
+- `milestone_requests` - Client change requests for milestones
+  - Fields: id, milestone_id, customer_id, request_type (change/addition/removal), description, status (pending/reviewed/addressed), admin_response (text), addressed_at, created_at, updated_at
+- `milestone_collaboration_submissions` - Track one-time submissions per milestone
+  - Fields: id, milestone_id, customer_id, submission_type (comments/requests/both), submitted_at, locked_until_next_milestone (boolean), created_at
+- `project_certificates` - Completion certificate records
+  - Fields: id, project_id, certificate_number, certificate_file_path (S3 path), repository_file_path (path in CodeCommit repo), generated_at, admin_signature, completion_date, certificate_hash (for verification), created_at, updated_at
+- `certificate_templates` - Certificate template definitions
+  - Fields: id, name, template_content (HTML/PDF template), variables (JSON), is_default, created_at, updated_at
+- `project_status_updates` - Project status updates and activity feed
+  - Fields: id, project_id, status_type (design/development/testing/deployment/completed), title, description, created_by, created_at, updated_at
+- `project_activity_log` - Comprehensive project activity log
+  - Fields: id, project_id, activity_type, description, user_id, metadata (JSON), created_at
+- `testimonials` - Client testimonials and reviews
+  - Fields: id, customer_id, project_id, rating (1-5, optional), testimonial_text, status (pending/approved/rejected), featured (boolean), approved_at, created_at, updated_at
+- `expenses` - Project-related expenses
+  - Fields: id, project_id, customer_id, category_id, description, amount, date, receipt_file_path, billable (boolean), markup_percentage, invoice_id (if billed), created_at, updated_at
+- `expense_categories` - Expense category management
+  - Fields: id, name, description, created_at
+
+### Project Repositories & Git Integration
+- `project_repositories` - Client project repository connections (AWS CodeCommit)
+  - Fields: id, project_id, codecommit_repo_name, codecommit_repo_arn, codecommit_clone_url_http, codecommit_clone_url_ssh, is_open_source (boolean), open_source_license (text), code_unlocked (boolean), unlocked_at, unlocked_by, created_at, updated_at
+- `repository_files` - Repository file metadata
+  - Fields: id, repository_id, file_path, file_name, file_type, file_size, is_code_file (boolean), is_visible (boolean), last_modified, git_commit_hash, created_at, updated_at
+- `repository_commits` - Git commit history
+  - Fields: id, repository_id, commit_hash, commit_message, author_name, author_email, commit_date, files_changed (JSON), created_at
 
 ### Booking System
 - `bookings` - Meeting bookings
@@ -374,7 +540,7 @@ Potential clients, recruiters, tech community, **existing customers** (portal ac
 ### What Gets Tested
 - ✅ All API endpoints
 - ✅ Authentication flows (email/password, OAuth, 2FA)
-- ✅ Payment processing (Stripe integration)
+- ✅ Payment processing (Polar integration - Merchant of Record)
 - ✅ Invoice creation and management (including recurring, payment plans, partial payments)
 - ✅ Contract management (DocuSign)
 - ✅ AI contract generation (n8n AI Agent)
@@ -410,319 +576,559 @@ Potential clients, recruiters, tech community, **existing customers** (portal ac
 **Goal**: Establish development foundation with TDD infrastructure and AWS ecosystem setup
 
 **Prerequisites**: 
-- All accounts set up (AWS, Stripe, OpenAI, etc.)
+- All accounts set up (AWS, Polar, OpenAI, etc.)
 - AWS account with appropriate permissions
 - Environment variables configured (see `.env.example`)
 - Development environment ready
 
 **Tasks**:
-- [ ] Project initialization (Refine + Next.js + TypeScript)
-- [ ] **Testing infrastructure setup (TDD foundation)**:
+- [ ] **TDD: Write tests first for all features below** (applies throughout)
+- [ ] **Project Initialization**:
+  - [ ] Create Next.js project with TypeScript and Tailwind
+  - [ ] Install Refine core packages and Ant Design
+  - [ ] Set up project structure (app/, components/, lib/, __tests__/)
+  - [ ] Configure TypeScript paths and environment variables
+- [ ] **Testing Infrastructure**:
   - [ ] Jest + React Testing Library configuration
   - [ ] Playwright setup for E2E testing
-  - [ ] Test utilities and helpers
   - [ ] Mock Service Worker (MSW) setup
-  - [ ] Test database configuration (AWS RDS test instance or local PostgreSQL)
-  - [ ] CI/CD pipeline with test automation (AWS CodePipeline or GitHub Actions)
+  - [ ] Test database configuration (local PostgreSQL or separate RDS instance)
+  - [ ] Test utilities and helpers
+  - [ ] CI/CD pipeline with test automation
 - [ ] **AWS Infrastructure Setup**:
   - [ ] AWS RDS PostgreSQL instance (development)
-  - [ ] AWS Cognito User Pool setup:
-    - [ ] Create User Pool
-    - [ ] Configure OAuth providers (Google, Facebook, LinkedIn, GitHub):
-      - [ ] Google: Set up OAuth 2.0 credentials in Google Cloud Console
-      - [ ] Facebook: Create Facebook App and get App ID/Secret
-      - [ ] LinkedIn: Create LinkedIn App and get Client ID/Secret
-      - [ ] GitHub: Create GitHub OAuth App and get Client ID/Secret
-      - [ ] Add each provider in Cognito Console > User Pool > Sign-in experience > Federated identity provider sign-in
-      - [ ] Configure OAuth scopes and attributes for each provider
-    - [ ] Set up Cognito Hosted UI (optional, for OAuth redirects)
-    - [ ] Configure OAuth callback URLs
-  - [ ] AWS S3 buckets (media, client-uploads)
+  - [ ] AWS Cognito User Pool with OAuth providers (Google, Facebook, LinkedIn, GitHub)
+  - [ ] AWS S3 buckets (media, client-uploads, public)
   - [ ] AWS CloudFront distribution (for production)
   - [ ] AWS Lambda functions structure
-  - [ ] AWS AppSync API (for real-time) or API Gateway WebSocket
-- [ ] Database schema setup (core tables only)
+  - [ ] AWS AppSync API or API Gateway WebSocket (for real-time)
+- [ ] **Database Schema**:
+  - [ ] Choose ORM (Prisma recommended)
+  - [ ] Create core tables: customers, projects, page_content
+  - [ ] Run initial migrations
+  - [ ] Set up seed data (optional)
 - [ ] **Custom Refine Providers**:
   - [ ] Custom AWS data provider (RDS PostgreSQL)
   - [ ] Custom AWS Cognito auth provider
-- [ ] Design system (Blue, Gold, Silver) - Tailwind + Ant Design
-- [ ] Stripe account setup (test mode)
-- [ ] Environment configuration validation
+- [ ] **Design System**:
+  - [ ] Tailwind CSS configuration (Blue, Gold, Silver color palette)
+  - [ ] Ant Design theme customization
+- [ ] **Polar Setup**:
+  - [ ] Polar account configuration (get from https://polar.sh)
+  - [ ] Polar API client setup (server and client-side)
+  - [ ] Configure payout account (uses Stripe Connect Express for payouts)
+- [ ] **Environment Validation**:
+  - [ ] Environment variable validation utility
+  - [ ] Verify all required variables are set
 
 **Deliverable**: Working development environment with TDD infrastructure, AWS ecosystem configured, and design system
 
 ### Phase 2: Admin Panel & CMS (Weeks 2-3)
-**Goal**: Build admin panel with full CMS capabilities
+**Goal**: Build admin panel with full CMS capabilities and populate initial content
 
 **Prerequisites**: Phase 1 complete (Foundation ready)
 
 **Tasks**:
-- [ ] **TDD: Write tests first for each feature below**
-- [ ] Admin authentication & dashboard:
-  - [ ] Write tests → Implement → Refactor
-  - [ ] Admin login/logout
-  - [ ] Admin dashboard with basic stats
-- [ ] Admin Projects CRUD:
-  - [ ] Write tests → Implement → Refactor
-  - [ ] Create, read, update, delete projects
-  - [ ] Image upload functionality
+- [ ] **TDD: Write tests first for all features below** (applies throughout)
+- [ ] **Admin Authentication & Authorization**:
+  - [ ] Add role field to Customer model (admin/customer)
+  - [ ] Admin login page and route protection
+  - [ ] Admin logout functionality
+- [ ] **Admin Dashboard**:
+  - [ ] Dashboard layout with sidebar navigation
+  - [ ] Statistics cards (projects, customers, invoices, revenue)
+  - [ ] Quick actions (create project, quote, invoice, etc.)
+- [ ] **Admin Projects CRUD** (`/admin/projects`):
+  - [ ] Projects list with search, filters, pagination
+  - [ ] Create/edit project forms
+  - [ ] Image upload to S3 (multiple images)
   - [ ] Featured project toggle
-- [ ] Admin Content Management (ALL pages editable):
-  - [ ] Write tests → Implement → Refactor
-  - [ ] WYSIWYG editor integration
+  - [ ] Delete project with confirmation
+- [ ] **Admin Content Management** (`/admin/content`):
+  - [ ] WYSIWYG editor integration (react-quill or TinyMCE)
   - [ ] Page content CRUD (Home, About, Skills, Contact)
-  - [ ] Page status (published/draft)
-- [ ] Admin Blog structure (hidden until ready):
-  - [ ] Write tests → Implement → Refactor
-  - [ ] Database schema (blog tables)
-  - [ ] Basic CRUD (can be hidden via feature flag)
-- [ ] Admin Settings page:
-  - [ ] Write tests → Implement → Refactor
-  - [ ] Site configuration management
-  - [ ] Feature flags
-- [ ] Public portfolio pages (read from DB):
-  - [ ] Write tests → Implement → Refactor
-  - [ ] Home, Projects, Skills, About pages
-  - [ ] Dynamic content loading
-- [ ] Run full test suite and ensure all tests pass
+  - [ ] Structured content editor (flexible JSON)
+  - [ ] Save draft / Publish workflow
+  - [ ] Content preview
+- [ ] **Public Portfolio Pages** (read from DB):
+  - [ ] Home page with dynamic content
+  - [ ] Projects page with filters and search
+  - [ ] Skills page
+  - [ ] About page
+  - [ ] Contact page
+- [ ] **Admin Settings** (`/admin/settings`):
+  - [ ] General settings (site name, email, company info)
+  - [ ] Feature flags management
+- [ ] **Blog Structure** (optional, hidden until ready):
+  - [ ] Blog database schema
+  - [ ] Basic blog CRUD (can be hidden via feature flag)
+- [ ] **Content Creation**:
+  - [ ] Gather project information
+  - [ ] Build projects via admin panel
+  - [ ] Edit all page content via admin
+  - [ ] Add professional headshot (`img/Destin-L-Mincy__HEADSHOT.png`)
+  - [ ] Test full CMS workflow
 
-**Deliverable**: Fully functional admin panel with CMS, public portfolio pages displaying dynamic content
+**Deliverable**: Fully functional admin panel with CMS, public portfolio pages displaying dynamic content, initial content populated
 
-### Phase 3: Content Creation (Week 4)
-**Prerequisites**: Phase 2 complete (Admin Panel & CMS functional)
-- [ ] Gather project information
-- [ ] Build projects via admin panel
-- [ ] Edit all page content via admin
-- [ ] Add professional headshot (`img/Destin-L-Mincy__HEADSHOT.png`)
-- [ ] Test full CMS workflow
-- [ ] **Deliverable**: Portfolio content ready for public viewing
 
-### Phase 4: Authentication & Customer Portal (Week 5)
+### Phase 3: Authentication & Customer Portal (Week 5)
 **Goal**: Implement authentication system and customer portal foundation
 
 **Prerequisites**: Phase 1 complete (AWS Cognito configured), Phase 2 complete (Admin panel ready)
 
 **Tasks**:
-- [ ] **TDD: Write tests first for authentication flows**
-- [ ] Customer authentication setup (AWS Cognito):
-  - [ ] Write tests for email/password auth → Implement → Refactor
+- [ ] **TDD: Write tests first for all features below** (applies throughout)
+- [ ] **Customer Authentication (AWS Cognito)**:
   - [ ] AWS Cognito User Pool configuration
   - [ ] Custom Refine Cognito auth provider implementation
-  - [ ] OAuth provider configuration (AWS Cognito Identity Pools):
-    - [ ] Write tests for Google OAuth → Implement → Refactor
-    - [ ] Write tests for Facebook OAuth → Implement → Refactor
-    - [ ] Write tests for LinkedIn OAuth → Implement → Refactor
-    - [ ] Write tests for GitHub OAuth (optional) → Implement → Refactor
-  - [ ] OAuth provider UI buttons/components (test UI interactions)
-  - [ ] Account linking (OAuth + email/password) - write tests first
+  - [ ] Email/password authentication
+  - [ ] OAuth providers (Google, Facebook, LinkedIn, GitHub optional):
+    - [ ] OAuth configuration in Cognito
+    - [ ] OAuth provider UI buttons/components
+  - [ ] Account linking (OAuth + email/password)
   - [ ] User sync from Cognito to RDS (customers table)
-- [ ] Customer Dashboard (widgets: balance, invoices, contracts, payments):
-  - [ ] Write tests for each widget → Implement → Refactor
-  - [ ] Dashboard layout and navigation
-  - [ ] Widget data fetching (will be populated in Phase 5)
-- [ ] Admin Dashboard (comprehensive analytics):
-  - [ ] Write tests for analytics → Implement → Refactor
-  - [ ] Analytics widgets (revenue, customers, invoices)
-  - [ ] Charts integration (Recharts)
-- [ ] Protected routes & role-based access:
-  - [ ] Write tests for route protection → Implement → Refactor
-  - [ ] Middleware for route protection
+- [ ] **Dashboards**:
+  - [ ] Customer Dashboard (`/dashboard`): Widgets (balance, quotes, invoices, contracts, payments), layout, navigation
+  - [ ] Admin Dashboard (`/admin`): Analytics widgets (revenue, customers, quotes, invoices), charts (Recharts)
+  - [ ] Widget data fetching (populated in Phase 5)
+- [ ] **Access Control**:
+  - [ ] Protected routes & middleware
   - [ ] Role-based access control (admin/customer/guest)
-- [ ] User role management:
-  - [ ] Write tests for role management → Implement → Refactor
-  - [ ] Role assignment (admin panel)
-- [ ] E2E tests for authentication flows
+  - [ ] User role management (admin panel)
+- [ ] **E2E Tests**: Authentication flows (email/password, OAuth, role-based access)
 
 **Deliverable**: Working authentication system (email/password + OAuth), protected routes, customer/admin dashboards (structure ready for data)
 
-### Phase 5: Invoice & Contract Management (Week 6)
-**Goal**: Build core invoice and contract management system
+### Phase 4: Quotes/Estimates System (Week 6)
+**Goal**: Build quotes/estimates system with hourly rate management, initial/final quote workflow, and quote-to-contract integration
 
-**Prerequisites**: Phase 4 complete (Authentication & customer portal ready)
+**Prerequisites**: Phase 3 complete (Authentication & customer portal ready)
 
 **Tasks**:
-- [ ] **TDD: Write tests first for all invoice/contract features**
-- [ ] Database schema setup:
-  - [ ] Write tests for schema → Implement → Refactor
-  - [ ] invoices, invoice_items, contracts tables
-  - [ ] Add invoice_number, currency fields
-- [ ] Invoice CRUD (admin & customer views):
-  - [ ] Write tests for invoice creation → Implement → Refactor
-  - [ ] Write tests for invoice updates → Implement → Refactor
-  - [ ] Write tests for invoice deletion → Implement → Refactor
-  - [ ] Write tests for invoice viewing (admin & customer) → Implement → Refactor
-- [ ] **Invoice Numbering System**:
-  - [ ] Write tests for invoice numbering → Implement → Refactor
-  - [ ] Customizable format configuration (admin settings)
-  - [ ] Sequential numbering logic
-  - [ ] Number format templates
-- [ ] Invoice PDF generation:
-  - [ ] Write tests for PDF generation → Implement → Refactor
-  - [ ] PDF template system
+- [ ] **TDD: Write tests first for all features below** (applies throughout)
+- [ ] **Database Schema**:
+  - [ ] quotes, quote_items, hourly_rates tables
+  - [ ] Add quote_id to contracts table (for tracking)
+  - [ ] Add quote_id to invoices table (optional, for tracking)
+- [ ] **Hourly Rate Management**:
+  - [ ] Admin settings page for hourly rates (`/admin/settings/hourly-rates`)
+  - [ ] Base hourly rate configuration
+  - [ ] Project type rates (website, e-commerce, AI integration, etc.)
+  - [ ] Complexity multipliers (Low: 1.0x, Medium: 1.25x, High: 1.5x)
+  - [ ] Default rate selection
+  - [ ] Rate override capability per quote
+- [ ] **Initial Quote Creation**:
+  - [ ] Admin UI (`/admin/quotes/create`): Create initial quote
+  - [ ] Quote form: Customer selection, project details, rough estimate
+  - [ ] Quote numbering system (QUOTE-YYYY-### format)
+  - [ ] Quote expiration date (default 30 days, configurable)
+  - [ ] Save as draft or send to client
+  - [ ] Email quote to client
+- [ ] **Planning Session Integration**:
+  - [ ] Link planning session to quote (meeting booking integration)
+  - [ ] Mark planning session as completed
+  - [ ] Planning session notes field
+  - [ ] Create final quote from initial quote
+- [ ] **Final Quote Creation**:
+  - [ ] Admin UI: Create final quote from initial quote
+  - [ ] Enter exact hours needed (32-hour work week basis)
+  - [ ] Select complexity level (Low/Medium/High)
+  - [ ] System calculates: hourly rate (based on complexity) × hours = total price
+  - [ ] Timeline calculation: estimated hours ÷ 32 = weeks
+  - [ ] Final quote includes: hourly rate, estimated hours, timeline, total price
+  - [ ] Quote line items (similar to invoice items)
+  - [ ] Send final quote to client
+- [ ] **Quote Management**:
+  - [ ] Admin quotes list (`/admin/quotes`): View all quotes, filters, status tracking
+  - [ ] Quote detail page: View, edit, duplicate, delete
+  - [ ] Quote status workflow: `draft` → `sent` → `approved`/`rejected` → `contract_created` → `expired`
+  - [ ] Quote revision workflow: Initial quote → Final quote (parent_quote_id linking)
+- [ ] **Client Quote Portal**:
+  - [ ] Client quotes list (`/quotes`): View quotes, filters, status
+  - [ ] Quote detail page (`/quotes/:id`): View full quote, approve/reject
+  - [ ] Quote approval workflow: Client reviews → approves/rejects
+  - [ ] Quote PDF download
+  - [ ] Quote expiration notifications
+- [ ] **Quote PDF Generation**:
+  - [ ] PDF template system (reuse invoice PDF templates)
+  - [ ] Quote PDF includes: Quote number, customer info, line items, hourly rate, estimated hours, timeline, total, terms
   - [ ] Download functionality
-- [ ] **Invoice Templates**:
-  - [ ] Write tests for template management → Implement → Refactor
-  - [ ] Multiple template support
+  - [ ] Email attachment
+- [ ] **Quote Templates**:
+  - [ ] Multiple quote templates
   - [ ] Custom branding (logo, colors)
   - [ ] Template preview
+  - [ ] Template selection per quote
+- [ ] **Quote → Contract Integration**:
+  - [ ] "Create Contract from Quote" button (appears when final quote is approved)
+  - [ ] Quote data transfer to contract generation:
+    - [ ] Project scope → contract scope
+    - [ ] Pricing → contract pricing
+    - [ ] Terms → contract terms
+    - [ ] Timeline → contract timeline
+  - [ ] Link contract to quote (`contract.quote_id`)
+  - [ ] Update quote status to `contract_created`
+  - [ ] Integration with AI contract generation (n8n workflow)
+- [ ] **Quote → Invoice Integration** (optional, for quick projects):
+  - [ ] Convert approved quote directly to invoice (skip contract)
+  - [ ] Link invoice to quote (`invoice.quote_id`)
+- [ ] **Nora AI Integration** (Phase 8):
+  - [ ] Nora can help create quotes (function calling)
+  - [ ] Nora can answer questions about quotes
+  - [ ] Quote status queries for authenticated users
+- [ ] **Integration Tests**: Initial quote → Planning session → Final quote → Contract workflow
+
+**Deliverable**: Complete quotes/estimates system with hourly rate management, initial/final quote workflow, planning session integration, and quote-to-contract conversion
+
+### Phase 5: Invoices, Contracts & Payments (Week 6.5)
+**Goal**: Build core invoice and contract management system with payment integration (contracts can be generated from quotes)
+
+**Prerequisites**: Phase 4 complete (Quotes system ready), Phase 3 complete (Authentication & customer portal ready)
+
+**Tasks**:
+- [ ] **TDD: Write tests first for all features below** (applies throughout)
+- [ ] **Database Schema**:
+  - [ ] invoices, invoice_items, contracts, contract_requests, project_files tables
+  - [ ] Add invoice_number, currency fields to invoices
+  - [ ] Add client request and two-way signing fields to contracts
+  - [ ] Add customer_id to projects table
+- [ ] **Invoice Management**:
+  - [ ] Invoice CRUD (admin & customer views)
+  - [ ] Invoice numbering system (customizable format, sequential logic)
+  - [ ] Invoice PDF generation (template system, download)
+  - [ ] Invoice templates (multiple templates, custom branding, preview)
 - [ ] **AI Contract Generation (n8n Agent)**:
-  - [ ] Write tests for contract generation API → Implement → Refactor
   - [ ] n8n AI Agent workflow setup:
-    - [ ] Create n8n AI Agent workflow for contract generation
+    - [ ] Create workflow for contract generation
     - [ ] Set up `N8N_WEBHOOK_CONTRACT_GENERATION` webhook
     - [ ] Configure AI Agent with contract templates and legal clauses
-    - [ ] Input data structure (client info, project details, scope, pricing, terms)
-    - [ ] Output formatting (PDF-ready contract document)
+    - [ ] Input: client info, project details, scope, pricing, terms (from quote if available)
+    - [ ] Output: PDF-ready contract document
   - [ ] Contract generation API endpoint:
-    - [ ] Write tests for API endpoint → Implement → Refactor
-    - [ ] Accept client_id, project_id (or project details), contract type
-    - [ ] Fetch client information from database
-    - [ ] Fetch project information (if exists) or use provided details
-    - [ ] Send data to n8n AI Agent webhook
-    - [ ] Receive generated contract
-    - [ ] Save contract to database (contracts table)
-    - [ ] Return contract document for review
-  - [ ] Admin UI for contract generation:
-    - [ ] Write tests for contract generation UI → Implement → Refactor
-    - [ ] Contract generation form (select client, project, contract type)
-    - [ ] Preview generated contract before sending
-    - [ ] Edit contract if needed (manual override)
+    - [ ] Accept quote_id (preferred) OR client_id, project_id, contract type
+    - [ ] If quote_id provided: Fetch quote data (scope, pricing, terms, timeline)
+    - [ ] If no quote_id: Fetch client/project information from database
+    - [ ] Send to n8n webhook → receive generated contract
+    - [ ] Save to database → link to quote if applicable → return for review
+  - [ ] Admin UI (`/admin/contracts/generate`):
+    - [ ] Contract generation form (select quote OR client/project, contract type)
+    - [ ] "Generate from Quote" option (shows approved quotes)
+    - [ ] Preview generated contract
+    - [ ] Edit contract (manual override)
     - [ ] Save and send to DocuSign
 - [ ] **Client-Initiated Contract Requests**:
-  - [ ] Write tests for contract request system → Implement → Refactor
-  - [ ] Database schema setup:
-    - [ ] Write tests for schema → Implement → Refactor
-    - [ ] contract_requests table
-    - [ ] Update contracts table (add client request fields, two-way signing fields)
-  - [ ] Contract request form (customer portal):
-    - [ ] Write tests for request form → Implement → Refactor
+  - [ ] Contract request form (customer portal `/contracts/request`):
     - [ ] Form fields (project details, scope, pricing, terms, timeline)
-    - [ ] Validation and submission
-    - [ ] Save request to database
+    - [ ] Validation and submission → save to database
   - [ ] Contract request via Nora (Phase 8 integration):
-    - [ ] Write tests for Nora contract request function → Implement → Refactor
-    - [ ] Add `request_contract` function to Nora (Phase 8)
+    - [ ] Add `request_contract` function to Nora
     - [ ] Nora collects project details via conversation
-    - [ ] Submit request to same API endpoint as form
+    - [ ] Submit to same API endpoint as form
   - [ ] Contract generation from request:
-    - [ ] Write tests for auto-generation → Implement → Refactor
     - [ ] Auto-generate contract when request submitted (via n8n AI Agent)
     - [ ] Link contract to request
   - [ ] Two-way signing workflow:
-    - [ ] Write tests for signing workflow → Implement → Refactor
     - [ ] Client signs first (DocuSign embedded signing)
-    - [ ] Admin receives notification for review
-    - [ ] Admin approval/rejection UI
-    - [ ] If approved: Admin signs contract
-    - [ ] If rejected: Client notified with reason
-    - [ ] Both parties notified when fully signed
-    - [ ] Fully signed contract delivered to both parties
-  - [ ] Admin contract review UI:
-    - [ ] Write tests for review UI → Implement → Refactor
+    - [ ] Admin receives notification → review in admin UI
+    - [ ] Admin approval/rejection → if approved: admin signs
+    - [ ] Both parties notified when fully signed → deliver signed contract
+  - [ ] Admin contract review UI (`/admin/contracts/requests`):
     - [ ] View pending contract requests
     - [ ] Review generated contract
     - [ ] Approve/reject with comments
     - [ ] Sign approved contracts
 - [ ] **Client File Uploads for Projects**:
-  - [ ] Write tests for file upload system → Implement → Refactor
-  - [ ] Database schema setup:
-    - [ ] Write tests for schema → Implement → Refactor
-    - [ ] project_files table
-    - [ ] Update projects table (add customer_id for client-assigned projects)
   - [ ] File upload API endpoint:
-    - [ ] Write tests for upload endpoint → Implement → Refactor
     - [ ] Accept file uploads (AWS S3)
     - [ ] Validate file types and sizes
-    - [ ] Store file metadata in database
-    - [ ] Link files to projects and customers
-  - [ ] Customer portal file upload UI:
-    - [ ] Write tests for upload UI → Implement → Refactor
-    - [ ] File upload interface on project detail page
-    - [ ] Drag-and-drop or file picker
+    - [ ] Store file metadata in database → link to projects/customers
+  - [ ] Customer portal file upload UI (`/projects/:id`):
+    - [ ] File upload interface (drag-and-drop or file picker)
     - [ ] File category selection (logo, assets, documentation, etc.)
     - [ ] File description/notes
     - [ ] Upload progress indicator
   - [ ] Project file library (customer portal):
-    - [ ] Write tests for file library → Implement → Refactor
     - [ ] Display all files for a project
     - [ ] File filtering by category
-    - [ ] File preview/download
-    - [ ] File deletion (with permissions)
-  - [ ] Admin file management:
-    - [ ] Write tests for admin file management → Implement → Refactor
+    - [ ] File preview/download/deletion (with permissions)
+  - [ ] Admin file management (`/admin/projects/:id/files`):
     - [ ] View all client-uploaded files
-    - [ ] Download files
-    - [ ] Organize files by project
-- [ ] DocuSign integration:
-  - [ ] Write tests for contract creation → Implement → Refactor
-  - [ ] Write tests for contract sending → Implement → Refactor
-  - [ ] Write tests for embedded signing → Implement → Refactor
-  - [ ] Write tests for webhook handlers → Implement → Refactor
+    - [ ] Download/organize files by project
+- [ ] **DocuSign Integration**:
   - [ ] DocuSign OAuth setup
+  - [ ] Contract creation, sending, embedded signing
+  - [ ] Webhook handlers for contract status updates
   - [ ] Contract status tracking
   - [ ] Integration with AI-generated contracts (seamless flow)
-- [ ] Payment Methods page:
-  - [ ] Write tests for payment method CRUD → Implement → Refactor
-  - [ ] Stripe payment methods integration
-  - [ ] Add/remove/set default methods
-- [ ] Account Settings page:
-  - [ ] Write tests for settings updates → Implement → Refactor
-  - [ ] Profile management
-  - [ ] Billing address
-  - [ ] Password change
-- [ ] Integration tests for invoice → contract → payment flow
+- [ ] **Customer Portal Pages**:
+  - [ ] Payment Methods page (`/payment-methods`): Polar integration, add/remove/set default
+  - [ ] Account Settings page (`/profile`): Profile management, billing address, password change
+- [ ] **Payment Integration**:
+  - [ ] Polar payment form integration: Secure payment form UI, card validation
+  - [ ] Payment creation: API route, amount validation, Polar API integration
+  - [ ] Payment flow: Invoice → payment → confirmation, success/failure handling
+  - [ ] Polar webhook handlers: Signature verification, payment status webhooks, error handling
+  - [ ] Payment status updates: Database updates, invoice status sync
+  - [ ] Receipt generation: PDF template, email receipt
+  - [ ] Security audit: PCI compliance verification (handled by Polar), webhook security review
+- [ ] **Integration Tests**: Invoice → contract → payment flow
 
-**Deliverable**: Complete invoice and contract management system with AI contract generation, client-initiated contract requests, two-way signing workflow, and client file uploads for projects
+**Deliverable**: Complete invoice and contract management system with payment integration, AI contract generation, client-initiated contract requests, two-way signing workflow, and client file uploads
 
-### Phase 6: Payment Integration (Week 7)
-**Goal**: Integrate Stripe payment processing with full security
+### Phase 6: Client Project Repository & Git Integration (Week 7)
+**Goal**: Implement client-accessible project repositories 100% hosted on AWS CodeCommit (closed-source by default), with file browser and code visibility control
 
-**Prerequisites**: Phase 5 complete (Invoices ready for payment)
+**Prerequisites**: Phase 5 complete (Projects and file management ready), Phase 1 complete (AWS infrastructure ready)
 
 **Tasks**:
-- [ ] **TDD: Write tests first for all payment features (CRITICAL for financial transactions)**
-- [ ] Stripe Elements integration:
-  - [ ] Write tests for payment form → Implement → Refactor
-  - [ ] Secure payment form UI
-  - [ ] Card validation
-- [ ] **Stripe Link setup** (one-click checkout):
-  - [ ] Write tests for Link integration → Implement → Refactor
-  - [ ] Enable Stripe Link in Stripe dashboard
-  - [ ] Configure Link in Stripe Elements
-  - [ ] E2E tests for Link checkout flow
-- [ ] Payment Intent creation:
-  - [ ] Write tests for payment intent creation → Implement → Refactor
-  - [ ] API route for payment intent
-  - [ ] Amount validation
-- [ ] Payment flow (invoice → payment → confirmation):
-  - [ ] Write tests for complete payment flow → Implement → Refactor
-  - [ ] Payment processing logic
-  - [ ] Success/failure handling
-  - [ ] E2E tests for payment process
-- [ ] Stripe webhook handlers:
-  - [ ] Write tests for webhook processing → Implement → Refactor
-  - [ ] Webhook signature verification
-  - [ ] Payment status webhooks
-  - [ ] Error handling
-- [ ] Payment status updates:
-  - [ ] Write tests for status updates → Implement → Refactor
-  - [ ] Database updates on payment
-  - [ ] Invoice status sync
-- [ ] Receipt generation:
-  - [ ] Write tests for receipt generation → Implement → Refactor
-  - [ ] Receipt PDF template
-  - [ ] Email receipt (via n8n or email system)
-- [ ] Security audit (including test coverage review)
-  - [ ] PCI compliance verification
-  - [ ] Webhook security review
-  - [ ] Payment flow security testing
+- [ ] **TDD: Write tests first for all repository features** (applies to all sections below)
+- [ ] **Foundation Setup**:
+  - [ ] Database schema: project_repositories, repository_files, repository_commits tables
+  - [ ] AWS CodeCommit service setup and configuration
+  - [ ] IAM roles and policies for CodeCommit access (admin full access, client read-only)
+  - [ ] CodeCommit API credentials setup (IAM credentials via Secrets Manager or IAM roles)
+  - [ ] Repository naming convention (e.g., `project-{project_id}`)
+- [ ] **CodeCommit API Integration** (shared across features):
+  - [ ] CodeCommit API client setup (`@aws-sdk/client-codecommit`)
+  - [ ] API methods: `CreateRepository`, `GetFile`, `GetFolder`, `ListBranches`, `GetCommit`, `ListCommits`
+  - [ ] Error handling and retry logic
+  - [ ] Rate limiting on API calls
+- [ ] **Repository Management**:
+  - [ ] Create CodeCommit repository per project (private by default, via `CreateRepository` API)
+  - [ ] Store repository metadata: ARN, clone URLs (HTTP/SSH), name
+  - [ ] Auto-create repository when project starts
+  - [ ] Repository initialization (initial commit, README, .gitignore)
+  - [ ] Repository deletion/archival (if needed)
+- [ ] **Code Visibility & Security**:
+  - [ ] File type detection (code vs. non-code files by extension: .js, .ts, .py, .php, etc.)
+  - [ ] Visibility rules: project status + payment status → code visibility
+  - [ ] Backend API filtering (enforce visibility server-side, not just frontend)
+  - [ ] Admin override capability
+  - [ ] IAM-based repository access control (project owner only)
+  - [ ] Private repository enforcement (CodeCommit repositories are private by default)
+- [ ] **Commit Tracking & History**:
+  - [ ] Parse git commit history using CodeCommit API (`GetCommit`, `ListCommits`)
+  - [ ] Store commits in database (hash, message, author, date, files changed)
+  - [ ] Real-time commit updates (poll CodeCommit API or CloudWatch events)
+  - [ ] Commit history viewer UI component
+  - [ ] Commit diff view (for non-code files or after payment)
+  - [ ] Filter/search commits
+- [ ] **File System Browser**:
+  - [ ] Backend API: Fetch file tree from CodeCommit (`GetFile`, `GetFolder`, `ListBranches`)
+  - [ ] File tree component (react-tree-view or similar)
+  - [ ] Display file structure (folders, file names, sizes, metadata)
+  - [ ] Code file visibility indicators (locked/hidden)
+  - [ ] File preview modal (for non-code files)
+  - [ ] File download (based on visibility rules, serve via signed URLs)
+  - [ ] Search files/folders
+- [ ] **Client Notifications**:
+  - [ ] Notification on new commits (triggered by commit tracking)
+  - [ ] Email notification (via existing email system)
+  - [ ] In-app notification (via existing notification system)
+  - [ ] Notification content (commit message, files changed, commit date)
+- [ ] **Download System**:
+  - [ ] Generate ZIP package from CodeCommit repository on project completion
+  - [ ] Store ZIP in S3 (or generate on-demand)
+  - [ ] Download button (only when project complete + paid)
+  - [ ] Secure download URLs (signed S3 URLs)
+- [ ] **Admin UI** (`/admin/projects/:id/repository`):
+  - [ ] Create/manage CodeCommit repositories
+  - [ ] View all files (no restrictions for admin)
+  - [ ] Unlock code visibility manually (if needed)
+  - [ ] Set open-source licensing (if contractually specified)
+  - [ ] Repository access management (IAM policies)
+- [ ] **Client UI** (`/projects/:id/repository`):
+  - [ ] Repository browser tab in project detail page
+  - [ ] File system view (with code visibility control)
+  - [ ] Git commit history tab
+  - [ ] Download button (when unlocked)
+- [ ] **System Integrations**:
+  - [ ] Payment system: Check payment status → unlock code when project complete + paid
+  - [ ] Project status: Auto-create repository when project starts, update visibility on status change
+  - [ ] Contracts: Check for open-source licensing terms → set repository open-source flag if specified
+- [ ] **E2E Tests**:
+  - [ ] Create CodeCommit repository → commit → client notification
+  - [ ] Client file browser access with code visibility
+  - [ ] Code visibility before/after payment
+  - [ ] Download final product
+  - [ ] Open-source repository (if contractually specified)
+  - [ ] IAM access control validation
 
-**Deliverable**: Fully functional payment system with Stripe integration, webhooks, and receipts
+**Deliverable**: Complete client project repository system 100% hosted on AWS CodeCommit (closed-source by default), with file browser, code visibility control, git commit history, download functionality, and optional open-source licensing support
 
-### Phase 7: Invoice Enhancements (Week 7.5)
-**Goal**: Add advanced invoice features (recurring, payment plans, tax, discounts, credits)
+### Phase 7: Project Milestones & Deliverables (Week 8)
+**Goal**: Implement milestone tracking system with deliverables linked to repository files/commits
 
-**Prerequisites**: Phase 5 & 6 complete (Basic invoices and payments working)
+**Prerequisites**: Phase 6 complete (Repository system ready), Phase 4 complete (Quotes system ready)
+
+**Tasks**:
+- [ ] **TDD: Write tests first for all features below** (applies throughout)
+- [ ] **Database Schema**:
+  - [ ] project_milestones, milestone_deliverables tables
+  - [ ] Add milestone_id to invoices table (optional, for milestone-based payments)
+- [ ] **Milestone Management (Admin)**:
+  - [ ] Admin UI (`/admin/projects/:id/milestones`): Create/edit/delete milestones
+  - [ ] Milestone form: Name, description, due date, start date, order/sequence, milestone amount (for per-milestone payments)
+  - [ ] Payment model selection: Full upfront payment OR per-milestone payment
+  - [ ] Milestone status workflow: `pending` → `payment_required` → `in_progress` → `completed` → `code_released` → `approved`/`rejected`
+  - [ ] Payment tracking: Mark payment as received, link to invoice
+  - [ ] Completion percentage tracking
+  - [ ] Milestone ordering/sequencing
+- [ ] **Deliverables Management (Admin)**:
+  - [ ] Create deliverables for each milestone
+  - [ ] Deliverable types: `file` (specific file in repository), `commit` (specific git commit), `feature` (description-based)
+  - [ ] Link deliverables to repository:
+    - [ ] File deliverables: Link to repository file path (e.g., `/src/components/Header.tsx`)
+    - [ ] Commit deliverables: Link to git commit hash
+    - [ ] Feature deliverables: Text description (can be linked to commits later)
+  - [ ] Deliverable status: `pending` → `completed` → `verified`
+  - [ ] Mark deliverables as completed when files/commits are ready
+- [ ] **Repository Integration & Code Release**:
+  - [ ] Link deliverables to repository files (file path matching)
+  - [ ] Link deliverables to git commits (commit hash matching)
+  - [ ] Repository browser shows milestone indicators on files/commits
+  - [ ] Click deliverable → navigate to linked file/commit in repository
+  - [ ] Auto-detect completion: When file is committed or commit is made, mark deliverable as completed
+  - [ ] **Milestone Code Release Logic**:
+    - [ ] When milestone is completed AND payment received: Release code/files for that milestone
+    - [ ] Code visibility per milestone: Only show code for milestones that are paid and completed
+    - [ ] Repository browser filters: Show/hide code based on milestone payment status
+    - [ ] Code release notification: Notify client when milestone code is released
+    - [ ] Admin can manually release code for a milestone (if payment received)
+- [ ] **Client Milestone Portal**:
+  - [ ] Client milestones list (`/projects/:id/milestones`): View all milestones with status
+  - [ ] Milestone detail view: See deliverables, linked files/commits, progress, payment status
+  - [ ] Payment status display: Show if milestone payment is required/received
+  - [ ] Deliverables view: List of deliverables with links to repository files/commits
+  - [ ] Click deliverable → opens repository browser at linked file/commit (if code is released)
+  - [ ] Code release indicator: Show which milestones have code released
+  - [ ] Milestone approval workflow: Client can approve/reject completed milestones (after code is released)
+  - [ ] Visual progress indicators (completion percentage, status badges, payment status)
+  - [ ] Payment prompt: If milestone requires payment, show payment button/link
+- [ ] **Timeline/Gantt View**:
+  - [ ] Timeline component showing milestones with dates
+  - [ ] Visual progress bars for each milestone
+  - [ ] Gantt chart view (optional, can use library like `react-gantt-chart`)
+  - [ ] Milestone dependencies (optional)
+- [ ] **Milestone-Based Payments**:
+  - [ ] Link milestones to invoices (milestone_id in invoices table)
+  - [ ] **Payment Models**:
+    - [ ] Full upfront payment: Single invoice for entire project (all milestones)
+    - [ ] Per-milestone payment: Generate invoice per milestone before work begins
+  - [ ] Payment required before milestone starts: Block milestone from `in_progress` until payment received
+  - [ ] Auto-generate invoice for next milestone (if per-milestone model)
+  - [ ] Milestone payment tracking: Mark payment as received, update milestone status
+  - [ ] Payment status affects code visibility: Code only released after payment received
+  - [ ] Payment confirmation: Update milestone status when payment is received
+- [ ] **Notifications**:
+  - [ ] Notify client when milestone payment is required (if per-milestone model)
+  - [ ] Notify client when milestone payment is received
+  - [ ] Notify client when milestone is marked completed
+  - [ ] Notify client when milestone code is released (after payment + completion)
+  - [ ] Notify admin when client approves/rejects milestone
+  - [ ] Notify client when deliverable is completed
+- [ ] **Activity Feed Integration**:
+  - [ ] Milestone status changes appear in project activity feed
+  - [ ] Deliverable completions appear in activity feed
+  - [ ] Link activity items to milestones/deliverables
+- [ ] **Integration with Quotes/Contracts**:
+  - [ ] Milestones can be defined in final quote (optional)
+  - [ ] Milestones can be included in contract (optional)
+  - [ ] Payment model selection (full upfront vs per-milestone) in quote/contract
+  - [ ] Link milestones to quote/contract for reference
+- [ ] **Code Visibility System Integration**:
+  - [ ] Update repository code visibility logic to be milestone-based
+  - [ ] Code files visible only for milestones that are: completed + paid + code released
+  - [ ] Repository browser filters code by milestone payment status
+  - [ ] Admin override: Can manually release code if needed
+- [ ] **Integration Tests**: 
+  - [ ] Milestone creation → Payment required → Payment received → Work begins → Deliverable completion → Code release → Client approval workflow
+  - [ ] Full upfront payment model: All milestones accessible after full payment
+  - [ ] Per-milestone payment model: Each milestone requires individual payment
+
+**Deliverable**: Complete milestone tracking system with payment-first model (full upfront or per-milestone), milestone-based code release, deliverables linked to repository files/commits, client approval workflow, and timeline view
+
+### Phase 8: Project Features (Week 8.5-9)
+**Goal**: Implement project status updates, activity feed, testimonials, expense tracking, collaboration, and completion certificates
+
+**Prerequisites**: Phase 7 complete (Milestones ready), Phase 6 complete (Repository ready)
+
+**Tasks**:
+- [ ] **TDD: Write tests first for all features below** (applies throughout)
+- [ ] **Database Schema**:
+  - [ ] project_status_updates, project_activity_log tables
+- [ ] **Status Updates (Admin)**:
+  - [ ] Admin UI: Post status updates to projects (`/admin/projects/:id`)
+  - [ ] Status update form: Status type (design/development/testing/deployment/completed), title, description
+  - [ ] Status categories: `design`, `development`, `testing`, `deployment`, `completed`
+  - [ ] Save status update → create activity log entry
+- [ ] **Activity Feed System**:
+  - [ ] Activity log component: Display all project activity
+  - [ ] Activity types: Status updates, milestone changes, deliverable completions, commits, messages, payments
+  - [ ] Activity feed API: Fetch and filter activities by project
+  - [ ] Real-time updates: Activity feed updates when new activities occur
+  - [ ] Activity metadata: Store additional context in JSON field
+- [ ] **Client Activity Portal**:
+  - [ ] Client activity feed (`/projects/:id/activity`): View all project activity
+  - [ ] Activity timeline view: Visual timeline of project activity
+  - [ ] Activity filtering: Filter by activity type, date range
+  - [ ] Status indicators: Visual status badges/indicators
+  - [ ] Activity details: Expandable activity items with full details
+- [ ] **Status Indicators**:
+  - [ ] Visual status badges for each status type
+  - [ ] Progress indicators showing project status
+  - [ ] Status history: View status change history
+- [ ] **Notifications Integration**:
+  - [ ] Notify client when status update is posted
+  - [ ] Notify client when project status changes
+  - [ ] Activity feed notifications (optional, can be disabled)
+- [ ] **Integration with Existing Systems**:
+  - [ ] Milestone status changes → activity log entry
+  - [ ] Deliverable completions → activity log entry
+  - [ ] Repository commits → activity log entry
+  - [ ] Payment received → activity log entry
+  - [ ] Messages → activity log entry (optional)
+- [ ] **Activity Feed Component**:
+  - [ ] Reusable activity feed component
+  - [ ] Activity item rendering (different layouts for different activity types)
+  - [ ] Infinite scroll or pagination
+  - [ ] Activity grouping (by date, by type)
+- [ ] **Integration Tests**: Status update creation → Activity log entry → Client notification → Activity feed display
+
+- [ ] **Client Testimonials & Reviews**:
+  - [ ] Database schema: testimonials table
+  - [ ] Client testimonial form (`/testimonials/submit`): Project selection, rating, testimonial text
+  - [ ] Testimonial submission via Nora (Phase 10 integration)
+  - [ ] Admin testimonials management (`/admin/testimonials`): Approve/reject, feature testimonials
+  - [ ] Portfolio display: Public testimonials component, featured testimonials section
+  - [ ] Automated testimonial requests: Auto-request after project completion, reminder emails
+- [ ] **Expense Tracking**:
+  - [ ] Database schema: expenses, expense_categories tables
+  - [ ] Expense categories management (`/admin/expenses/categories`)
+  - [ ] Expense management (`/admin/expenses`): Create/edit expenses, receipt upload to S3
+  - [ ] Expense-to-invoice integration: Mark billable, add to invoices, prevent double-billing
+  - [ ] Expense reports: Generate reports by project/customer/category, export CSV/PDF
+- [ ] **Enhanced Project Collaboration**:
+  - [ ] Database schema: milestone_comments, milestone_requests, milestone_collaboration_submissions tables
+  - [ ] Milestone-based comment system: Comments on visible deliverables only, file/code line comments
+  - [ ] Milestone-based request system: Change requests on released milestones
+  - [ ] One-time submission logic: Lock after submission until next milestone release
+  - [ ] Admin review interface: View comments/requests, mark as reviewed/addressed
+- [ ] **Project Completion Certificates**:
+  - [ ] Database schema: project_certificates, certificate_templates tables
+  - [ ] Certificate template management (`/admin/settings/certificate-templates`)
+  - [ ] Automatic certificate generation: Trigger on project completion, PDF generation, repository commit
+  - [ ] Certificate management: Admin view, client access, certificate verification (hash)
+  - [ ] Repository integration: Commit certificate to project repository
+
+**Deliverable**: Complete project features system (status updates, activity feed, testimonials, expenses, collaboration, certificates)
+
+
+### Phase 9: Invoice Enhancements & Subscriptions (Week 10)
+**Goal**: Add advanced invoice features and implement subscription management
+
+**Prerequisites**: Phase 5 complete (Basic invoices and payments working)
 
 **Tasks**:
 - [ ] **TDD: Write tests first for invoice enhancements**
@@ -761,15 +1167,67 @@ Potential clients, recruiters, tech community, **existing customers** (portal ac
   - [ ] Write tests for refunds → Implement → Refactor
   - [ ] Database schema (credit_notes, refunds tables)
   - [ ] Credit note creation
-  - [ ] Stripe refund integration
+  - [ ] Polar refund integration
   - [ ] Apply credit to invoices
+- [ ] **Automated Invoice Follow-ups**:
+  - [ ] Database schema (invoice_reminders, invoice_reminder_rules tables)
+  - [ ] **Escalation Rules Configuration (Admin)**:
+    - [ ] Admin settings page (`/admin/settings/invoice-reminders`): Configure reminder rules
+    - [ ] Create/edit reminder rules: Days overdue, reminder type, email template, late fee percentage (optional)
+    - [ ] Reminder schedule configuration (e.g., 3 days, 7 days, 14 days overdue)
+    - [ ] Grace period settings (days before first reminder)
+    - [ ] Enable/disable reminder rules
+  - [ ] **Email Templates for Reminders**:
+    - [ ] Create email templates for each escalation level
+    - [ ] Template variables: Invoice details, days overdue, payment link, late fee amount
+    - [ ] Template preview and testing
+  - [ ] **Automated Reminder System**:
+    - [ ] Automated job (n8n workflow or AWS Lambda + EventBridge):
+      - [ ] Check for overdue invoices daily
+      - [ ] Determine which reminder to send based on days overdue
+      - [ ] Check if reminder already sent for this level
+      - [ ] Send reminder email
+      - [ ] Log reminder in database (invoice_reminders table)
+      - [ ] Schedule next reminder if applicable
+    - [ ] Reminder tracking: Track which reminders have been sent
+    - [ ] Prevent duplicate reminders: Don't send same reminder twice
+  - [ ] **Late Fee Automation** (optional):
+    - [ ] Calculate late fees based on reminder rules
+    - [ ] Auto-apply late fees to invoice (optional, configurable)
+    - [ ] Late fee notification: Notify client when late fee is applied
+    - [ ] Late fee reversal: Admin can reverse late fees if needed
+  - [ ] **Payment Plan Offers** (optional):
+    - [ ] Offer payment plans for overdue invoices (in reminder emails)
+    - [ ] Link to payment plan creation in reminder email
+  - [ ] **Integration with Email System**:
+    - [ ] Use existing email template system
+    - [ ] Use existing email notification infrastructure
+    - [ ] Email delivery tracking for reminders
+  - [ ] **Admin Reminder Management**:
+    - [ ] View all sent reminders (`/admin/invoices/:id/reminders`)
+    - [ ] Manual reminder trigger (admin can manually send reminder)
+    - [ ] Reminder history per invoice
+  - [ ] **Client Portal Integration**:
+    - [ ] Show reminder status on invoice detail page
+    - [ ] Show late fee information if applicable
+  - [ ] **Integration Tests**: Overdue invoice detection → Reminder rule matching → Email sending → Reminder logging
 
-**Deliverable**: Enhanced invoice system with recurring invoices, payment plans, tax, discounts, and credits
+- [ ] **Recurring Service Subscriptions**:
+  - [ ] Database schema: subscription_tiers, subscriptions, subscription_usage, subscription_invoices tables
+  - [ ] Subscription tiers management (`/admin/subscription-tiers`): Create/edit tiers, Polar Product/Price sync
+  - [ ] Subscription management (`/admin/subscriptions`): View all subscriptions, analytics (MRR, churn), manual actions
+  - [ ] Customer subscription portal (`/subscriptions`): View subscriptions, upgrade/downgrade, cancel/pause, billing history
+  - [ ] Polar Subscriptions integration: Webhook handlers, lifecycle management, automatic billing
+  - [ ] Usage tracking (optional): Track usage per period, display in portal
+  - [ ] Email notifications: Subscription created, upgraded/downgraded, cancelled, payment succeeded/failed
 
-### Phase 8: AI Features Integration (Week 8)
+**Deliverable**: Enhanced invoice system with recurring invoices, payment plans, tax, discounts, credits, automated follow-ups, and complete subscription management
+
+
+### Phase 10: AI Features Integration (Week 10.5)
 **Goal**: Implement Nora AI chat widget with smart navigation and function calling
 
-**Prerequisites**: Phase 4 complete (Authentication working for guest/authenticated distinction)
+**Prerequisites**: Phase 3 complete (Authentication working for guest/authenticated distinction)
 
 **Tasks**:
 - [ ] **TDD: Write tests first for AI features**
@@ -821,10 +1279,10 @@ Potential clients, recruiters, tech community, **existing customers** (portal ac
 
 **Deliverable**: Fully functional Nora AI chat widget with navigation, highlighting, and function calling
 
-### Phase 9: Email Notifications & Communication (Week 8.5)
+### Phase 11: Email Notifications & Communication (Week 11)
 **Goal**: Implement email notifications, in-app messaging, and notifications center
 
-**Prerequisites**: Phase 5 & 6 complete (Invoices and payments working)
+**Prerequisites**: Phase 5 complete (Invoices and payments working)
 
 **Tasks**:
 - [ ] **TDD: Write tests first for email and communication features**
@@ -838,8 +1296,8 @@ Potential clients, recruiters, tech community, **existing customers** (portal ac
     - [ ] AWS SQS queue for email jobs (optional)
     - [ ] n8n workflows for complex email automation
   - [ ] AWS SES integration for email sending
-  - [ ] Automated invoice reminders (configurable schedule)
   - [ ] Payment confirmations
+  - [ ] *Note: Automated invoice follow-ups with escalation rules implemented in Phase 8*
   - [ ] Invoice sent notifications
   - [ ] Payment failed notifications
   - [ ] Contract signing reminders
@@ -867,10 +1325,10 @@ Potential clients, recruiters, tech community, **existing customers** (portal ac
 
 **Deliverable**: Complete communication system (email notifications, messaging, notifications center)
 
-### Phase 10: Security & Audit (Week 8.75)
+### Phase 12: Security & Audit (Week 11.5)
 **Goal**: Implement security features and compliance
 
-**Prerequisites**: Phase 4 complete (Authentication system in place)
+**Prerequisites**: Phase 3 complete (Authentication system in place)
 
 **Tasks**:
 - [ ] **TDD: Write tests first for security features**
@@ -910,10 +1368,10 @@ Potential clients, recruiters, tech community, **existing customers** (portal ac
 
 **Deliverable**: Complete security system with 2FA, audit logs, rate limiting, and GDPR compliance
 
-### Phase 11: Meeting Booking System (Week 9)
+### Phase 13: Meeting Booking System (Week 12)
 **Goal**: Build complete meeting booking system with Google Calendar integration
 
-**Prerequisites**: Phase 4 complete (Authentication), Phase 8 complete (Nora AI for booking integration)
+**Prerequisites**: Phase 3 complete (Authentication), Phase 10 complete (Nora AI for booking integration)
 
 **Tasks**:
 - [ ] **Database Schema Setup** (foundation for booking system):
@@ -1017,10 +1475,10 @@ Potential clients, recruiters, tech community, **existing customers** (portal ac
 
 *See "Technical Implementation Details" section below for full architecture*
 
-### Phase 12: Additional Features (Week 9.5)
+### Phase 14: Additional Features (Week 12.5)
 **Goal**: Add polish features (export, bulk ops, search, dark mode, meeting enhancements)
 
-**Prerequisites**: Core features complete (Phases 1-11)
+**Prerequisites**: Core features complete (Phases 1-12)
 
 **Tasks**:
 - [ ] **TDD: Write tests first for additional features**
@@ -1067,10 +1525,10 @@ Potential clients, recruiters, tech community, **existing customers** (portal ac
 
 **Deliverable**: Enhanced UX features (export, bulk ops, search, dark mode, meeting enhancements)
 
-### Phase 13: Polish & Optimization (Week 10)
+### Phase 15: Polish & Optimization (Week 13)
 **Goal**: Optimize performance, accessibility, SEO, and security
 
-**Prerequisites**: All feature phases complete (Phases 1-12)
+**Prerequisites**: All feature phases complete (Phases 1-13)
 
 **Tasks**:
 - [ ] **Test coverage review** (ensure 80%+ coverage on business logic)
@@ -1085,10 +1543,10 @@ Potential clients, recruiters, tech community, **existing customers** (portal ac
 
 **Deliverable**: Optimized, tested, and production-ready application
 
-### Phase 14: Deployment & Launch (Week 11)
+### Phase 16: Deployment & Launch (Week 14)
 **Goal**: Deploy to production and launch portfolio
 
-**Prerequisites**: Phase 13 complete (Polish & optimization done)
+**Prerequisites**: Phase 15 complete (Polish & optimization done)
 
 **Tasks**:
 - [ ] Production deployment (AWS Amplify or ECS/EC2):
@@ -1103,7 +1561,7 @@ Potential clients, recruiters, tech community, **existing customers** (portal ac
 - [ ] Environment configuration:
   - [ ] Production environment variables in AWS
   - [ ] AWS Secrets Manager for sensitive credentials
-- [ ] Stripe webhooks (production):
+- [ ] Polar webhooks (production):
   - [ ] Configure production webhook endpoints
   - [ ] Test webhook delivery
 - [ ] Domain & SSL setup:
@@ -1118,10 +1576,10 @@ Potential clients, recruiters, tech community, **existing customers** (portal ac
 
 **Deliverable**: Live portfolio website with all public features
 
-### Phase 15: Customer Portal Launch (Week 12+)
+### Phase 17: Customer Portal Launch (Week 15+)
 **Goal**: Launch customer portal with beta testing
 
-**Prerequisites**: Phase 14 complete (Portfolio launched)
+**Prerequisites**: Phase 16 complete (Portfolio launched)
 
 **Tasks**:
 - [ ] Beta testing with 1 current client
@@ -1131,10 +1589,10 @@ Potential clients, recruiters, tech community, **existing customers** (portal ac
 
 **Deliverable**: Fully operational customer portal with all features
 
-### Phase 16: Post-Launch (Ongoing)
+### Phase 18: Post-Launch (Ongoing)
 **Goal**: Monitor, maintain, and enhance the application
 
-**Prerequisites**: Phase 15 complete (Full launch)
+**Prerequisites**: Phase 17 complete (Full launch)
 
 **Tasks**:
 - [ ] Monitor performance
@@ -1423,12 +1881,13 @@ You have the ability to help users find content on the website by:
 - **UI Framework**: Ant Design (default)
 - **Routing**: Next.js App Router integration
 
-### Payment Architecture (Stripe)
-- **Frontend**: Stripe Elements (secure payment forms)
-- **Stripe Link**: One-click checkout (enabled for faster payments)
-- **Backend**: Payment Intents API
+### Payment Architecture (Polar - Merchant of Record)
+- **Frontend**: Polar secure payment forms
+- **Backend**: Polar Payment API
 - **Webhooks**: Payment event handling
-- **Security**: PCI-compliant, webhook signature verification
+- **Security**: PCI-compliant (handled by Polar), webhook signature verification
+- **Tax Compliance**: Handled automatically by Polar as Merchant of Record
+- **Payouts**: Managed through Polar dashboard (uses Stripe Connect Express for payouts)
 
 ### Contract Management (DocuSign + AI Generation)
 - **AI Contract Generation**: n8n AI Agent workflow
@@ -1516,7 +1975,7 @@ You have the ability to help users find content on the website by:
 2. ✅ **Color Scheme**: Blue, Gold, Silver
 3. ✅ **Headshot**: Ready in project folder
 4. ✅ **Timeline**: 10-11 weeks (flexible)
-5. ✅ **Payment Provider**: Stripe
+5. ✅ **Payment Provider**: Polar (Merchant of Record)
 6. ✅ **Payment System**: Architected from start
 7. ✅ **Admin Panel**: Required from start, full CMS
 8. ✅ **Database**: AWS RDS (PostgreSQL) - Scalable, enterprise-ready
@@ -1528,7 +1987,7 @@ You have the ability to help users find content on the website by:
 14. ✅ **Nora Smart Navigation**: Navigate & highlight content
 15. ✅ **Current Clients**: 1 client for initial portal access
 16. ✅ **OAuth Authentication**: Google, Facebook, LinkedIn (GitHub optional) alongside email/password
-17. ✅ **Stripe Link**: One-click checkout enabled for faster payment experience
+17. ✅ **Polar Payment Processing**: Merchant of Record handles payments, tax compliance, and billing
 18. ✅ **Test-Driven Development (TDD)**: All features developed test-first (Red → Green → Refactor)
 19. ✅ **AWS Ecosystem**: Full AWS infrastructure for scalability and enterprise growth
 
@@ -1548,11 +2007,12 @@ You have the ability to help users find content on the website by:
   - [HR Dashboard](https://hr.refine.dev/login)
 - **Next.js**: https://nextjs.org/docs
 - **Ant Design**: https://ant.design
-- **Stripe**: https://docs.stripe.com
-  - [Payment Intents](https://docs.stripe.com/payments/payment-intents)
-  - [Elements](https://docs.stripe.com/payments/elements)
-  - [Link](https://docs.stripe.com/payments/link) - One-click checkout
-  - [Webhooks](https://docs.stripe.com/webhooks)
+- **Polar**: https://polar.sh/docs
+  - [Getting Started](https://polar.sh/docs/getting-started)
+  - [Payment API](https://polar.sh/docs/api/payments)
+  - [Subscriptions](https://polar.sh/docs/api/subscriptions)
+  - [Webhooks](https://polar.sh/docs/webhooks)
+  - [Polar as Merchant of Record](https://polar.sh/docs/documentation/polar-as-merchant-of-record)
 - **OpenAI**: https://platform.openai.com/docs
 - **DocuSign**: https://developers.docusign.com/docs
 - **n8n**: https://docs.n8n.io
@@ -1593,7 +2053,7 @@ You have the ability to help users find content on the website by:
    - AWS ElastiCache Redis (optional, for caching)
 3. ⏭️ Set up OAuth provider accounts (Google, Facebook, LinkedIn, GitHub optional)
 4. ⏭️ Configure OAuth in AWS Cognito Identity Pools
-5. ⏭️ Set up Stripe account (test mode)
+5. ⏭️ Set up Polar account (get from https://polar.sh)
 6. ⏭️ Set up OpenAI API account
 7. ⏭️ Set up Google Calendar API credentials
 8. ⏭️ **Configure environment variables**:
@@ -1617,7 +2077,7 @@ You have the ability to help users find content on the website by:
   - [ ] AWS ElastiCache Redis cluster (optional, for caching)
 - [ ] OAuth provider accounts configured (Google, Facebook, LinkedIn, GitHub optional)
 - [ ] OAuth providers linked in AWS Cognito
-- [ ] Stripe account configured (test mode)
+- [ ] Polar account configured (Merchant of Record - get from https://polar.sh)
 - [ ] OpenAI API keys obtained
 - [ ] Google Calendar API credentials obtained
 - [ ] DocuSign API credentials obtained (if using)
@@ -1629,7 +2089,7 @@ You have the ability to help users find content on the website by:
 - [ ] **Environment variables configured**:
   - [ ] Copy `.env.example` to `.env`
   - [ ] Fill in all AWS credentials (RDS, Cognito, S3, Lambda, etc.)
-  - [ ] Fill in all API keys (Stripe, OpenAI, DocuSign, Google Calendar, etc.)
+  - [ ] Fill in all API keys (Polar, OpenAI, DocuSign, Google Calendar, etc.)
   - [ ] Generate SESSION_SECRET (use: `openssl rand -base64 32`)
   - [ ] Verify `.env` is in `.gitignore`
 - [ ] Design mockups (optional, can iterate)

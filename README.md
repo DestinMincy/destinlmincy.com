@@ -11,9 +11,18 @@ This is a comprehensive portfolio website showcasing Destin L. Mincy's work as a
 - ✅ **Full CMS** - All content editable via admin panel (no code changes)
 - ✅ **Customer Portal** - Authentication, invoices, contracts, payments, project management
 - ✅ **AI Chat Widget (Nora)** - Smart navigation, account access, meeting booking
-- ✅ **Invoice Management** - Recurring invoices, payment plans, tax calculation, multi-currency
+- ✅ **Quotes/Estimates System** - Initial quotes, planning sessions, final quotes with hourly rate pricing
+- ✅ **Invoice Management** - Recurring invoices, payment plans, tax calculation, multi-currency, automated follow-ups
 - ✅ **Contract Management** - AI-generated contracts, DocuSign integration, two-way signing
-- ✅ **Payment Processing** - Stripe integration with one-click checkout (Stripe Link)
+- ✅ **Payment Processing** - Polar integration (Merchant of Record - handles payments, tax compliance, billing)
+- ✅ **Project Repositories** - AWS CodeCommit integration, file browser, git commit history, milestone-based code release
+- ✅ **Project Milestones** - Milestone tracking, deliverables, payment-first model, code visibility control
+- ✅ **Project Collaboration** - Milestone-based comments and change requests
+- ✅ **Activity Feed** - Real-time project status updates and activity tracking
+- ✅ **Testimonials** - Client testimonial system with portfolio display
+- ✅ **Expense Tracking** - Project expense management with receipt upload
+- ✅ **Subscriptions** - Recurring service subscriptions with automatic billing
+- ✅ **Completion Certificates** - Automated project completion certificates
 - ✅ **Meeting Booking** - Google Calendar sync, real-time availability, unified API
 - ✅ **Client File Uploads** - Project file management for clients
 - ✅ **Client-Initiated Contracts** - Request contracts via form or Nora chat
@@ -35,7 +44,8 @@ This is a comprehensive portfolio website showcasing Destin L. Mincy's work as a
 - **CDN**: AWS CloudFront
 
 ### Integrations
-- **Payments**: Stripe (Payment Intents, Elements, Link)
+- **Payments**: Polar (Merchant of Record - Payment API, Subscriptions, tax compliance)
+- **Repository Hosting**: AWS CodeCommit (100% AWS-hosted, closed-source by default)
 - **AI**: OpenAI (GPT-3.5 Turbo / GPT-4 Turbo)
 - **Contracts**: DocuSign API
 - **Calendar**: Google Calendar API
@@ -65,7 +75,7 @@ Before you begin, ensure you have:
 - AWS account with appropriate permissions
 - Accounts set up for:
   - AWS (RDS, Cognito, S3, Lambda, Amplify, etc.)
-  - Stripe (test mode)
+  - Polar (Merchant of Record - get from https://polar.sh)
   - OpenAI
   - DocuSign (optional)
   - Google Calendar API
@@ -100,7 +110,7 @@ pnpm install
 2. Fill in all environment variables in `.env`:
    - AWS credentials (RDS, Cognito, S3, Lambda, etc.)
    - OAuth provider credentials (Google, Facebook, LinkedIn)
-   - Stripe keys (test mode)
+   - Polar API keys (Merchant of Record - get from https://polar.sh)
    - OpenAI API key
    - DocuSign credentials (if using)
    - Google Calendar API credentials
@@ -214,20 +224,22 @@ See `PROJECT_PLAN.md` for complete development roadmap. Summary:
 
 - **Phase 1**: Foundation & Setup (Week 1)
 - **Phase 2**: Admin Panel & CMS (Weeks 2-3)
-- **Phase 3**: Content Creation (Week 4)
-- **Phase 4**: Authentication & Customer Portal (Week 5)
-- **Phase 5**: Invoice & Contract Management (Week 6)
-- **Phase 6**: Payment Integration (Week 7)
-- **Phase 7**: Invoice Enhancements (Week 7.5)
-- **Phase 8**: AI Features Integration (Week 8)
-- **Phase 9**: Email Notifications & Communication (Week 8.5)
-- **Phase 10**: Security & Audit (Week 8.75)
-- **Phase 11**: Meeting Booking System (Week 9)
-- **Phase 12**: Additional Features (Week 9.5)
-- **Phase 13**: Polish & Optimization (Week 10)
-- **Phase 14**: Deployment & Launch (Week 11)
-- **Phase 15**: Customer Portal Launch (Week 12+)
-- **Phase 16**: Post-Launch (Ongoing)
+- **Phase 3**: Authentication & Customer Portal (Week 5)
+- **Phase 4**: Quotes/Estimates System (Week 6)
+- **Phase 5**: Invoices, Contracts & Payments (Week 6.5)
+- **Phase 6**: Client Project Repository & Git Integration (Week 7)
+- **Phase 7**: Project Milestones & Deliverables (Week 8)
+- **Phase 8**: Project Features - Status Updates, Activity Feed, Testimonials, Expenses, Collaboration, Certificates (Week 8.5-9)
+- **Phase 9**: Invoice Enhancements & Subscriptions (Week 10)
+- **Phase 10**: AI Features Integration (Week 10.5)
+- **Phase 11**: Email Notifications & Communication (Week 11)
+- **Phase 12**: Security & Audit (Week 11.5)
+- **Phase 13**: Meeting Booking System (Week 12)
+- **Phase 14**: Additional Features (Week 12.5)
+- **Phase 15**: Polish & Optimization (Week 13)
+- **Phase 16**: Deployment & Launch (Week 14)
+- **Phase 17**: Customer Portal Launch (Week 15+)
+- **Phase 18**: Post-Launch (Ongoing)
 
 ## 📚 Documentation
 
@@ -240,7 +252,7 @@ See `PROJECT_PLAN.md` for complete development roadmap. Summary:
 - All API endpoints are rate-limited
 - Authentication uses AWS Cognito with OAuth support
 - Two-factor authentication (2FA) available
-- PCI-compliant payment processing (Stripe)
+- PCI-compliant payment processing (Polar - Merchant of Record)
 - GDPR compliance features
 - Activity logs and audit trail
 
@@ -265,5 +277,5 @@ See LICENSE and COMMONS_CLAUSE files for details.
 ---
 
 **Status**: 🚧 In Development  
-**Last Updated**: 11-14-2025 
-**Version**: 3.0 (Refactored & Streamlined)
+**Last Updated**: 11/17/2025  
+**Version**: 3.0 (Refactored & Streamlined - Polar Integration)
