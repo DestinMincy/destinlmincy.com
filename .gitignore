@@ -79,6 +79,9 @@ web_modules/
 .env.production.local
 .env.local
 
+# Project decision tracking (may contain sensitive planning info)
+PHASE1_DECISIONS.md
+
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 .parcel-cache
