@@ -45,8 +45,8 @@ This is a comprehensive portfolio website showcasing Destin L. Mincy's work as a
 
 ### Integrations
 - **Payments**: Polar (Merchant of Record - Payment API, Subscriptions, tax compliance)
-- **Repository Hosting**: AWS CodeCommit (100% AWS-hosted, closed-source by default)
-- **AI**: OpenAI (GPT-3.5 Turbo / GPT-4 Turbo)
+- **Repository Hosting**: AWS CodeCommit (100% AWS-hosted, closed-source by default; GitHub sync for client projects marked as open-source)
+- **AI**: OpenAI (GPT-3.5-turbo / GPT-4o)
 - **Contracts**: DocuSign API
 - **Calendar**: Google Calendar API
 - **Automation**: n8n (workflows & AI Agents)
@@ -131,7 +131,7 @@ pnpm install
 2. **AWS Cognito**: Create User Pool and Identity Pool
    - Configure OAuth providers (Google, Facebook, LinkedIn, GitHub)
    - Set up hosted UI (optional)
-3. **AWS S3**: Create buckets (media, client-uploads, public)
+3. **AWS S3**: Create buckets (client-downloads, portfolio-media, user-uploads)
    - Configure bucket policies and CORS
    - Set up CloudFront distribution for CDN
 4. **AWS CloudFront**: Create distribution (for production)
@@ -222,24 +222,25 @@ destinlmincy.com/
 
 See `PROJECT_PLAN.md` for complete development roadmap. Summary:
 
+### MVP (Phases 1-10) - 8-11 weeks
 - **Phase 1**: Foundation & Setup (Week 1)
 - **Phase 2**: Admin Panel & CMS (Weeks 2-3)
-- **Phase 3**: Authentication & Customer Portal (Week 5)
-- **Phase 4**: Quotes/Estimates System (Week 6)
-- **Phase 5**: Invoices, Contracts & Payments (Week 6.5)
-- **Phase 6**: Client Project Repository & Git Integration (Week 7)
-- **Phase 7**: Project Milestones & Deliverables (Week 8)
-- **Phase 8**: Project Features - Status Updates, Activity Feed, Testimonials, Expenses, Collaboration, Certificates (Week 8.5-9)
-- **Phase 9**: Invoice Enhancements & Subscriptions (Week 10)
-- **Phase 10**: AI Features Integration (Week 10.5)
-- **Phase 11**: Email Notifications & Communication (Week 11)
-- **Phase 12**: Security & Audit (Week 11.5)
-- **Phase 13**: Meeting Booking System (Week 12)
-- **Phase 14**: Additional Features (Week 12.5)
-- **Phase 15**: Polish & Optimization (Week 13)
-- **Phase 16**: Deployment & Launch (Week 14)
-- **Phase 17**: Customer Portal Launch (Week 15+)
-- **Phase 18**: Post-Launch (Ongoing)
+- **Phase 3**: Authentication & Customer Portal (Week 4-5)
+- **Phase 4**: Project Management Engine (Week 6) - Repositories & Milestones
+- **Phase 5**: Quotes & Estimates (Week 7)
+- **Phase 6**: Invoices, Contracts & Payments (Weeks 7.5-8)
+- **Phase 7**: AI Features Integration (Nora) (Weeks 8-9)
+- **Phase 8**: Meeting Booking System (Week 10)
+- **Phase 9**: Polish & Optimization (Week 11)
+- **Phase 10**: Deployment & Launch (Week 11-12)
+
+### Post-MVP (Phases 11+) - After Launch
+- **Phase 11**: Project Collaboration (Comments, Approvals)
+- **Phase 12**: Invoice Enhancements & Subscriptions
+- **Phase 13**: Email Notifications & Communication
+- **Phase 14**: Security & Audit
+- **Phase 15**: Additional Features (Onboarding Checklists, Project Templates, Testimonials, Expenses, Certificates)
+- **Phase 16**: Post-Launch (Ongoing improvements, analytics, SEO)
 
 ## 📚 Documentation
 
@@ -262,7 +263,11 @@ This is a personal portfolio project. For questions or collaboration inquiries, 
 
 ## 📝 License
 
-#### APACHE 2.0 + COMMONS CLAUSE
+#### Apache License 2.0 + Commons Clause
+
+**This project is NOT open source.** It is licensed under Apache License 2.0 with the Commons Clause, which restricts commercial use of the software.
+
+**Note**: Individual client projects created through this platform may use different licenses (MIT, Apache 2.0, GPL3, Proprietary, Source Available) as specified during project creation.
 
 See LICENSE and COMMONS_CLAUSE files for details.
 
@@ -276,6 +281,6 @@ See LICENSE and COMMONS_CLAUSE files for details.
 
 ---
 
-**Status**: 🚧 In Development  
-**Last Updated**: 11/17/2025  
-**Version**: 3.0 (Refactored & Streamlined - Polar Integration)
+**Status**: ✅ Planning Complete - Ready for Phase 1 Development  
+**Last Updated**: 2025-01-20  
+**Version**: 4.0 (Master Plan Complete - All Decisions Finalized)
