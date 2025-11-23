@@ -21,7 +21,7 @@ export async function GET(
         // Fetch the quote
         const quote = await prisma.quote.findUnique({
             where: { id: params.id },
-            include: { customer: true },
+            include: { client: true },
         });
 
         if (!quote) {
@@ -30,7 +30,7 @@ export async function GET(
 
         // Authorization: Admin can view any quote, customers can only view their own
         const isAdmin = session.user.role === 'admin';
-        const isOwner = quote.customer?.email === session.user.email;
+        const isOwner = quote.client?.email === session.user.email;
 
         if (!isAdmin && !isOwner) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
@@ -46,9 +46,9 @@ export async function GET(
             createdAt: quote.createdAt.toISOString(),
             expiresAt: quote.expiresAt?.toISOString(),
             items: quote.items as any,
-            customer: {
-                name: quote.customer?.name || 'Customer',
-                email: quote.customer?.email || '',
+            client: {
+                name: quote.client?.name || 'Client',
+                email: quote.client?.email || '',
             },
         };
 

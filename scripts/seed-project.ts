@@ -3,15 +3,15 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-    // Find a customer
-    const customer = await prisma.customer.findFirst();
+    // Find a client
+    const client = await prisma.client.findFirst();
 
-    if (!customer) {
-        console.error("No customer found. Please register a user first.");
+    if (!client) {
+        console.error("No client found. Please register a user first.");
         return;
     }
 
-    console.log(`Assigning project to customer: ${customer.email} (${customer.id})`);
+    console.log(`Assigning project to client: ${client.email} (${client.id})`);
 
     // Create a project
     const project = await prisma.project.create({
@@ -20,7 +20,7 @@ async function main() {
             description: "A modern portfolio website with AI integration and client portal.",
             slug: "ai-portfolio-platform",
             technologies: ["Next.js", "TypeScript", "AWS", "Prisma"],
-            customerId: customer.id,
+            clientId: client.id,
             repositoryUrl: "https://git-codecommit.us-east-1.amazonaws.com/v1/repos/destinlmincy-portfolio",
             featured: true,
             milestones: {

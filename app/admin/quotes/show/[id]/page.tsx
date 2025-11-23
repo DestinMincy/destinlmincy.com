@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Descriptions, Tag, Button } from 'antd';
 
-interface Customer {
+interface Client {
     id: string;
     email: string;
     name: string;
@@ -13,12 +13,12 @@ interface Customer {
 interface Quote {
     id: string;
     quoteNumber: string;
-    customerId: string;
+    clientId: string;
     status: string;
     amount: any;
     description?: string;
     createdAt: string;
-    customer?: Customer;
+    client?: Client;
 }
 
 export default function QuoteShowPage({ params }: { params: { id: string } }) {
@@ -59,7 +59,7 @@ export default function QuoteShowPage({ params }: { params: { id: string } }) {
         <div className="p-6 max-w-3xl">
             <h1 className="text-2xl font-bold mb-4">Quote #{quote.quoteNumber}</h1>
             <Descriptions bordered column={1}>
-                <Descriptions.Item label="Customer">{quote.customer?.email}</Descriptions.Item>
+                <Descriptions.Item label="Client">{quote.client?.email}</Descriptions.Item>
                 <Descriptions.Item label="Status"><Tag>{quote.status}</Tag></Descriptions.Item>
                 <Descriptions.Item label="Amount">${quote.amount.toString()}</Descriptions.Item>
                 <Descriptions.Item label="Created">{new Date(quote.createdAt).toLocaleString()}</Descriptions.Item>

@@ -10,7 +10,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
     }
     const quote = await prisma.quote.findUnique({
         where: { id: params.id },
-        include: { customer: true },
+        include: { client: true },
     });
     if (!quote) {
         return NextResponse.json({ error: 'Quote not found' }, { status: 404 });
@@ -25,7 +25,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     }
     const data = await request.json();
     // Only allow specific fields to be updated
-    const allowed = ['quoteNumber', 'customerId', 'status', 'amount', 'description'];
+    const allowed = ['quoteNumber', 'clientId', 'status', 'amount', 'description'];
     const updateData: any = {};
     for (const key of allowed) {
         if (key in data) updateData[key] = data[key];

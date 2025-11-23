@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Form, Input, InputNumber, Button, Select, message } from 'antd';
 
-interface Customer {
+interface Client {
     id: string;
     email: string;
 }
@@ -12,7 +12,7 @@ interface Customer {
 interface QuoteData {
     id: string;
     quoteNumber: string;
-    customerId: string;
+    clientId: string;
     status: string;
     amount: number;
     description?: string;
@@ -21,7 +21,7 @@ interface QuoteData {
 export default function EditQuotePage({ params }: { params: { id: string } }) {
     const router = useRouter();
     const [quote, setQuote] = useState<QuoteData | null>(null);
-    const [customers, setCustomers] = useState<Customer[]>([]);
+    const [clients, setClients] = useState<Client[]>([]);
 
     // Load quote and customers on mount
     useEffect(() => {
@@ -33,11 +33,11 @@ export default function EditQuotePage({ params }: { params: { id: string } }) {
                 message.error('Failed to load quote');
                 router.push('/admin/quotes');
             });
-        // Fetch customers for select
-        fetch('/api/customers')
+        // Fetch clients for select
+        fetch('/api/clients')
             .then((res) => res.json())
-            .then(setCustomers)
-            .catch(() => message.error('Failed to load customers'));
+            .then(setClients)
+            .catch(() => message.error('Failed to load clients'));
     }, [params.id, router]);
 
     const onFinish = async (values: any) => {
@@ -67,9 +67,9 @@ export default function EditQuotePage({ params }: { params: { id: string } }) {
                 <Form.Item name="quoteNumber" label="Quote Number" rules={[{ required: true }]}>
                     <Input />
                 </Form.Item>
-                <Form.Item name="customerId" label="Customer" rules={[{ required: true }]}>
-                    <Select placeholder="Select a customer">
-                        {customers.map((c) => (
+                <Form.Item name="clientId" label="Client" rules={[{ required: true }]}>
+                    <Select placeholder="Select a client">
+                        {clients.map((c) => (
                             <Select.Option key={c.id} value={c.id}>
                                 {c.email}
                             </Select.Option>

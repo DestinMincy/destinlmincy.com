@@ -8,7 +8,7 @@ export async function GET() {
     if (!session?.user?.role || session.user.role !== 'admin') {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    const quotes = await prisma.quote.findMany({ include: { customer: true } });
+    const quotes = await prisma.quote.findMany({ include: { client: true } });
     return NextResponse.json(quotes);
 }
 

@@ -6,10 +6,11 @@ import { useRouter } from "next/navigation";
 import { Button, Drawer } from "antd";
 import { MenuOutlined, UserOutlined } from "@ant-design/icons";
 import { useSession } from "next-auth/react";
+import DashboardSwitcher from "@/components/DashboardSwitcher";
 
 export default function Navbar() {
     const [drawerOpen, setDrawerOpen] = useState(false);
-    const { data: session } = useSession();
+    const { data: session, status } = useSession();
     const router = useRouter();
 
     const navLinks = [
@@ -46,7 +47,16 @@ export default function Navbar() {
                                 {link.label}
                             </Link>
                         ))}
-                        {session ? (
+                        {session && <DashboardSwitcher />}
+                        {status === "loading" ? (
+                            <Button
+                                type="default"
+                                icon={<UserOutlined />}
+                                loading
+                            >
+                                Loading
+                            </Button>
+                        ) : session ? (
                             <Button
                                 type="primary"
                                 icon={<UserOutlined />}
@@ -94,7 +104,21 @@ export default function Navbar() {
                             {link.label}
                         </Link>
                     ))}
-                    {session ? (
+                    {session && (
+                        <div onClick={() => setDrawerOpen(false)}>
+                            <DashboardSwitcher />
+                        </div>
+                    )}
+                    {status === "loading" ? (
+                        <Button
+                            type="default"
+                            icon={<UserOutlined />}
+                            block
+                            loading
+                        >
+                            Loading
+                        </Button>
+                    ) : session ? (
                         <Button
                             type="primary"
                             icon={<UserOutlined />}

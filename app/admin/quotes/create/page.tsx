@@ -1,29 +1,28 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { redirect } from 'next/navigation';
 import { Form, Input, InputNumber, Button, Select } from 'antd';
 import { useRouter } from 'next/navigation';
 
-interface Customer {
+interface Client {
     id: string;
     email: string;
 }
 
 export default function CreateQuotePage() {
     const router = useRouter();
-    const [customers, setCustomers] = useState<Customer[]>([]);
+    const [clients, setClients] = useState<Client[]>([]);
 
     // Ensure admin access on client side (fallback)
     useEffect(() => {
         // Could add auth check via API if needed
-        fetch('/api/customers')
+        fetch('/api/clients')
             .then((res) => res.json())
-            .then(setCustomers)
+            .then(setClients)
             .catch(() => {
-                redirect('/login');
+                router.push('/login');
             });
-    }, []);
+    }, [router]);
 
     const onFinish = async (values: any) => {
         await fetch('/api/quotes', {
@@ -41,9 +40,9 @@ export default function CreateQuotePage() {
                 <Form.Item name="quoteNumber" label="Quote Number" rules={[{ required: true }]}>
                     <Input />
                 </Form.Item>
-                <Form.Item name="customerId" label="Customer" rules={[{ required: true }]}>
-                    <Select placeholder="Select a customer">
-                        {customers.map((c) => (
+                <Form.Item name="clientId" label="Client" rules={[{ required: true }]}>
+                    <Select placeholder="Select a client">
+                        {clients.map((c) => (
                             <Select.Option key={c.id} value={c.id}>
                                 {c.email}
                             </Select.Option>

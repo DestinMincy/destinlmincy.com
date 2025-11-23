@@ -7,11 +7,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Customer {
+model Client {
   id            String   @id @default(uuid())
   email         String   @unique
   name          String
-  role          String   @default("customer") // admin, customer
+  role          String   @default("client") // admin, client
   cognitoId     String?  @unique
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -27,8 +27,8 @@ model Customer {
 model Quote {
   id            String   @id @default(uuid())
   quoteNumber   String   @unique
-  customerId    String
-  customer      Customer @relation(fields: [customerId], references: [id])
+  clientId      String
+  client        Client   @relation(fields: [clientId], references: [id])
   status        String   // draft, sent, approved, rejected, converted
   amount        Decimal
   description   String   @db.Text
@@ -41,8 +41,8 @@ model Quote {
 model Invoice {
   id            String   @id @default(uuid())
   invoiceNumber String   @unique
-  customerId    String
-  customer      Customer @relation(fields: [customerId], references: [id])
+  clientId      String
+  client        Client   @relation(fields: [clientId], references: [id])
   status        String   // draft, sent, paid, overdue, cancelled
   amount        Decimal
   paidAmount    Decimal  @default(0)
@@ -57,8 +57,8 @@ model Invoice {
 
 model Contract {
   id            String   @id @default(uuid())
-  customerId    String
-  customer      Customer @relation(fields: [customerId], references: [id])
+  clientId      String
+  client        Client   @relation(fields: [clientId], references: [id])
   title         String
   status        String   // draft, sent, signed, completed, cancelled
   docusignId    String?  @unique
@@ -72,8 +72,8 @@ model Payment {
   id            String   @id @default(uuid())
   invoiceId     String
   invoice       Invoice  @relation(fields: [invoiceId], references: [id])
-  customerId    String
-  customer      Customer @relation(fields: [customerId], references: [id])
+  clientId      String
+  client        Client   @relation(fields: [clientId], references: [id])
   amount        Decimal
   status        String   // pending, completed, failed, refunded
   polarPaymentId String? @unique
@@ -91,8 +91,8 @@ model Project {
   images        String[] // S3 URLs
   liveUrl       String?
   githubUrl     String?
-  customerId    String?
-  customer      Customer? @relation(fields: [customerId], references: [id])
+  clientId      String?
+  client        Client?  @relation(fields: [clientId], references: [id])
   
   // New MVP Features
   repositoryUrl String?  // AWS CodeCommit URL
@@ -140,8 +140,8 @@ model Booking {
 
 model Message {
   id            String   @id @default(uuid())
-  customerId    String
-  customer      Customer @relation(fields: [customerId], references: [id])
+  clientId      String
+  client        Client   @relation(fields: [clientId], references: [id])
   fromAdmin     Boolean  @default(false)
   content       String   @db.Text
   read          Boolean  @default(false)

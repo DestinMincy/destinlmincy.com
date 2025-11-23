@@ -55,23 +55,23 @@ export const authOptions: NextAuthOptions = {
 
                     if (email) {
                         // Check if user exists
-                        const existingUser = await prisma.customer.findUnique({
+                        const existingUser = await prisma.client.findUnique({
                             where: { email },
                         });
 
                         if (!existingUser) {
                             // Create new user
-                            await prisma.customer.create({
+                            await prisma.client.create({
                                 data: {
                                     email,
                                     name,
                                     cognitoId,
-                                    role: "customer",
+                                    role: "client",
                                 },
                             });
                         } else if (!existingUser.cognitoId) {
                             // Link existing user to Cognito
-                            await prisma.customer.update({
+                            await prisma.client.update({
                                 where: { email },
                                 data: { cognitoId },
                             });
@@ -87,13 +87,13 @@ export const authOptions: NextAuthOptions = {
         async session({ session, token }: any) {
             if (session?.user) {
                 // Default from token
-                session.user.role = token.role || "customer";
+                session.user.role = token.role || "client";
                 session.user.id = token.sub;
 
                 // Try to fetch latest role/id from DB if available
                 if (session.user.email) {
                     try {
-                        const dbUser = await prisma.customer.findUnique({
+                        const dbUser = await prisma.client.findUnique({
                             where: { email: session.user.email },
                         });
                         if (dbUser) {
@@ -109,11 +109,11 @@ export const authOptions: NextAuthOptions = {
         },
         async jwt({ token, user, account }: any) {
             if (user) {
-                token.role = (user as any).role || "customer";
+                token.role = (user as any).role || "client";
             }
-            // For Cognito users, mark them as customers
+            // For Cognito users, mark them as clients
             if (account?.provider === "cognito") {
-                token.role = "customer";
+                token.role = "client";
             }
             return token;
         },

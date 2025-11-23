@@ -39,12 +39,12 @@ export async function POST(request: NextRequest) {
 
         // Sync user to local database
         try {
-            await prisma.customer.create({
+            await prisma.client.create({
                 data: {
                     email,
                     name,
                     cognitoId: response.UserSub,
-                    role: "customer",
+                    role: "client",
                 },
             });
         } catch (dbError) {

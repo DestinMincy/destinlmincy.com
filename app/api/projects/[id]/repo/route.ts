@@ -22,7 +22,7 @@ export async function GET(
         // 1. Fetch project and verify access
         const project = await prisma.project.findUnique({
             where: { id: projectId },
-            include: { customer: true },
+            include: { client: true },
         });
 
         if (!project) {
@@ -33,12 +33,12 @@ export async function GET(
         const userRole = (session.user as any).role;
         const userId = (session.user as any).id;
 
-        // Note: In a real app, we'd check if userId matches project.customerId
-        // For now, assuming admins can see all, and customers can see their own
-        if (userRole !== "admin" && project.customerId !== userId) {
-            // Strict check: if project has no customer, maybe only admin can see?
-            // Or if project.customerId is set, it must match.
-            if (project.customerId && project.customerId !== userId) {
+        // Note: In a real app, we'd check if userId matches project.clientId
+        // For now, assuming admins can see all, and clients can see their own
+        if (userRole !== "admin" && project.clientId !== userId) {
+            // Strict check: if project has no client, maybe only admin can see?
+            // Or if project.clientId is set, it must match.
+            if (project.clientId && project.clientId !== userId) {
                 return NextResponse.json({ error: "Forbidden" }, { status: 403 });
             }
         }

@@ -1,0 +1,58 @@
+# AWS Infrastructure Setup Walkthrough
+
+## Overview
+This walkthrough documents the automated setup of the AWS infrastructure for [destinlmincy.com](file:///d:/Github%20Repos/destinlmincy.com) using the [scripts/setup-aws.ps1](file:///d:/Github%20Repos/destinlmincy.com/scripts/setup-aws.ps1) PowerShell script.
+
+## Resources Provisioned
+
+### 1. Network (VPC)
+- **VPC**: `destinlmincy.com-vpc` (10.0.0.0/16)
+- **Subnets**:
+  - Public: `destinlmincy.com-public-subnet` (10.0.1.0/24)
+  - Private: `destinlmincy.com-private-subnet` (10.0.2.0/24) - Created for RDS multi-AZ requirement
+- **Security Group**: `destinlmincy.com-sg`
+  - Inbound: SSH (22), HTTP (80), HTTPS (443), Postgres (5432)
+
+### 2. Compute (EC2)
+- **Instance**: `destinlmincy.com-dev`
+- **Type**: `t2.micro`
+- **OS**: Ubuntu 22.04 LTS
+- **Public IP**: `44.202.50.39`
+- **Key Pair**: `destinlmincy.com-key.pem` (Saved locally)
+
+### 3. Database (RDS)
+- **Instance**: `destinlmincy-com-db`
+- **Engine**: PostgreSQL
+- **Class**: `db.t3.micro`
+- **Access**: Publicly accessible (for dev convenience)
+
+### 4. Storage (S3)
+- `destinlmincy-com-assets`
+- `destinlmincy-com-backups`
+- `destinlmincy-com-uploads`
+
+### 5. Authentication (Cognito)
+- **User Pool**: `destinlmincy.com-users`
+- **App Client**: `destinlmincy.com-app`
+
+### 6. DNS (Route 53)
+- **Record**: `dev.destinlmincy.com` -> `44.202.50.39`
+
+## Verification
+To verify the setup:
+1.  **SSH into EC2**:
+    ```bash
+    ssh -i destinlmincy.com-key.pem ubuntu@44.202.50.39
+    ```
+2.  **Check Database**:
+    Connect via pgAdmin/DBeaver using the endpoint from the AWS Console and user `postgres` / `ChangeMe123!`.
+3.  **Check DNS**:
+    ```bash
+    nslookup dev.destinlmincy.com
+    ```
+
+## Script Usage
+The script is idempotent and can be re-run to verify or repair the infrastructure state.
+```powershell
+.\scripts\setup-aws.ps1
+```

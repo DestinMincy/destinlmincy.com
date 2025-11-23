@@ -2,6 +2,8 @@
 
 import { Refine, Authenticated } from "@refinedev/core";
 import { ThemedLayoutV2, ThemedTitleV2 } from "@refinedev/antd";
+import routerProvider from "@refinedev/nextjs-router";
+import { ProjectOutlined, FileTextOutlined } from "@ant-design/icons";
 import { authProvider } from "@/providers/auth-provider";
 import { dataProvider } from "@/providers/data-provider";
 import "@refinedev/antd/dist/reset.css";
@@ -15,6 +17,7 @@ export default function AdminLayout({
         <Refine
             authProvider={authProvider}
             dataProvider={dataProvider}
+            routerProvider={routerProvider}
             resources={[
                 {
                     name: "projects",
@@ -22,7 +25,10 @@ export default function AdminLayout({
                     create: "/admin/projects/create",
                     edit: "/admin/projects/edit/:id",
                     show: "/admin/projects/show/:id",
-                    meta: { canDelete: true },
+                    meta: {
+                        canDelete: true,
+                        icon: <ProjectOutlined />
+                    },
                 },
                 {
                     name: "quotes",
@@ -30,7 +36,10 @@ export default function AdminLayout({
                     create: "/admin/quotes/create",
                     edit: "/admin/quotes/edit/:id",
                     show: "/admin/quotes/show/:id",
-                    meta: { canDelete: true },
+                    meta: {
+                        canDelete: true,
+                        icon: <FileTextOutlined />
+                    },
                 },
             ]}
             options={{

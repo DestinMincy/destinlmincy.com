@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Table, Button, Space, Tag } from 'antd';
 import { Decimal } from '@prisma/client/runtime/library';
 
-interface Customer {
+interface Client {
     id: string;
     email: string;
     name: string;
@@ -14,12 +14,12 @@ interface Customer {
 interface Quote {
     id: string;
     quoteNumber: string;
-    customerId: string;
+    clientId: string;
     status: string;
     amount: Decimal;
     description?: string;
     createdAt: Date;
-    customer?: Customer;
+    client?: Client;
 }
 
 export default function QuotesListPage() {
@@ -39,7 +39,7 @@ export default function QuotesListPage() {
 
     const columns = [
         { title: 'Quote #', dataIndex: 'quoteNumber', key: 'quoteNumber' },
-        { title: 'Customer', dataIndex: ['customer', 'email'], key: 'customer' },
+        { title: 'Client', dataIndex: ['client', 'email'], key: 'client' },
         { title: 'Status', dataIndex: 'status', key: 'status', render: (status: string) => <Tag>{status}</Tag> },
         { title: 'Amount', dataIndex: 'amount', key: 'amount', render: (amt: any) => `$${amt}` },
         { title: 'Created', dataIndex: 'createdAt', key: 'createdAt', render: (date: string) => new Date(date).toLocaleDateString() },
