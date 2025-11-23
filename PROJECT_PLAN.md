@@ -382,7 +382,7 @@ Let's build something great together.
 
 ## Core Features
 
-### 1. Nora AI Chat Assistant ⭐
+### 1. Nora (New Opportunity Relationship Advisor) ⭐
 **Persistent chat widget on all pages**
 
 **Two-Tier Model Strategy**:

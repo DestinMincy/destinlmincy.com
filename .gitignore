@@ -130,4 +130,14 @@ dist
 .yarn/unplugged
 .yarn/build-state.yml
 .yarn/install-state.gz
-.pnp.
+.pnp.*
+
+# Nora AI System Prompt
+NORA_PROMPT.md
+/src/generated/prisma
+
+# Sensitive screenshots and credentials
+sensitive_screenshots/
+
+# AWS Cognito configuration files
+cognito-*.json
