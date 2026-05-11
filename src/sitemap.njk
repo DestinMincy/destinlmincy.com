@@ -1,0 +1,14 @@
+---
+permalink: /sitemap.xml
+eleventyExcludeFromCollections: true
+---
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  {%- set pages = ["/", "/about/", "/services/", "/work/", "/work/elatum/", "/contact/"] -%}
+  {%- for p in pages %}
+  <url>
+    <loc>{{ site.url }}{{ p }}</loc>
+    <changefreq>monthly</changefreq>
+  </url>
+  {%- endfor %}
+</urlset>

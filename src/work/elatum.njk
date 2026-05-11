@@ -1,0 +1,127 @@
+---
+layout: layouts/base.njk
+title: ELATUM — Case study
+description: ELATUM — AI guest support for short-term rental operators in the Great Smoky Mountains. The first agent shipped by Destin L. Mincy Software and AI Agency.
+permalink: /work/elatum/index.html
+---
+
+{# ─────────────────────────────────────────────────────────────
+   COPY NOTE — This case study reflects the actual ELATUM positioning
+   pulled from elatum.destinlmincy.com: Smokies-specific, 7-node
+   pipeline, Petals modular framework, beta launching May–June 2026.
+   Update the metrics section as real beta data comes in.
+───────────────────────────────────────────────────────────── #}
+
+<section class="page-hero">
+  <div class="container">
+    <p class="eyebrow">Case study — Featured agent</p>
+    <h1>ELATUM</h1>
+    <p class="lead">
+      AI guest support for short-term rental operators in the Great Smoky Mountains. The first
+      agent built and shipped by Destin L. Mincy Software and AI Agency.
+    </p>
+    <p>
+      <a class="btn btn--primary" href="https://elatum.destinlmincy.com">Visit the product site →</a>
+    </p>
+  </div>
+</section>
+
+<section class="case-study">
+  <div class="container narrow">
+
+    <h2>The problem</h2>
+    <p>
+      Short-term rental owners in the Smokies handle dozens of repeat guest questions every
+      week — WiFi passwords, hot tub temps, check-out instructions, bear-trash rules, Cades
+      Cove hours. After 11 PM, every unanswered text becomes a slow response — which Airbnb
+      penalizes in search ranking and Superhost status.
+    </p>
+    <p>
+      Owners didn't need another hire. They needed something that runs the playbook 24/7,
+      sounds like them, and — critically — actually understands the local area. Generic AI
+      can't tell a guest whether Cades Cove is vehicle-free on Tuesday or when Elkmont
+      fireflies are running. ELATUM can.
+    </p>
+
+    <h2>The approach</h2>
+    <p>
+      ELATUM is a 7-node AI pipeline purpose-built for guest support, not a generic chatbot
+      pointed at a knowledge base.
+    </p>
+    <ol class="list-checked">
+      <li><strong>Ingest</strong> — guest message arrives via Twilio SMS or web chat</li>
+      <li><strong>Guest lookup</strong> — phone matched to active reservation</li>
+      <li><strong>Intent classification</strong> — sorted into 8 categories</li>
+      <li><strong>RAG retrieval</strong> — semantic search over property + local docs (PostgreSQL + pgvector)</li>
+      <li><strong>Response generation</strong> — grounded in retrieved context, no fabrication</li>
+      <li><strong>Action execution</strong> — reply, Stripe link, maintenance ticket, or owner escalation</li>
+      <li><strong>Audit log</strong> — every action visible in the host dashboard</li>
+    </ol>
+
+    <h2>The moat: local data</h2>
+    <p>
+      The ELATUM knowledge base isn't web-scraped. Every property gets a bespoke RAG corpus
+      built from the owner's own documents, layered over a shared East Tennessee knowledge
+      layer that maintains things generic models can't:
+    </p>
+    <ul class="list-checked">
+      <li>Cades Cove vehicle-free day schedule</li>
+      <li>Bear-proof trash procedures by municipality (Townsend / Walland / Pigeon Forge)</li>
+      <li>GSMNP trail closures and alerts</li>
+      <li>Elkmont synchronous firefly season</li>
+      <li>Local dining, seasonal events, and Maryville College / Highland Games traffic</li>
+    </ul>
+
+    <h2>Modular by design — the Petals framework</h2>
+    <p>
+      ELATUM ships as independent, plug-and-play modules. V1 launches with one Petal; each
+      subsequent module extends the platform without a rebuild.
+    </p>
+    <ul class="list-checked">
+      <li><strong>The Concierge (V1, 2026):</strong> 24/7 guest support, the current shipping product</li>
+      <li><strong>The Yield (planned):</strong> dynamic pricing using local demand signals</li>
+      <li><strong>The Guardian (planned):</strong> STR compliance monitoring (noise, fire, trash)</li>
+      <li><strong>The Pulse (planned):</strong> internal ops and maintenance routing</li>
+    </ul>
+
+    <h2>The stack</h2>
+    <p>
+      Deliberate and battle-tested. One codebase, one database, one LLM provider.
+    </p>
+    <ul class="list-checked">
+      <li>FastAPI (Python) backend</li>
+      <li>LangGraph for agent orchestration</li>
+      <li>Specialized LLM for intent classification and response generation</li>
+      <li>PostgreSQL + pgvector for state and semantic search</li>
+      <li>AWS (EC2 + RDS) for production</li>
+      <li>Twilio for SMS, Stripe for payments, Guesty PMS integration in progress</li>
+    </ul>
+
+    <h2>Status</h2>
+    <p>
+      ELATUM is in beta, launching May–June 2026. Current focus: onboarding the first cohort
+      of Smokies-area operators and tuning the agent against real guest traffic. Metrics and
+      named customers will land here as the beta matures.
+    </p>
+    <p>
+      <em>If you run a short-term rental in the Smokies and want into the early cohort, the
+      <a href="https://elatum.destinlmincy.com">product site</a> is the place to start.</em>
+    </p>
+
+    <h2>What this build proves</h2>
+    <p>
+      Two things. One: a single experienced builder can take an AI agent from idea to shipped
+      product without an agency-of-five overhead. Two: niche agents with real local knowledge
+      will beat generalist tools that understand all industries shallowly. That's the bet the
+      agency is built on — and ELATUM is the proof of concept.
+    </p>
+  </div>
+</section>
+
+<section class="cta-band">
+  <div class="container cta-band__inner">
+    <h2>Got an industry that needs its own agent?</h2>
+    <p>ELATUM is the first. It won't be the last.</p>
+    <a class="btn btn--primary" href="/contact/">Pitch the next one</a>
+  </div>
+</section>
