@@ -330,6 +330,7 @@ ul, ol { padding-left: 1.2em; }
   clip-path: var(--clip-card);
   padding: var(--space-8);
   box-shadow: var(--shadow-1);
+  margin-bottom: 1.5rem;
 }
 .work-card::before {
   content: ''; position: absolute; inset: 0;
