@@ -301,7 +301,7 @@ ul, ol { padding-left: 1.2em; }
 .cta-band__inner { text-align: center; }
 
 /* ---- Services -------------------------------------------- */
-.services { padding: var(--space-8) 0 var(--space-10); display: grid; gap: var(--space-8); }
+.services { padding: var(--space-8) 0 var(--space-10); display: grid; gap: var(--space-12); }
 
 .service {
   position: relative;
@@ -322,7 +322,7 @@ ul, ol { padding-left: 1.2em; }
 .not-fit { padding: var(--space-8) 0; }
 
 /* ---- Work cards ------------------------------------------ */
-.work-list { padding: var(--space-6) 0 var(--space-10); display: grid; gap: var(--space-6); }
+.work-list { padding: var(--space-6) 0 var(--space-10); display: grid; gap: var(--space-10); }
 
 .work-card {
   position: relative;
