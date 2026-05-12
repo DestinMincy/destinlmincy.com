@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Destin L. Mincy | Coming Soon</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description"
+    content="Destin L. Mincy — Freelance Web Developer & AI Engineer. Custom portals, AI automation, and full-stack solutions for small businesses and startups.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --blue: #2776EA;
+      --gold: #FFD700;
+      --silver: #C0C0C0;
+      --bg: #0b1220;
+      --text: #e9f0ff;
+      --blue-glow: rgba(39, 118, 234, 0.4);
+      --gold-glow: rgba(255, 215, 0, 0.35);
+      --silver-glow: rgba(192, 192, 192, 0.2);
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: 'Rajdhani', 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    canvas#neuralNet {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+
+    .hex-grid-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      opacity: 0.04;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='56'%3E%3Cpath d='M66 28L50 0L16 0L0 28L16 56L50 56L66 28L100 28' fill='none' stroke='%232776EA' stroke-width='0.8'/%3E%3Cpath d='M0 28L34 28L50 0L84 0L100 28L84 56L50 56L34 28' fill='none' stroke='%23C0C0C0' stroke-width='0.4'/%3E%3C/svg%3E");
+      background-size: 100px 56px;
+    }
+
+    .radial-wash {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 70% 50% at 15% 20%, var(--blue-glow), transparent),
+        radial-gradient(ellipse 50% 40% at 85% 10%, var(--gold-glow), transparent),
+        radial-gradient(ellipse 60% 50% at 50% 90%, rgba(39, 118, 234, 0.12), transparent);
+    }
+
+    .vignette {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background: radial-gradient(ellipse 80% 80% at 50% 50%, transparent 50%, rgba(0, 0, 0, 0.5));
+    }
+
+    .scene {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+      gap: 2rem;
+    }
+
+    /* ─── Hexagonal Hero Badge ─── */
+    .hex-badge {
+      position: relative;
+      width: 180px;
+      height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: float 6s ease-in-out infinite, fadeSlideDown 1.2s ease-out both;
+    }
+
+    .hex-badge .hex-logo {
+      width: 180px;
+      height: 180px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 20px var(--blue-glow)) drop-shadow(0 0 12px rgba(255, 215, 0, 0.3));
+    }
+
+    /* ─── Main Content Card ─── */
+    .main-card {
+      position: relative;
+      width: min(680px, 100%);
+      padding: 3.5rem 3rem;
+      animation: fadeSlideUp 1s ease-out 0.3s both;
+    }
+
+    .main-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      clip-path: polygon(28px 0%, calc(100% - 28px) 0%, 100% 28px, 100% calc(100% - 28px), calc(100% - 28px) 100%, 28px 100%, 0% calc(100% - 28px), 0% 28px);
+      background: linear-gradient(160deg, rgba(39, 118, 234, 0.25), rgba(192, 192, 192, 0.08) 50%, rgba(255, 215, 0, 0.12));
+      z-index: -2;
+    }
+
+    .main-card::after {
+      content: '';
+      position: absolute;
+      inset: 1px;
+      clip-path: polygon(28px 0%, calc(100% - 28px) 0%, 100% 28px, 100% calc(100% - 28px), calc(100% - 28px) 100%, 28px 100%, 0% calc(100% - 28px), 0% 28px);
+      background: rgba(5, 8, 18, 0.85);
+      backdrop-filter: blur(30px) saturate(1.2);
+      z-index: -1;
+    }
+
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 2rem;
+      animation: fadeSlideUp 0.8s ease-out 0.6s both;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 10px var(--gold-glow), 0 0 20px var(--gold-glow);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    .status-text {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+
+    h1 {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.3rem;
+      animation: fadeSlideUp 0.8s ease-out 0.8s both;
+    }
+
+    h1 .gradient-text {
+      background: linear-gradient(135deg, var(--blue), #5BA3FF, var(--silver));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    h1 .gold-accent {
+      background: linear-gradient(135deg, var(--gold), #FFF1A0, var(--gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      background-size: 200% 200%;
+      animation: shimmer 3s ease-in-out infinite;
+    }
+
+    .subtitle {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      font-weight: 400;
+      color: rgba(233, 240, 255, 0.7);
+      line-height: 1.7;
+      max-width: 540px;
+      margin-bottom: 2rem;
+      animation: fadeSlideUp 0.8s ease-out 1s both;
+    }
+
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--blue), var(--gold), var(--silver), transparent);
+      margin: 1.5rem 0;
+      opacity: 0.5;
+      animation: fadeSlideUp 0.8s ease-out 1.1s both;
+    }
+
+    /* ─── Hex Feature Pills ─── */
+    .features {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+      animation: fadeSlideUp 0.8s ease-out 1.2s both;
+    }
+
+    .feature-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border: 1px solid rgba(39, 118, 234, 0.3);
+      background: rgba(39, 118, 234, 0.06);
+      clip-path: polygon(8px 0%, calc(100% - 8px) 0%, 100% 50%, calc(100% - 8px) 100%, 8px 100%, 0% 50%);
+      color: var(--silver);
+      transition: all 0.3s ease;
+    }
+
+    .feature-pill:hover {
+      border-color: var(--gold);
+      background: rgba(255, 215, 0, 0.06);
+      color: var(--gold);
+    }
+
+    .feature-pill svg {
+      width: 14px;
+      height: 14px;
+      fill: var(--blue);
+      flex-shrink: 0;
+    }
+
+    /* ─── CTA Section ─── */
+    .cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+      animation: fadeSlideUp 0.8s ease-out 1.4s both;
+    }
+
+    .cta-primary {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.85rem 2rem;
+      font-family: 'Orbitron', monospace;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: var(--bg);
+      background: linear-gradient(135deg, var(--gold), #FFC800);
+      clip-path: polygon(12px 0%, calc(100% - 12px) 0%, 100% 50%, calc(100% - 12px) 100%, 12px 100%, 0% 50%);
+      transition: all 0.35s ease;
+      box-shadow: 0 0 30px var(--gold-glow), 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .cta-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 50px var(--gold-glow), 0 8px 30px rgba(0, 0, 0, 0.4);
+      filter: brightness(1.1);
+    }
+
+    .cta-primary svg {
+      width: 16px;
+      height: 16px;
+      fill: var(--bg);
+    }
+
+    .launch-date {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      color: var(--silver);
+      opacity: 0.7;
+    }
+
+    /* ─── Bottom Hex Decorations ─── */
+    .hex-deco-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      animation: fadeSlideUp 0.8s ease-out 1.6s both;
+    }
+
+    .hex-deco {
+      width: 10px;
+      height: 10px;
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      animation: hex-blink 4s ease-in-out infinite;
+    }
+
+    .hex-deco:nth-child(1) {
+      background: var(--blue);
+      animation-delay: 0s;
+    }
+
+    .hex-deco:nth-child(2) {
+      background: var(--gold);
+      animation-delay: 0.6s;
+    }
+
+    .hex-deco:nth-child(3) {
+      background: var(--silver);
+      animation-delay: 1.2s;
+    }
+
+    .hex-deco:nth-child(4) {
+      background: var(--blue);
+      animation-delay: 1.8s;
+    }
+
+    .hex-deco:nth-child(5) {
+      background: var(--gold);
+      animation-delay: 2.4s;
+    }
+
+    /* ─── Floating Hexagons (decorative) ─── */
+    .floating-hex {
+      position: fixed;
+      z-index: 2;
+      pointer-events: none;
+      opacity: 0;
+      animation: hex-float 20s linear infinite;
+    }
+
+    .floating-hex svg {
+      fill: none;
+      stroke-width: 0.8;
+    }
+
+    /* ─── Keyframes ─── */
+    @keyframes fadeSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeSlideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-12px);
+      }
+    }
+
+    @keyframes shimmer {
+
+      0%,
+      100% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+    }
+
+    @keyframes pulse-dot {
+
+      0%,
+      100% {
+        opacity: 1;
+        box-shadow: 0 0 10px var(--gold-glow), 0 0 20px var(--gold-glow);
+      }
+
+      50% {
+        opacity: 0.5;
+        box-shadow: 0 0 5px var(--gold-glow);
+      }
+    }
+
+    @keyframes hex-blink {
+
+      0%,
+      100% {
+        opacity: 0.3;
+      }
+
+      50% {
+        opacity: 1;
+      }
+    }
+
+    @keyframes hex-float {
+      0% {
+        opacity: 0;
+        transform: translateY(110vh) rotate(0deg);
+      }
+
+      10% {
+        opacity: 0.12;
+      }
+
+      90% {
+        opacity: 0.12;
+      }
+
+      100% {
+        opacity: 0;
+        transform: translateY(-10vh) rotate(180deg);
+      }
+    }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 600px) {
+      .main-card {
+        padding: 2.5rem 1.5rem;
+      }
+
+      .hex-badge {
+        width: 140px;
+        height: 140px;
+      }
+
+      .hex-badge .hex-logo {
+        width: 140px;
+        height: 140px;
+      }
+
+      .features {
+        gap: 0.5rem;
+      }
+
+      .feature-pill {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.8rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <canvas id="neuralNet"></canvas>
+  <div class="hex-grid-overlay"></div>
+  <div class="radial-wash"></div>
+  <div class="vignette"></div>
+
+  <!-- Floating hex decorations -->
+  <div class="floating-hex" style="left:8%;animation-duration:22s;animation-delay:0s">
+    <svg width="46" height="40" viewBox="0 0 46 40">
+      <polygon points="45,20 34,39 12,39 1,20 12,1 34,1" stroke="#2776EA" />
+    </svg>
+  </div>
+  <div class="floating-hex" style="left:25%;animation-duration:28s;animation-delay:4s">
+    <svg width="28" height="24" viewBox="0 0 46 40">
+      <polygon points="45,20 34,39 12,39 1,20 12,1 34,1" stroke="#FFD700" />
+    </svg>
+  </div>
+  <div class="floating-hex" style="left:55%;animation-duration:25s;animation-delay:8s">
+    <svg width="37" height="32" viewBox="0 0 46 40">
+      <polygon points="45,20 34,39 12,39 1,20 12,1 34,1" stroke="#C0C0C0" />
+    </svg>
+  </div>
+  <div class="floating-hex" style="left:75%;animation-duration:30s;animation-delay:2s">
+    <svg width="23" height="20" viewBox="0 0 46 40">
+      <polygon points="45,20 34,39 12,39 1,20 12,1 34,1" stroke="#2776EA" />
+    </svg>
+  </div>
+  <div class="floating-hex" style="left:90%;animation-duration:26s;animation-delay:6s">
+    <svg width="42" height="36" viewBox="0 0 46 40">
+      <polygon points="45,20 34,39 12,39 1,20 12,1 34,1" stroke="#FFD700" />
+    </svg>
+  </div>
+
+  <div class="scene">
+
+    <!-- Hexagonal Logo Badge -->
+    <div class="hex-badge">
+      <img class="hex-logo" src="img/dlm-logo--hex.png" alt="Destin L. Mincy Logo">
+    </div>
+
+    <!-- Main Card -->
+    <div class="main-card">
+
+      <div class="status-bar">
+        <span class="status-dot"></span>
+        <span class="status-text">Launching Soon</span>
+      </div>
+
+      <h1>
+        <span class="gradient-text">Your Next Big Idea,</span><br>
+        <span class="gold-accent">Built Right.</span>
+      </h1>
+
+      <p class="subtitle">
+        20 years of full-stack development. One relentless,
+        non-negotiable standard. I build AI automation, AI-powered
+        tools, and custom software that move businesses forward
+        — no fluff, no compromise.
+      </p>
+
+      <div class="divider"></div>
+
+      <div class="features">
+        <span class="feature-pill">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M16 18l2-2v-6l-2-2H8l-2 2v6l2 2h8zM12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+          </svg>
+          Full-Stack Development
+        </span>
+        <span class="feature-pill">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+          </svg>
+          AI-Powered Automation
+        </span>
+        <span class="feature-pill">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+          </svg>
+          Client Portal
+        </span>
+        <span class="feature-pill">
+          <svg viewBox="0 0 24 24">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="16" y1="13" x2="8" y2="13" />
+            <line x1="16" y1="17" x2="8" y2="17" />
+          </svg>
+          On-Demand Quotes
+        </span>
+      </div>
+
+      <div class="cta-row">
+        <a class="cta-primary" href="mailto:dlmincy@destinlmincy.com">
+          <svg viewBox="0 0 24 24">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+            <polyline points="22,6 12,13 2,6" />
+          </svg>
+          Contact Destin
+        </a>
+        <span class="launch-date">Let's build something great.</span>
+      </div>
+
+      <div class="hex-deco-row">
+        <span class="hex-deco"></span>
+        <span class="hex-deco"></span>
+        <span class="hex-deco"></span>
+        <span class="hex-deco"></span>
+        <span class="hex-deco"></span>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      const canvas = document.getElementById('neuralNet');
+      const ctx = canvas.getContext('2d');
+      let W, H, nodes, mouse;
+      const NODE_COUNT_BASE = 120;
+      const CONNECTION_DIST = 160;
+      const MOUSE_RADIUS = 200;
+
+      const BLUE = { r: 39, g: 118, b: 234 };
+      const GOLD = { r: 255, g: 215, b: 0 };
+      const SILVER = { r: 192, g: 192, b: 192 };
+      const palette = [BLUE, BLUE, BLUE, GOLD, SILVER, SILVER];
+
+      function resize() {
+        W = canvas.width = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+      }
+
+      function hexPath(ctx, cx, cy, r) {
+        ctx.beginPath();
+        for (let i = 0; i < 6; i++) {
+          const angle = (Math.PI / 3) * i - Math.PI / 6;
+          const x = cx + r * Math.cos(angle);
+          const y = cy + r * Math.sin(angle);
+          i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+      }
+
+      class Node {
+        constructor() {
+          this.reset();
+          this.x = Math.random() * W;
+          this.y = Math.random() * H;
+        }
+
+        reset() {
+          this.x = Math.random() * W;
+          this.y = Math.random() * H;
+          this.vx = (Math.random() - 0.5) * 0.4;
+          this.vy = (Math.random() - 0.5) * 0.4;
+          const c = palette[Math.floor(Math.random() * palette.length)];
+          this.color = c;
+          this.radius = Math.random() * 2 + 1;
+          this.isHex = Math.random() < 0.3;
+          this.pulseOffset = Math.random() * Math.PI * 2;
+          this.hexSize = this.radius * 2.5 + Math.random() * 2;
+        }
+
+        update() {
+          if (mouse) {
+            const dx = this.x - mouse.x;
+            const dy = this.y - mouse.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < MOUSE_RADIUS) {
+              const force = (MOUSE_RADIUS - dist) / MOUSE_RADIUS * 0.02;
+              this.vx += dx * force;
+              this.vy += dy * force;
+            }
+          }
+
+          this.vx *= 0.99;
+          this.vy *= 0.99;
+          this.x += this.vx;
+          this.y += this.vy;
+
+          if (this.x < -50) this.x = W + 50;
+          if (this.x > W + 50) this.x = -50;
+          if (this.y < -50) this.y = H + 50;
+          if (this.y > H + 50) this.y = -50;
+        }
+
+        draw(t) {
+          const pulse = Math.sin(t * 0.002 + this.pulseOffset) * 0.3 + 0.7;
+          const { r, g, b } = this.color;
+
+          if (this.isHex) {
+            hexPath(ctx, this.x, this.y, this.hexSize * pulse);
+            ctx.strokeStyle = `rgba(${r},${g},${b},${0.5 * pulse})`;
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
+            ctx.fillStyle = `rgba(${r},${g},${b},${0.08 * pulse})`;
+            ctx.fill();
+          } else {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius * pulse, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${r},${g},${b},${0.7 * pulse})`;
+            ctx.fill();
+          }
+
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radius * 3 * pulse, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${r},${g},${b},${0.06 * pulse})`;
+          ctx.fill();
+        }
+      }
+
+      function init() {
+        resize();
+        const count = Math.floor(NODE_COUNT_BASE * (W * H) / (1920 * 1080));
+        nodes = Array.from({ length: Math.max(40, Math.min(count, 200)) }, () => new Node());
+        mouse = null;
+      }
+
+      function drawConnections(t) {
+        for (let i = 0; i < nodes.length; i++) {
+          for (let j = i + 1; j < nodes.length; j++) {
+            const dx = nodes[i].x - nodes[j].x;
+            const dy = nodes[i].y - nodes[j].y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < CONNECTION_DIST) {
+              const opacity = (1 - dist / CONNECTION_DIST) * 0.25;
+              const pulse = Math.sin(t * 0.001 + i * 0.1) * 0.1 + 0.9;
+              const ci = nodes[i].color;
+              const cj = nodes[j].color;
+              const mr = (ci.r + cj.r) / 2;
+              const mg = (ci.g + cj.g) / 2;
+              const mb = (ci.b + cj.b) / 2;
+
+              ctx.beginPath();
+              ctx.moveTo(nodes[i].x, nodes[i].y);
+              ctx.lineTo(nodes[j].x, nodes[j].y);
+              ctx.strokeStyle = `rgba(${mr},${mg},${mb},${opacity * pulse})`;
+              ctx.lineWidth = 0.6;
+              ctx.stroke();
+
+              if (dist < CONNECTION_DIST * 0.4 && Math.random() < 0.003) {
+                const mx = (nodes[i].x + nodes[j].x) / 2;
+                const my = (nodes[i].y + nodes[j].y) / 2;
+                ctx.beginPath();
+                ctx.arc(mx, my, 2, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${mr},${mg},${mb},${0.6})`;
+                ctx.fill();
+              }
+            }
+          }
+        }
+      }
+
+      function drawDataPulses(t) {
+        const pulseCount = 5;
+        for (let p = 0; p < pulseCount; p++) {
+          const progress = ((t * 0.0003 + p / pulseCount) % 1);
+          const i = Math.floor(p * nodes.length / pulseCount) % nodes.length;
+          let closest = -1;
+          let minDist = CONNECTION_DIST;
+          for (let j = 0; j < nodes.length; j++) {
+            if (j === i) continue;
+            const dx = nodes[i].x - nodes[j].x;
+            const dy = nodes[i].y - nodes[j].y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < minDist) { minDist = dist; closest = j; }
+          }
+          if (closest >= 0) {
+            const px = nodes[i].x + (nodes[closest].x - nodes[i].x) * progress;
+            const py = nodes[i].y + (nodes[closest].y - nodes[i].y) * progress;
+            ctx.beginPath();
+            ctx.arc(px, py, 2.5, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255,215,0,${0.8 * (1 - progress)})`;
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(px, py, 6, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255,215,0,${0.15 * (1 - progress)})`;
+            ctx.fill();
+          }
+        }
+      }
+
+      function animate(t) {
+        ctx.clearRect(0, 0, W, H);
+
+        for (const node of nodes) node.update();
+        drawConnections(t);
+        for (const node of nodes) node.draw(t);
+        drawDataPulses(t);
+
+        requestAnimationFrame(animate);
+      }
+
+      window.addEventListener('resize', () => {
+        resize();
+        const count = Math.floor(NODE_COUNT_BASE * (W * H) / (1920 * 1080));
+        const target = Math.max(40, Math.min(count, 200));
+        while (nodes.length < target) nodes.push(new Node());
+        while (nodes.length > target) nodes.pop();
+      });
+
+      window.addEventListener('mousemove', e => {
+        mouse = { x: e.clientX, y: e.clientY };
+      });
+
+      window.addEventListener('mouseleave', () => {
+        mouse = null;
+      });
+
+      window.addEventListener('touchmove', e => {
+        if (e.touches.length > 0) {
+          mouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        }
+      });
+
+      window.addEventListener('touchend', () => {
+        mouse = null;
+      });
+
+      init();
+      requestAnimationFrame(animate);
+    })();
+  </script>
+</body>
+
+</html>
