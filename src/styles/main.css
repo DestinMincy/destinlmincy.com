@@ -14,6 +14,7 @@
   --color-text:         #e9f0ff;
   --color-text-muted:   #8a95a8;
   --color-accent:       #2776EA;   /* electric blue */
+  --color-accent-light: #5BA3FF;   /* accessible blue — passes WCAG AA on dark bg */
   --color-accent-2:     #FFD700;   /* gold */
   --color-accent-3:     #C0C0C0;   /* silver */
   --color-danger:       #ff5c7a;
@@ -69,7 +70,7 @@ body {
 
 img, svg { max-width: 100%; height: auto; display: block; }
 
-a { color: var(--color-accent); text-decoration: none; }
+a { color: #5BA3FF; text-decoration: none; }
 a:hover, a:focus-visible { color: var(--color-accent-2); }
 
 h1, h2, h3, h4 {
@@ -118,7 +119,7 @@ ul, ol { padding-left: 1.2em; }
   font-size: 0.78rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--color-accent);
+  color: var(--color-accent-2);
   margin: 0 0 var(--space-3);
 }
 .lead { font-size: 1.15rem; color: var(--color-text-muted); }
