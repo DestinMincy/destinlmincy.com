@@ -1,0 +1,103 @@
+---
+layout: layouts/base.njk
+title: Contact
+description: Get in touch about an AI agent build, a partnership, or anything else.
+permalink: /contact/index.html
+---
+
+<section class="page-hero">
+  <div class="container">
+    <p class="eyebrow">Contact</p>
+    <h1>Let's talk.</h1>
+    <p class="lead">
+      Tell me what you're trying to automate, ship, or untangle. I read every message
+      and reply within two business days.
+    </p>
+  </div>
+</section>
+
+<section class="contact">
+  <div class="container contact__grid">
+    <div class="contact__copy">
+      <h2>Best fits</h2>
+      <ul class="list-checked">
+        <li>You run a small business and want an AI agent that does real work</li>
+        <li>You're a short-term rental owner curious about ELATUM</li>
+        <li>You have a software build that's stuck and need a senior pair of hands</li>
+      </ul>
+
+      <h2>Other ways to reach me</h2>
+      <p>
+        Email: <a href="mailto:{{ site.email }}">{{ site.email }}</a><br />
+        ELATUM product site: <a href="https://elatum.destinlmincy.com">elatum.destinlmincy.com</a>
+      </p>
+    </div>
+
+    <form
+      id="contact-form"
+      class="contact-form"
+      action="https://formspree.io/f/{{ site.formspreeFormId }}"
+      method="POST"
+      novalidate
+    >
+      <div data-fs-success class="form-success" hidden>
+        Thanks — your message is in. I'll be in touch within two business days.
+      </div>
+      <div data-fs-error class="form-error" role="alert"></div>
+
+      <div class="field">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" data-fs-field required autocomplete="name" />
+        <span class="field__error" data-fs-error="name"></span>
+      </div>
+
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" data-fs-field required autocomplete="email" />
+        <span class="field__error" data-fs-error="email"></span>
+      </div>
+
+      <div class="field">
+        <label for="company">Company <span class="field__optional">(optional)</span></label>
+        <input type="text" id="company" name="company" autocomplete="organization" />
+      </div>
+
+      <div class="field">
+        <label for="topic">What's this about?</label>
+        <select id="topic" name="topic" data-fs-field required>
+          <option value="">Select one…</option>
+          <option value="agent-build">A new AI agent build</option>
+          <option value="elatum">ELATUM for my rental</option>
+          <option value="software-build">Custom software / contract work</option>
+          <option value="partnership">Partnership or referral</option>
+          <option value="other">Something else</option>
+        </select>
+        <span class="field__error" data-fs-error="topic"></span>
+      </div>
+
+      <div class="field">
+        <label for="message">Message</label>
+        <textarea id="message" name="message" rows="6" data-fs-field required></textarea>
+        <span class="field__error" data-fs-error="message"></span>
+      </div>
+
+      <!-- Honeypot: bots fill this, humans don't see it -->
+      <div class="field field--hidden" aria-hidden="true">
+        <label for="company-fax">Don't fill this in</label>
+        <input type="text" id="company-fax" name="_gotcha" tabindex="-1" autocomplete="off" />
+      </div>
+
+      <button type="submit" class="btn btn--primary" data-fs-submit-btn>
+        Send message
+      </button>
+    </form>
+  </div>
+</section>
+
+{% block scripts %}
+<script>
+  window.formspree = window.formspree || function () { (formspree.q = formspree.q || []).push(arguments); };
+  formspree('initForm', { formElement: '#contact-form', formId: '{{ site.formspreeFormId }}' });
+</script>
+<script src="https://unpkg.com/@formspree/ajax@1" defer></script>
+{% endblock %}

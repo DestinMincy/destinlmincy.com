@@ -1,0 +1,24 @@
+{
+  "name": "Destin L. Mincy",
+  "company": "Destin L. Mincy Software and AI Agency",
+  "title": "Destin L. Mincy Software and AI Agency — Custom AI agents and software for small business",
+  "tagline": "Your next big idea, built right.",
+  "description": "Destin L. Mincy Software and AI Agency builds custom AI agents and software for small businesses. Founded 2026 in Maryville, Tennessee. Featured product: ELATUM — AI guest support for short-term rental operators in the Great Smoky Mountains.",
+  "url": "https://destinlmincy.com",
+  "author": "Destin L. Mincy",
+  "location": "Maryville, Tennessee",
+  "founded": "January 2026",
+  "email": "dlmincy@destinlmincy.com",
+  "twitter": "",
+  "linkedin": "https://www.linkedin.com/in/destin-l-mincy",
+  "github": "https://github.com/DestinMincy",
+  "formspreeFormId": "mqenwlvv",
+  "products": [
+    {
+      "name": "ELATUM",
+      "url": "https://elatum.destinlmincy.com",
+      "category": "AI guest support for Smokies-area short-term rentals",
+      "status": "Beta — launching May–June 2026"
+    }
+  ]
+}
