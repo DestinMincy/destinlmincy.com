@@ -6,12 +6,12 @@ _Last updated: 2026-05-11_
 
 A small agency / personal site for **Destin L. Mincy**. The business sells AI Agents-as-a-Service (AaaS) to small businesses. The first product, **ELATUM**, is an AI agent for short-term rental owners. Additional agents will follow and be featured on this site.
 
-The site itself is a marketing site. It is not a client portal, app, or product surface. ELATUM lives at its own subdomain (`elatum.destinlmincy.com`) and the main site funnels visitors there for that specific offer.
+The site itself is a marketing site. It is not a client portal, app, or product surface. ELATUM lives at its own subdomain (`elatum.ai`) and the main site funnels visitors there for that specific offer.
 
 ## Current state
 
 - `index.html` — static "Coming Soon" page (dark sci-fi aesthetic, Orbitron/Rajdhani fonts, neural-network canvas)
-- `elatum/` — separate ELATUM landing page served at `elatum.destinlmincy.com`
+- `elatum/` — separate ELATUM landing page served at `elatum.ai`
 - `img/` — image assets
 - `PROJECT_PLAN.md` — **superseded by this doc; archive or delete**
 - No build step, no framework, no backend

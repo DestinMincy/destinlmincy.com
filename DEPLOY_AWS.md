@@ -17,7 +17,7 @@ CloudFront Distribution (with custom domain destinlmincy.com)
 S3 Bucket (private, OAC-restricted) ← `_site/` syncs here
 ```
 
-`elatum.destinlmincy.com` stays exactly as it is — it's a separate distribution. Don't touch it during this migration.
+`elatum.ai` is on its own distribution/domain. Don't touch it during this migration.
 
 ## One-time setup (if not already done)
 
