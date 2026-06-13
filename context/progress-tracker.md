@@ -24,6 +24,10 @@ Update this file after every meaningful implementation change.
 - Selected Clerk for auth and subscriptions, Stripe for custom project invoices/payment links.
 - Selected link-only deliverables for v1.
 - Added a hard design rule against generic AI/vibe-coded UI tropes and decorative gradient overuse.
+- Adopted `context/frontend-design-taste.md` as the authoritative ruleset for frontend visual design and UI copy, wired into the workflow rules, code standards, UI context, and Unit 01 spec.
+- Committed a brand direction: approachable, human, trustworthy. Keep the deliberate blue/gold/silver palette (recalibrated for warmth: deeper blue, gold as sparing signal/warmth, silver as structural neutral, plus warm neutrals). Retire Orbitron for a humanist/characterful sans. Lead with real photography of Destin and first-person voice.
+- Decided: ship light and dark mode as first-class themes from the start, built on semantic theme-resolved tokens; dark is a warm dark, not the old cold blue-black; both verify WCAG AA.
+- Decided: the hexagon is a core, integrated motif and the signature layout primitive (brand mark plus hex geometry in page elements), never a glowing neural-canvas background; dashboards stay rectangular with hex used only as markers/accents.
 
 ## In Progress
 
@@ -46,6 +50,8 @@ Update this file after every meaningful implementation change.
 - Reverse proxy choice for EC2: Nginx or Caddy.
 - Process manager choice: systemd or PM2.
 - Whether the dashboard UI should keep Rajdhani or move to a denser app font.
+- Specific display and body font families for the warmer direction (pick at implementation, state back before building).
+- Exact recalibrated values for blue/gold/silver in each theme (pick at implementation, verify AA).
 
 ## Architecture Decisions
 
@@ -66,6 +72,7 @@ Update this file after every meaningful implementation change.
 - Messaging and support tickets are deferred.
 - Production database target is RDS Postgres, but Dockerized local Postgres is used until deployment/client need justifies RDS cost.
 - UI implementation must avoid generic AI/SaaS visual tropes; gradients require a documented functional or brand reason.
+- Brand evolves the existing blue/gold/silver identity toward approachable/human/trustworthy rather than rebranding; the cold sci-fi execution (electric-blue glow, neural-canvas atmosphere, Orbitron) is retired.
 
 ## Session Notes
 

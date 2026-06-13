@@ -54,9 +54,11 @@
 - Tailwind is acceptable, but color choices should map to CSS variables rather than hardcoded hex values.
 - Dashboard UI should prioritize readability over decorative effects.
 - Do not add visible instructional text that explains the UI instead of making the UI clear.
-- Avoid AI-template visual tropes: decorative gradient blobs, generic purple/blue washes, glassmorphism for its own sake, glow-heavy panels, bento filler, and empty marketing cards.
+- `context/frontend-design-taste.md` is the authority on frontend visual design and UI copy; it wins over framework, Tailwind, and component-library defaults. Read it before writing UI.
+- Avoid AI-template visual tropes: decorative gradient blobs, generic purple/blue washes, glassmorphism for its own sake, glow-heavy panels, bento filler, and empty marketing cards. See the full blocklist in `frontend-design-taste.md`.
 - Use gradients only when the active unit spec gives a concrete functional or brand reason.
-- For UI-heavy units, perform or request a design-direction pass before coding if an appropriate design skill/workflow is available.
+- UI copy must follow the banned-vocabulary, banned-opener, and banned-sentence-pattern lists in `frontend-design-taste.md`. No em dashes or en dashes in UI copy; use colons, commas, parentheses, pipes, or periods.
+- For UI-heavy units, run the design-system derivation in `frontend-design-taste.md` (or an available design-direction skill/workflow) before coding, and state the chosen direction first.
 
 ## Blog
 

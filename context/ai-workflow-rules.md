@@ -4,6 +4,8 @@
 
 Build this migration through small, spec-driven units. The repo currently has an Eleventy site; the target is a Next.js client relationship OS with Clerk auth, Clerk subscriptions, Stripe project payment gates, DocuSign signatures, app-owned contract generation, blog, client portal, admin hub, and EC2 deployment. Do not implement from memory or vibes. Read the context pack and the active spec first.
 
+For any UI work, `context/frontend-design-taste.md` is required reading and is the authority on visual design and UI copy. It outranks framework, Tailwind, and component-library defaults. Reconcile it with the project brand using `context/ui-context.md`.
+
 ## Scoping Rules
 
 - Work on one unit spec at a time.
@@ -32,7 +34,7 @@ Split an implementation step if it combines:
 - Do not invent client portal data models beyond the relationship OS specs.
 - Do not collapse project payment gates and subscriptions into one billing abstraction.
 - Do not allow generated contracts to bypass published template versions.
-- Do not introduce generic AI/SaaS visual tropes when building UI.
+- Do not introduce generic AI/SaaS visual tropes when building UI; follow `context/frontend-design-taste.md`.
 - Do not add database tables until a unit spec names the data and verification path.
 - Add unresolved decisions to `context/progress-tracker.md`.
 
@@ -52,6 +54,7 @@ Update the relevant context file whenever implementation changes:
 - Architecture or storage model.
 - Auth, billing, or access-control rules.
 - UI conventions.
+- Frontend design taste, blocklist, or brand reconciliation (`context/frontend-design-taste.md`).
 - Code standards.
 - Current progress or open questions.
 
