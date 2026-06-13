@@ -42,6 +42,7 @@ Split an implementation step if it combines:
 
 - Preserve unrelated uncommitted user changes.
 - Treat `src/` as legacy Eleventy source until the migration unit explicitly replaces it.
+- During Unit 01, stage Next.js alongside Eleventy. Do not delete Eleventy source while establishing the foundation.
 - Treat `_site/` as generated output.
 - Do not modify `elatum/` unless the user explicitly expands scope to that product site.
 - Do not modify contract, payment, subscription, or access-control behavior outside the active unit spec.

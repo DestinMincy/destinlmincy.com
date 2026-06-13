@@ -31,6 +31,7 @@ Update this file after every meaningful implementation change.
 - Decided: Zilla Slab is the display/headings face and Hanken Grotesk is the body/UI face for the Next.js app.
 - Decided: fonts must be self-hosted from Fontsource WOFF2 files. Do not use Google Fonts or external font requests in production.
 - Decided: canonical brand colors are Blue `#2675e9`, Gold `#ffd700`, and Silver `#c0c0c0`.
+- Decided: Unit 01 will stage Next.js alongside the existing Eleventy site. This branch is the launch path; when merged to `master`, the Next.js app is intended to ship.
 
 ## In Progress
 
@@ -78,6 +79,7 @@ Update this file after every meaningful implementation change.
 - Font roles are strict: Zilla Slab for display/headings/markers, Hanken Grotesk for body/UI.
 - Production font loading is self-hosted only.
 - Canonical brand palette: Blue `#2675e9`, Gold `#ffd700`, Silver `#c0c0c0`.
+- Next.js will be staged alongside Eleventy during Unit 01; full Eleventy cleanup waits until Unit 16.
 
 ## Session Notes
 
