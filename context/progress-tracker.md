@@ -20,7 +20,7 @@ Update this file after every meaningful implementation change.
 - Selected app-owned contract templates with DocuSign for signatures only.
 - Selected block-based contract editor with versioned database-managed templates.
 - Selected S3 private bucket for generated and signed PDFs.
-- Selected local Postgres for development and RDS Postgres only when deployment/client need justifies cost.
+- Selected Dockerized local Postgres for development and RDS Postgres only when deployment/client need justifies cost.
 - Selected Clerk for auth and subscriptions, Stripe for custom project invoices/payment links.
 - Selected link-only deliverables for v1.
 
@@ -63,7 +63,7 @@ Update this file after every meaningful implementation change.
 - Applications/sites are admin-created in v1; client request flow is deferred.
 - Client portal v1 includes contracts, payments, subscriptions, milestones, approvals, and link deliverables.
 - Messaging and support tickets are deferred.
-- Production database target is RDS Postgres, but local Postgres is used until deployment/client need justifies RDS cost.
+- Production database target is RDS Postgres, but Dockerized local Postgres is used until deployment/client need justifies RDS cost.
 
 ## Session Notes
 

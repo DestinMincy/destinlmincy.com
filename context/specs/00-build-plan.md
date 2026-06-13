@@ -7,7 +7,7 @@ Move `destinlmincy.com` from the current Eleventy static site to a Next.js clien
 ## Unit Sequence
 
 1. `01-next-foundation.md` - Create the Next.js TypeScript foundation and migrate enough public site structure to prove routing, styling, and metadata.
-2. `02-data-foundation.md` - Add local Postgres development setup, ORM choice, schema baseline, migrations, and seed strategy.
+2. `02-data-foundation.md` - Add Dockerized local Postgres development setup, ORM choice, schema baseline, migrations, and seed strategy.
 3. `03-clerk-auth-access.md` - Add Clerk auth, admin email allowlist, and server-side protected route structure.
 4. `04-client-relationship-core.md` - Add admin-managed client relationships, lifecycle state, and client users.
 5. `05-applications-sites-projects.md` - Add applications/sites and projects as separate but related domain objects.

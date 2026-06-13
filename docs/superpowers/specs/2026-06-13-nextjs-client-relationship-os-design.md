@@ -162,7 +162,7 @@ Target stack:
 - Clerk for auth and subscription entitlements.
 - Stripe for custom project invoice/payment-link tracking.
 - DocuSign for signing workflow.
-- Local Postgres in development.
+- Dockerized local Postgres in development.
 - RDS Postgres as production target when deployment/client need justifies cost.
 - Private S3 bucket for generated and signed PDFs.
 - EC2 for Next.js runtime.

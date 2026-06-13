@@ -121,7 +121,7 @@ Current repo fact: the site is still Eleventy/Nunjucks with static pages, dark s
 
 - Next.js React application migration.
 - TypeScript application foundation.
-- Local Postgres development database.
+- Dockerized local Postgres development database.
 - RDS Postgres production target, provisioned only when deployment/client need justifies cost.
 - Private S3 document storage for generated/signed contracts.
 - Clerk authentication and subscription entitlement integration.

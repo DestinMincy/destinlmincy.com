@@ -19,7 +19,7 @@ The repo currently contains an Eleventy 3.x static site under `src/`, generated 
 | UI Components | Local components, likely shadcn/ui where useful | Accessible dashboard, editor, table, and form primitives |
 | Blog Content | MDX or Markdown files in repo | Versioned posts without a CMS dependency |
 | App Data | PostgreSQL | Client relationships, contracts, projects, payments, milestones |
-| Dev Database | Local Postgres | Development without early RDS spend |
+| Dev Database | Dockerized Postgres container | Local development without early RDS spend |
 | Production Database | RDS Postgres when justified | Durable managed database once deployment/client need exists |
 | Document Storage | Private S3 bucket | Generated and signed contract PDFs |
 | ORM | Undecided: Prisma or Drizzle | Must be selected before database-backed implementation |
@@ -98,7 +98,7 @@ Primary relational model:
 - EC2 hosts the Next.js runtime.
 - A reverse proxy terminates HTTPS and forwards to the app process.
 - Environment variables are managed on the instance or through AWS-managed secret storage.
-- Development uses local Postgres.
+- Development uses a Dockerized Postgres container.
 - Production target is RDS Postgres, but RDS should not be provisioned until deployment/client need justifies the cost.
 - S3 stores generated and signed contract PDFs from the first production contract workflow.
 - Existing S3/CloudFront static deployment is legacy for the current Eleventy build and should not be extended for the Next.js server runtime without a clear reason.

@@ -65,7 +65,7 @@
 ## Data And Storage
 
 - App-owned durable state belongs in PostgreSQL.
-- Development uses local Postgres.
+- Development uses a Dockerized Postgres container, not an ad hoc host-installed database requirement.
 - Production PostgreSQL target is RDS, but provisioning waits until deployment/client need justifies the spend.
 - Migrations are mandatory once a database is introduced.
 - Do not store secrets or credentials in repo files.
