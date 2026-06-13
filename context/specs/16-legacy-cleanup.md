@@ -20,7 +20,6 @@ Cleanup should reduce confusion without destroying useful assets or copy. The ol
 ### Preserve
 
 - Preserve reusable images, logos, copy, and brand tokens.
-- Preserve `elatum/` unless explicitly scoped into the migration.
 
 ## Dependencies
 

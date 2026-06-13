@@ -32,6 +32,7 @@ Update this file after every meaningful implementation change.
 - Decided: fonts must be self-hosted from Fontsource WOFF2 files. Do not use Google Fonts or external font requests in production.
 - Decided: canonical brand colors are Blue `#2675e9`, Gold `#ffd700`, and Silver `#c0c0c0`.
 - Decided: Unit 01 will stage Next.js alongside the existing Eleventy site. This branch is the launch path; when merged to `master`, the Next.js app is intended to ship.
+- Confirmed `elatum/` has already been deleted by the owner and is not a protected migration area.
 
 ## In Progress
 

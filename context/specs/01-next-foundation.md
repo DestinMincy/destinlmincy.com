@@ -33,7 +33,6 @@ Follow the committed design direction in `context/ui-context.md`: an approachabl
 ### Legacy Handling
 
 - Do not delete Eleventy files in this unit.
-- Do not modify `elatum/`.
 - Keep legacy content and assets available for migration.
 - Make Next.js and legacy Eleventy development/build commands unambiguous during the staged overlap.
 - Switch primary production scripts to Next.js only after the Next foundation builds and the migrated public shell is verified.
@@ -63,5 +62,4 @@ Follow the committed design direction in `context/ui-context.md`: an approachabl
 - [ ] Orbitron and Rajdhani are not used in the new app.
 - [ ] Zilla Slab and Hanken Grotesk are self-hosted with no production Google Fonts or external font requests.
 - [ ] Font roles are strict: Zilla Slab for display/headings/markers, Hanken Grotesk for body/UI.
-- [ ] `elatum/` is untouched.
 - [ ] Existing unrelated working-tree changes are preserved.
