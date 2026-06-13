@@ -30,6 +30,7 @@ Update this file after every meaningful implementation change.
 - Decided: the hexagon is a core, integrated motif and the signature layout primitive (brand mark plus hex geometry in page elements), never a glowing neural-canvas background; dashboards stay rectangular with hex used only as markers/accents.
 - Decided: Zilla Slab is the display/headings face and Hanken Grotesk is the body/UI face for the Next.js app.
 - Decided: fonts must be self-hosted from Fontsource WOFF2 files. Do not use Google Fonts or external font requests in production.
+- Decided: canonical brand colors are Blue `#2675e9`, Gold `#ffd700`, and Silver `#c0c0c0`.
 
 ## In Progress
 
@@ -51,7 +52,7 @@ Update this file after every meaningful implementation change.
 - Exact Stripe metadata fields needed for manual payment-link/invoice attachment.
 - Reverse proxy choice for EC2: Nginx or Caddy.
 - Process manager choice: systemd or PM2.
-- Exact recalibrated values for blue/gold/silver in each theme (pick at implementation, verify AA).
+- Exact semantic light/dark theme token mappings derived from the brand colors (verify AA, especially gold usage).
 
 ## Architecture Decisions
 
@@ -76,6 +77,7 @@ Update this file after every meaningful implementation change.
 - Zilla Slab and Hanken Grotesk replace Orbitron and Rajdhani in the Next.js app.
 - Font roles are strict: Zilla Slab for display/headings/markers, Hanken Grotesk for body/UI.
 - Production font loading is self-hosted only.
+- Canonical brand palette: Blue `#2675e9`, Gold `#ffd700`, Silver `#c0c0c0`.
 
 ## Session Notes
 

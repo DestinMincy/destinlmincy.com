@@ -180,7 +180,7 @@ Typography is fixed:
 - Fonts are self-hosted from Fontsource WOFF2 files in the static font directory.
 - Production must not load Google Fonts or any external font service.
 
-The blue/gold/silver brand stays, recalibrated for warmth. Hex geometry remains the signature primitive, but dashboards stay rectangular and scannable with hex used only as markers, status, or icon accents.
+The blue/gold/silver brand stays with canonical brand anchors: Blue `#2675e9`, Gold `#ffd700`, and Silver `#c0c0c0`. Theme-specific semantic tokens may derive contrast-safe tints from these anchors, but the palette stays blue/gold/silver plus warm neutrals. Hex geometry remains the signature primitive, but dashboards stay rectangular and scannable with hex used only as markers, status, or icon accents.
 
 ## Verification Strategy
 

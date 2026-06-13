@@ -6,7 +6,7 @@ The brand should feel **approachable, human, and trustworthy**. Destin runs this
 
 This is an evolution of the existing blue/gold/silver brand, not a rebrand. The palette is a deliberate, long-standing choice and stays. What changes is the execution: the current dark, glowing, sci-fi signals (electric-blue glow, neural canvas atmosphere, Orbitron) read cold and faceless and fight the "approachable & human" goal.
 
-- **Palette:** blue/gold/silver, recalibrated for warmth. Blue stays primary and structural but as a confident, slightly deeper blue, not an electric neon glow; blue carries trust. Gold is the warmth carrier and the signal/accent color (emphasis, key actions, highlights), used sparingly. Silver is structural metal (borders, dividers, secondary surfaces, muted text), not a third decorative color. Add warm neutrals (warm off-white surface, warm near-black ink) so nothing reads as cold grey.
+- **Palette:** blue/gold/silver, anchored by the brand colors Blue `#2675e9`, Gold `#ffd700`, and Silver `#c0c0c0`. Blue is primary and structural; blue carries trust. Gold is the warmth carrier and the signal/accent color (emphasis, key actions, highlights), used sparingly. Silver is structural metal (borders, dividers, secondary surfaces, muted text), not a third decorative color. Add warm neutrals (warm off-white surface, warm near-black ink) so nothing reads as cold grey.
 - **Type:** retire Orbitron and Rajdhani. Use Zilla Slab for display/headings and Hanken Grotesk for body/UI. The pairing is intentionally grounded and human: slab display for sturdy local-builder credibility over a warm, legible humanist grotesque for long-form and operational UI.
 - **Layout primitive:** the hexagon is the signature primitive (see below), supported by a clear grid and hairline rules with generous human spacing. One primitive, repeated, becomes the brand signature. Cards only for genuinely repeated items.
 - **Hexagon motif (core, required):** the hex shape is a committed, central design element, not optional decoration. It appears as the brand mark (logo, favicon) and is integrated into page elements: hex-derived/chamfered geometry on key surfaces and image frames (e.g. Destin's headshot in a hex frame), hexagonal section markers and iconography frames, and a restrained hex tessellation as texture where it earns a place. It must NOT return as a glowing animated neural-network node canvas. The discipline: the hexagon is a deliberate, repeated signature, never applied to everything at once. Dense dashboard surfaces stay rectangular for scanning; there the hex appears only as markers, status, or iconography accents, not as panel shapes.
@@ -40,7 +40,15 @@ Everything else in the blocklist (gradient blobs, glassmorphism, glow filler, be
 
 ## Colors
 
-Existing source tokens from `src/styles/main.css`:
+Canonical brand colors:
+
+| Role | CSS Variable | Value |
+| --- | --- | --- |
+| Brand blue | `--brand-blue` | `#2675e9` |
+| Brand gold | `--brand-gold` | `#ffd700` |
+| Brand silver | `--brand-silver` | `#c0c0c0` |
+
+Legacy source tokens from `src/styles/main.css`:
 
 | Role | CSS Variable | Value |
 | --- | --- | --- |
@@ -50,25 +58,25 @@ Existing source tokens from `src/styles/main.css`:
 | Border | `--color-border` | `#1f2735` |
 | Primary text | `--color-text` | `#e9f0ff` |
 | Muted text | `--color-text-muted` | `#8a95a8` |
-| Primary accent | `--color-accent` | `#2776EA` |
+| Primary accent | `--color-accent` | `#2776EA` (legacy, replace with brand blue `#2675e9` in the Next.js token system) |
 | Accent light | `--color-accent-light` | `#5BA3FF` |
-| Gold accent | `--color-accent-2` | `#FFD700` |
-| Silver accent | `--color-accent-3` | `#C0C0C0` |
+| Gold accent | `--color-accent-2` | `#FFD700` (same as brand gold `#ffd700`) |
+| Silver accent | `--color-accent-3` | `#C0C0C0` (same as brand silver `#c0c0c0`) |
 | Error | `--color-danger` | `#ff5c7a` |
 | Success | `--color-success` | `#4ade80` |
 
-Migration rule: map these into the Next.js CSS token system before creating new colors. Add new neutral dashboard tokens only when repeated UI states require them.
+Migration rule: use the canonical brand colors in the Next.js CSS token system before creating new colors. Add new neutral dashboard tokens only when repeated UI states require them.
 
-Recalibration for the committed direction (see Committed Design Direction): these tokens are the source of record but are being warmed and re-roled. Deepen the primary blue away from the electric glow value; promote gold to the sparing warmth/signal accent; treat silver as a structural neutral (borders, dividers, muted text) rather than decoration; and add warm off-white surface and warm near-black ink neutrals so surfaces do not read as cold grey or blue-black. Do not introduce new hues outside blue/gold/silver plus neutrals.
+Recalibration for the committed direction (see Committed Design Direction): Blue `#2675e9`, Gold `#ffd700`, and Silver `#c0c0c0` are the anchor colors. Use blue as the primary brand/action color, gold as the sparing signal/warmth accent, silver as the structural neutral, and add warm off-white surface and warm near-black ink neutrals so surfaces do not read as cold grey or blue-black. Do not introduce new hues outside blue/gold/silver plus neutrals.
 
 ### Theming (light and dark, both first-class)
 
 Both modes ship from the start, so the token layer is semantic, not raw hex. Define role tokens (surface, surface-elevated, surface-panel, text, text-muted, border, accent, signal, success, danger) that resolve per theme; components reference roles only, never literal colors. Initialize from `prefers-color-scheme`, expose a real persisted toggle, and avoid a flash of the wrong theme on load.
 
 Palette behavior across themes:
-- **Blue** is the primary brand color in both modes; pick a value that holds contrast on a light surface and on a warm dark surface (it may resolve to a slightly different tint per theme).
-- **Gold** is the warmth/signal accent. Gold has poor contrast as text on light surfaces, so use it as a fill with dark text on it, or as emphasis on darker surfaces; do not set small gold text on white. Verify every gold usage against AA.
-- **Silver** is a structural neutral (borders, dividers, muted text), re-roled per theme; it is not a third decorative color.
+- **Blue** is the primary brand color in both modes. Start from `#2675e9`; if a theme-specific tint is required for contrast, document the derived token.
+- **Gold** is the warmth/signal accent. Start from `#ffd700`. Gold has poor contrast as text on light surfaces, so use it as a fill with dark text on it, or as emphasis on darker surfaces; do not set small gold text on white. Verify every gold usage against AA.
+- **Silver** starts from `#c0c0c0` and is a structural neutral (borders, dividers, muted text), re-roled per theme; it is not a third decorative color.
 - Dark mode is a **warm** dark, not the old cold blue-black (`#0b1220`).
 
 ## Typography

@@ -16,7 +16,7 @@ Follow the committed design direction in `context/ui-context.md`: an approachabl
 
 - Add Next.js App Router with TypeScript strict mode.
 - Add root layout, metadata defaults, public header, and footer.
-- Add global CSS/token setup using semantic, theme-resolved tokens (surface, text, border, accent, signal, etc.), recalibrated from the existing brand per `context/ui-context.md`.
+- Add global CSS/token setup using semantic, theme-resolved tokens (surface, text, border, accent, signal, etc.), derived from the canonical brand colors in `context/ui-context.md`: Blue `#2675e9`, Gold `#ffd700`, Silver `#c0c0c0`.
 - Add self-hosted font setup from Fontsource-sourced WOFF2 files in the static font directory. Do not use Google Fonts or external font requests in production.
 - Add `--font-display` and `--font-body` tokens using Zilla Slab and Hanken Grotesk exactly as specified in `context/ui-context.md`.
 - Add light and dark mode as first-class themes from the start: initialize from `prefers-color-scheme`, expose a persisted toggle, and prevent a flash of the wrong theme on load.
