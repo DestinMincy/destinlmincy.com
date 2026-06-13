@@ -19,6 +19,8 @@ Read these files in order before implementing or making architecture decisions:
 5. `context/ai-workflow-rules.md`
 6. `context/progress-tracker.md`
 
+For frontend or UI work, also read `context/frontend-design-taste.md` before implementation. It is the authority on visual design and UI copy.
+
 For scoped work, also read the relevant unit spec under `context/specs/`.
 
 ## Development Rules

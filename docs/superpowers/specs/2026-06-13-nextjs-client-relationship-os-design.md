@@ -169,6 +169,19 @@ Target stack:
 
 Admin access starts with an email allowlist. Clerk organizations are unnecessary for a solo admin business and should wait until delegated operators exist.
 
+## UI Direction
+
+The visual direction is approachable, human, and trustworthy. The old cold sci-fi execution is retired: no Orbitron, no Rajdhani in the new app, no glowing neural canvas, no default generated SaaS tropes.
+
+Typography is fixed:
+
+- Display/headings: Zilla Slab, weight 600.
+- Body/UI: Hanken Grotesk variable.
+- Fonts are self-hosted from Fontsource WOFF2 files in the static font directory.
+- Production must not load Google Fonts or any external font service.
+
+The blue/gold/silver brand stays, recalibrated for warmth. Hex geometry remains the signature primitive, but dashboards stay rectangular and scannable with hex used only as markers, status, or icon accents.
+
 ## Verification Strategy
 
 Each unit must be independently verifiable. Protected routes verify signed-out, wrong-user, and authorized behavior. Contract units verify immutability, generation, storage, and signature state. Payment units verify project payment gates do not get confused with recurring subscription entitlements.

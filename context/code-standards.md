@@ -54,6 +54,9 @@
 - Tailwind is acceptable, but color choices should map to CSS variables rather than hardcoded hex values.
 - Dashboard UI should prioritize readability over decorative effects.
 - Do not add visible instructional text that explains the UI instead of making the UI clear.
+- Use Zilla Slab for display/headings and Hanken Grotesk for body/UI in the Next.js app.
+- Self-host production fonts from local WOFF2 files. Do not load Google Fonts or any external font service in production.
+- Keep font roles strict: Zilla Slab for display/headings/markers, Hanken Grotesk for body/UI.
 - `context/frontend-design-taste.md` is the authority on frontend visual design and UI copy; it wins over framework, Tailwind, and component-library defaults. Read it before writing UI.
 - Avoid AI-template visual tropes: decorative gradient blobs, generic purple/blue washes, glassmorphism for its own sake, glow-heavy panels, bento filler, and empty marketing cards. See the full blocklist in `frontend-design-taste.md`.
 - Use gradients only when the active unit spec gives a concrete functional or brand reason.

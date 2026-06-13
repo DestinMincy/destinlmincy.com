@@ -7,7 +7,7 @@ The brand should feel **approachable, human, and trustworthy**. Destin runs this
 This is an evolution of the existing blue/gold/silver brand, not a rebrand. The palette is a deliberate, long-standing choice and stays. What changes is the execution: the current dark, glowing, sci-fi signals (electric-blue glow, neural canvas atmosphere, Orbitron) read cold and faceless and fight the "approachable & human" goal.
 
 - **Palette:** blue/gold/silver, recalibrated for warmth. Blue stays primary and structural but as a confident, slightly deeper blue, not an electric neon glow; blue carries trust. Gold is the warmth carrier and the signal/accent color (emphasis, key actions, highlights), used sparingly. Silver is structural metal (borders, dividers, secondary surfaces, muted text), not a third decorative color. Add warm neutrals (warm off-white surface, warm near-black ink) so nothing reads as cold grey.
-- **Type:** retire Orbitron. Use a humanist or characterful sans with warmth and personality (not Inter, not Orbitron, not the recycled Space Grotesk / Geist combos) plus a highly readable body face. See Typography below.
+- **Type:** retire Orbitron and Rajdhani. Use Zilla Slab for display/headings and Hanken Grotesk for body/UI. The pairing is intentionally grounded and human: slab display for sturdy local-builder credibility over a warm, legible humanist grotesque for long-form and operational UI.
 - **Layout primitive:** the hexagon is the signature primitive (see below), supported by a clear grid and hairline rules with generous human spacing. One primitive, repeated, becomes the brand signature. Cards only for genuinely repeated items.
 - **Hexagon motif (core, required):** the hex shape is a committed, central design element, not optional decoration. It appears as the brand mark (logo, favicon) and is integrated into page elements: hex-derived/chamfered geometry on key surfaces and image frames (e.g. Destin's headshot in a hex frame), hexagonal section markers and iconography frames, and a restrained hex tessellation as texture where it earns a place. It must NOT return as a glowing animated neural-network node canvas. The discipline: the hexagon is a deliberate, repeated signature, never applied to everything at once. Dense dashboard surfaces stay rectangular for scanning; there the hex appears only as markers, status, or iconography accents, not as panel shapes.
 - **Show the human:** real photography of Destin and a first-person voice in copy. This is the single biggest "approachable & human" lever and costs no design tokens.
@@ -73,13 +73,72 @@ Palette behavior across themes:
 
 ## Typography
 
-| Role | Direction | Use |
+| Role | Font | Use |
 | --- | --- | --- |
-| Display | Retire Orbitron; pick a humanist or characterful sans with warmth and personality | Logo wordmark, marketing hero, major public-page headings |
-| Body | Highly readable humanist body face (not Inter) | Public and dashboard body copy |
-| Dashboard UI | Same body face or a close legible companion; choose at implementation | Dense dashboard tables/forms |
+| Display/headings | Zilla Slab, weight 600 | Logo wordmark, marketing hero, major public-page headings, section headings, step numerals |
+| Body/UI | Hanken Grotesk variable, weights 100-900 | Public body copy, dashboard UI, forms, tables, nav, buttons |
+| Fallback display | Georgia, serif | Only if self-hosted Zilla Slab fails |
+| Fallback body | system-ui, sans-serif | Only if self-hosted Hanken Grotesk fails |
 
-Type bans (from `frontend-design-taste.md`): not Inter anywhere, not Orbitron, and not the recycled Space Grotesk / Geist / Instrument Serif combos. Keep Rajdhani only if it genuinely earns a spot in the warmer direction; default is to retire it with Orbitron. Pick the specific families at implementation and state them back before building.
+Type bans (from `frontend-design-taste.md`): not Inter anywhere, not Orbitron, not Rajdhani for the new app, and not the recycled Space Grotesk / Geist / Instrument Serif combos.
+
+Keep roles strict. Zilla Slab is for headings/display and selected numerals or markers only. Hanken Grotesk owns body, UI, controls, labels, and dashboard text. Do not mix them casually or the pairing loses its point.
+
+### Font Hosting
+
+Self-host fonts. Do not load Google Fonts or any external font service in production.
+
+Use Fontsource packages during implementation:
+
+- `@fontsource-variable/hanken-grotesk`
+- `@fontsource/zilla-slab`
+
+Copy the required WOFF2 files into the static font directory, likely `/public/fonts` in the Next.js app:
+
+- `hanken-grotesk-latin-wght-normal.woff2`
+- `zilla-slab-latin-600-normal.woff2`
+- Optional for lighter numerals: `zilla-slab-latin-400-normal.woff2`
+
+Required `@font-face` shape:
+
+```css
+@font-face {
+  font-family: 'Hanken Grotesk';
+  src: url('/fonts/hanken-grotesk-latin-wght-normal.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Zilla Slab';
+  src: url('/fonts/zilla-slab-latin-600-normal.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+```
+
+Token requirements:
+
+```css
+:root {
+  --font-display: 'Zilla Slab', Georgia, serif;
+  --font-body: 'Hanken Grotesk', system-ui, sans-serif;
+}
+```
+
+Baseline type rules:
+
+- `body`: `font-family: var(--font-body)`, `line-height: 1.6`, `font-weight: 400`.
+- `h1`, `h2`, `h3`: `font-family: var(--font-display)`, `font-weight: 600`.
+- `h1`: `font-size: clamp(2.6rem, 6.2vw, 4.7rem)`, `line-height: 1.08`, `letter-spacing: -0.02em`.
+- `h2`: `font-size: clamp(1.9rem, 3.8vw, 2.85rem)`, `line-height: 1.1`.
+- `h3`: `font-size: 1.4rem`, `line-height: 1.15`.
+- `p`, `li`: `font-size: clamp(1.0625rem, 1.4vw, 1.125rem)`.
+- Eyebrows: Hanken Grotesk, uppercase, `letter-spacing: 0.2em`, `font-size: 0.74rem`, `font-weight: 600`, gold token.
+- Buttons: Hanken Grotesk, `font-weight: 600`.
+- Step numbers and numbered markers: Zilla Slab, `font-weight: 600`, gold token.
 
 Do not use viewport-scaled font sizes inside dashboard controls. Marketing hero text can use responsive clamps where already appropriate.
 
