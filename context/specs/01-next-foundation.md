@@ -8,6 +8,8 @@ Create the Next.js React TypeScript application foundation without implementing 
 
 Use the existing dark technical brand tokens as the starting point. Public pages may keep the expressive atmosphere, but the layout should be built in Next.js-native components rather than copied as raw Nunjucks.
 
+Avoid AI-template visual tropes during the migration: no decorative gradient blobs, generic purple/blue gradient washes, glassmorphism panels, glow-heavy filler, or bento-card decoration. Preserve brand atmosphere through tokens, typography, spacing, angular geometry, and real content. Gradients require a specific functional or brand reason.
+
 ## Implementation
 
 ### App Foundation
@@ -42,4 +44,5 @@ Use the existing dark technical brand tokens as the starting point. Public pages
 - [ ] `npm run build` passes.
 - [ ] Public navigation works for migrated routes.
 - [ ] Metadata exists for the home page.
+- [ ] Public shell avoids generic AI/SaaS visual tropes and does not rely on decorative gradients.
 - [ ] Existing unrelated working-tree changes are preserved.

@@ -24,6 +24,7 @@ Split an implementation step if it combines:
 - Client portal and admin hub behavior.
 - EC2 deployment and app feature work.
 - Database schema decisions and unrelated UI polish.
+- UI implementation before design direction is clear.
 
 ## Handling Missing Requirements
 
@@ -31,6 +32,7 @@ Split an implementation step if it combines:
 - Do not invent client portal data models beyond the relationship OS specs.
 - Do not collapse project payment gates and subscriptions into one billing abstraction.
 - Do not allow generated contracts to bypass published template versions.
+- Do not introduce generic AI/SaaS visual tropes when building UI.
 - Do not add database tables until a unit spec names the data and verification path.
 - Add unresolved decisions to `context/progress-tracker.md`.
 

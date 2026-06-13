@@ -6,6 +6,14 @@ The current brand is a dark technical agency interface: near-black backgrounds, 
 
 Hard rule: marketing can be expressive; dashboards must be usable. Do not carry heavy glow, clipped cards, or decorative canvas effects into admin/client work surfaces where they damage scanning and repeated use.
 
+## Anti-Trope Rule
+
+Avoid the default "AI-generated SaaS" look. Do not use decorative gradient blobs, purple/blue gradient washes, glassmorphism panels, generic bento grids, oversized rounded cards, meaningless glow effects, or stock "AI" visual metaphors unless there is a specific product reason documented in the active unit spec.
+
+Gradients are allowed only when they serve a concrete function: depth, state, brand accent, or readable image treatment. They are not a default background strategy. If a page starts to look like a vibe-coded template, stop and simplify toward typography, spacing, hierarchy, real content, and restrained surfaces.
+
+For UI-heavy units, use an available design workflow/skill before implementation when possible. Suitable examples include local design-direction/interface-review skills. If a specific "open design" skill is available in the agent environment, use it for visual direction before building; otherwise follow this file and request a focused design review before coding the unit.
+
 ## Colors
 
 Existing source tokens from `src/styles/main.css`:
@@ -43,6 +51,8 @@ Do not use viewport-scaled font sizes inside dashboard controls. Marketing hero 
 - Dashboard cards/panels should use restrained rectangular surfaces with subtle borders.
 - Avoid nested cards.
 - Cards are for repeated items, modals, or genuinely framed tools. Page sections should not become floating-card soup.
+- Do not use gradients as a substitute for layout, hierarchy, or real content.
+- Avoid large rounded rectangles and generic SaaS panels unless the component has a clear operational purpose.
 
 ## Component Direction
 

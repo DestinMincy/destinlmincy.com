@@ -54,6 +54,9 @@
 - Tailwind is acceptable, but color choices should map to CSS variables rather than hardcoded hex values.
 - Dashboard UI should prioritize readability over decorative effects.
 - Do not add visible instructional text that explains the UI instead of making the UI clear.
+- Avoid AI-template visual tropes: decorative gradient blobs, generic purple/blue washes, glassmorphism for its own sake, glow-heavy panels, bento filler, and empty marketing cards.
+- Use gradients only when the active unit spec gives a concrete functional or brand reason.
+- For UI-heavy units, perform or request a design-direction pass before coding if an appropriate design skill/workflow is available.
 
 ## Blog
 
