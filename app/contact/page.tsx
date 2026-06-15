@@ -12,6 +12,11 @@ export const metadata = {
     "Get in touch about an AI agent build, ELATUM, custom software, or partnership work.",
 };
 
+/**
+ * Renders the contact page with a form and contact information.
+ *
+ * @returns The contact page component.
+ */
 export default function ContactPage() {
   return (
     <>

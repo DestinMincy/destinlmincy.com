@@ -3,6 +3,11 @@ import Link from "next/link";
 import { navItems } from "@/lib/site";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
+/**
+ * Renders the site header with branding, theme toggle, and primary navigation.
+ *
+ * @returns The site header component.
+ */
 export function SiteHeader() {
   return (
     <header className="site-header">

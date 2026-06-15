@@ -7,6 +7,9 @@ export const metadata = {
   description: "Featured agents and software builds from Destin L Mincy.",
 };
 
+/**
+ * Renders the work portfolio page displaying featured agents and projects.
+ */
 export default function WorkPage() {
   return (
     <>
