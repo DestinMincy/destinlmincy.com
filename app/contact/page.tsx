@@ -6,18 +6,40 @@ const fits = [
   "You have a software build that needs a senior pair of hands.",
 ];
 
+const topicOptions = [
+  { value: "agent-build", label: "A new AI agent build" },
+  { value: "elatum", label: "ELATUM for my rental" },
+  { value: "software-build", label: "Custom software or contract work" },
+  { value: "partnership", label: "Partnership or referral" },
+  { value: "other", label: "Something else" },
+] as const;
+
+type TopicValue = (typeof topicOptions)[number]["value"];
+
+type ContactPageProps = {
+  searchParams?: Promise<{
+    topic?: string | string[];
+  }>;
+};
+
 export const metadata = {
   title: "Contact",
   description:
     "Get in touch about an AI agent build, ELATUM, custom software, or partnership work.",
 };
 
-/**
- * Renders the contact page with a form and contact information.
- *
- * @returns The contact page component.
- */
-export default function ContactPage() {
+function getSelectedTopic(topic: string | string[] | undefined): "" | TopicValue {
+  const value = Array.isArray(topic) ? topic[0] : topic;
+
+  return topicOptions.some((option) => option.value === value)
+    ? (value as TopicValue)
+    : "";
+}
+
+export default async function ContactPage({ searchParams }: ContactPageProps) {
+  const params = await searchParams;
+  const selectedTopic = getSelectedTopic(params?.topic);
+
   return (
     <>
       <section className="page-hero">
@@ -78,15 +100,15 @@ export default function ContactPage() {
             </div>
             <div className="field">
               <label htmlFor="topic">Topic</label>
-              <select id="topic" name="topic" required defaultValue="">
+              <select id="topic" name="topic" required defaultValue={selectedTopic}>
                 <option value="" disabled>
                   Select one
                 </option>
-                <option value="agent-build">A new AI agent build</option>
-                <option value="elatum">ELATUM for my rental</option>
-                <option value="software-build">Custom software or contract work</option>
-                <option value="partnership">Partnership or referral</option>
-                <option value="other">Something else</option>
+                {topicOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
               </select>
             </div>
             <div className="field">

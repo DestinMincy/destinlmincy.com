@@ -23,7 +23,7 @@
 }
 
 :root {
-  --font-display: "Zilla Slab", Georgia, serif;
+  --font-display: "Zilla Slab", georgia, serif;
   --font-body: "Hanken Grotesk", system-ui, sans-serif;
 
   --brand-blue: #2675e9;
@@ -454,6 +454,7 @@ main {
 .check-list li {
   --bullet-hex-width: 10px;
   --bullet-hex-height: 11.55px;
+
   display: grid;
   grid-template-columns: var(--bullet-hex-width) minmax(0, 1fr);
   column-gap: 16px;
