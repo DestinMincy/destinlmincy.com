@@ -4,11 +4,11 @@ Update this file after every meaningful implementation change.
 
 ## Current Phase
 
-- Unit 01 implementation and review for the Next.js foundation.
+- Unit 02 preparation for the data foundation.
 
 ## Current Goal
 
-- Verify the staged Next.js public shell while preserving the legacy Eleventy source and commands.
+- Prepare to add the Dockerized Postgres and ORM-backed schema foundation for the client relationship OS.
 
 ## Completed
 
@@ -36,15 +36,17 @@ Update this file after every meaningful implementation change.
 - Implemented Unit 01 foundation: Next.js App Router, strict TypeScript config, metadata defaults, semantic theme tokens, self-hosted Zilla Slab and Hanken Grotesk fonts, persisted light/dark theme control, CSS-only hex atmosphere, public header/footer, and migrated public routes for `/`, `/about`, `/services`, `/work`, and `/contact`.
 - Preserved legacy Eleventy source and moved legacy commands behind explicit `legacy:*` scripts.
 - Confirmed `elatum/` has already been deleted by the owner and is not a protected migration area.
+- Merged Unit 01 into `nextjs-application-overhaul` after CodeRabbit review and follow-up fixes.
 
 ## In Progress
 
-- Unit 01 is implemented locally and ready for owner review.
+- Unit 02 is ready for implementation planning and ORM selection.
 
 ## Next Up
 
-- Owner review of the Unit 01 public shell.
-- After approval, move to the next scoped unit spec.
+- Select Prisma or Drizzle for the data layer.
+- Add Dockerized local Postgres, database environment contract, migration workflow, and seed strategy.
+- Create the narrow baseline schema named in `context/specs/02-data-foundation.md`.
 
 ## Open Questions
 
