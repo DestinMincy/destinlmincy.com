@@ -2,17 +2,32 @@
   "name": "destinlmincy-site",
   "version": "0.1.0",
   "private": true,
-  "description": "destinlmincy.com — marketing site for the agency",
+  "description": "destinlmincy.com marketing site and client relationship OS",
   "scripts": {
-    "build": "eleventy",
-    "start": "eleventy --serve --watch",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "next typegen && tsc --noEmit",
+    "legacy:build": "eleventy",
+    "legacy:start": "eleventy --serve --watch",
     "clean": "rimraf _site",
-    "deploy:s3": "aws s3 sync _site/ s3://destinlmincy.com --delete --cache-control \"public, max-age=300\"",
-    "deploy:invalidate": "aws cloudfront create-invalidation --distribution-id E21OST0SP78GLD --paths \"/*\"",
-    "deploy": "npm run build && npm run deploy:s3 && npm run deploy:invalidate"
+    "legacy:deploy:s3": "aws s3 sync _site/ s3://destinlmincy.com --delete --cache-control \"public, max-age=300\"",
+    "legacy:deploy:invalidate": "aws cloudfront create-invalidation --distribution-id E21OST0SP78GLD --paths \"/*\"",
+    "legacy:deploy": "npm run legacy:build && npm run legacy:deploy:s3 && npm run legacy:deploy:invalidate"
   },
   "devDependencies": {
     "@11ty/eleventy": "^3.0.0",
-    "rimraf": "^5.0.5"
+    "@types/node": "^25.9.3",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "rimraf": "^5.0.5",
+    "typescript": "^6.0.3"
+  },
+  "dependencies": {
+    "@fontsource-variable/hanken-grotesk": "^5.2.8",
+    "@fontsource/zilla-slab": "^5.2.8",
+    "next": "^16.2.9",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
   }
 }
