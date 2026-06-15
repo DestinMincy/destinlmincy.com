@@ -32,7 +32,12 @@ export function ThemeToggle() {
   function handleToggle() {
     const nextTheme = (theme ?? readTheme()) === "dark" ? "light" : "dark";
 
-    localStorage.setItem(storageKey, nextTheme);
+    try {
+      localStorage.setItem(storageKey, nextTheme);
+    } catch {
+      // Storage can be blocked; the UI should still apply the selected theme.
+    }
+
     applyTheme(nextTheme);
     setTheme(nextTheme);
   }
