@@ -48,6 +48,11 @@ export const metadata = {
     "Agent builds, agent operations, and custom software from Destin L Mincy Software and AI Agency.",
 };
 
+/**
+ * Renders the Services landing page.
+ *
+ * @returns The Services page layout with hero section, service offerings, and fit check callout.
+ */
 export default function ServicesPage() {
   return (
     <>

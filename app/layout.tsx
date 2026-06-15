@@ -73,6 +73,9 @@ const themeScript = `
 })();
 `;
 
+/**
+ * Renders the application's root HTML document with theme initialization, site header, and footer components.
+ */
 export default function RootLayout({
   children,
 }: Readonly<{

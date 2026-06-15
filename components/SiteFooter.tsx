@@ -2,6 +2,9 @@ import Link from "next/link";
 
 import { navItems, site } from "@/lib/site";
 
+/**
+ * Renders the site footer with branding, navigation, and contact information.
+ */
 export function SiteFooter() {
   return (
     <footer className="site-footer">

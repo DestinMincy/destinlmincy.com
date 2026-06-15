@@ -6,6 +6,11 @@ type Theme = "light" | "dark";
 
 const storageKey = "dlm-theme";
 
+/**
+ * Determines the current theme setting.
+ *
+ * @returns The active theme: `"light"` or `"dark"`.
+ */
 function readTheme(): Theme {
   const currentTheme = document.documentElement.dataset.theme;
 
@@ -16,11 +21,20 @@ function readTheme(): Theme {
   return matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
+/**
+ * Applies a theme to the document element.
+ */
+```
 function applyTheme(theme: Theme) {
   document.documentElement.dataset.theme = theme;
   document.documentElement.style.colorScheme = theme;
 }
 
+/**
+ * A button component that toggles the application theme between light and dark modes.
+ *
+ * The selected theme is persisted to browser storage and applied to the document.
+ */
 export function ThemeToggle() {
   const [theme, setTheme] = useState<Theme | null>(null);
   const label = theme === null ? "Theme" : theme === "dark" ? "Dark" : "Light";
