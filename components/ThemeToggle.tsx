@@ -24,7 +24,6 @@ function readTheme(): Theme {
 /**
  * Applies a theme to the document element.
  */
-```
 function applyTheme(theme: Theme) {
   document.documentElement.dataset.theme = theme;
   document.documentElement.style.colorScheme = theme;
