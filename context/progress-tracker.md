@@ -4,11 +4,11 @@ Update this file after every meaningful implementation change.
 
 ## Current Phase
 
-- Unit 02 preparation for the data foundation.
+- Unit 03 preparation for Clerk auth and access control.
 
 ## Current Goal
 
-- Prepare to add the Dockerized Postgres and ORM-backed schema foundation for the client relationship OS.
+- Prepare to add Clerk auth, server-side protected route structure, and admin email allowlist enforcement.
 
 ## Completed
 
@@ -37,20 +37,23 @@ Update this file after every meaningful implementation change.
 - Preserved legacy Eleventy source and moved legacy commands behind explicit `legacy:*` scripts.
 - Confirmed `elatum/` has already been deleted by the owner and is not a protected migration area.
 - Merged Unit 01 into `nextjs-application-overhaul` after CodeRabbit review and follow-up fixes.
+- Selected Prisma for the data layer.
+- Implemented Unit 02 data foundation: Dockerized local Postgres on host port `5434`, Prisma config/schema, generated-client workflow, initial migration, deterministic seed data, and a server-side Prisma client helper.
+- Added baseline schema shells for client relationships, client users, applications/sites, projects, contract templates and versions, payment gates, subscription references, milestones, and deliverables.
+- Documented the local database workflow and RDS production target in `docs/data-foundation.md`.
 
 ## In Progress
 
-- Unit 02 is ready for implementation planning and ORM selection.
+- None.
 
 ## Next Up
 
-- Select Prisma or Drizzle for the data layer.
-- Add Dockerized local Postgres, database environment contract, migration workflow, and seed strategy.
-- Create the narrow baseline schema named in `context/specs/02-data-foundation.md`.
+- Begin Unit 03: Clerk auth and access control.
+- Add Clerk environment contract and protected route structure.
+- Add server-side admin email allowlist enforcement.
 
 ## Open Questions
 
-- ORM choice: Prisma or Drizzle.
 - Blog content format: Markdown or MDX.
 - PDF generation engine for contracts: browser rendering, React PDF, or document-generation library.
 - DocuSign integration mode and auth flow.
@@ -77,6 +80,8 @@ Update this file after every meaningful implementation change.
 - Client portal v1 includes contracts, payments, subscriptions, milestones, approvals, and link deliverables.
 - Messaging and support tickets are deferred.
 - Production database target is RDS Postgres, but Dockerized local Postgres is used until deployment/client need justifies RDS cost.
+- Prisma is the selected ORM and migration system.
+- Local Docker Postgres uses host port `5434` to avoid conflicts with other local Postgres services.
 - UI implementation must avoid generic AI/SaaS visual tropes; gradients require a documented functional or brand reason.
 - Brand evolves the existing blue/gold/silver identity toward approachable/human/trustworthy rather than rebranding; the cold sci-fi execution (electric-blue glow, neural-canvas atmosphere, Orbitron) is retired.
 - Zilla Slab and Hanken Grotesk replace Orbitron and Rajdhani in the Next.js app.
@@ -95,3 +100,6 @@ Update this file after every meaningful implementation change.
 - Fixed Unit 01 theme initialization warnings: moved the inline bootstrap to Next's `Script` component and made the React theme toggle own its hydrated label/click state. Verified with `npm run typecheck`, `npm run build`, and an Edge console capture against a production build on `http://127.0.0.1:3001`.
 - Addressed CodeRabbit review findings for Unit 01: validated the contact `topic` query parameter server-side, fixed CSS stylelint formatting, and kept theme changes functional when localStorage persistence is blocked.
 - Fixed development theme-toggle hydration through forwarded hosts by allowing `127.0.0.1` and `*.ngrok-free.app` in Next dev origins, then restarted `next dev` on port 3000 and verified the toggle on `http://127.0.0.1:3000`.
+- Unit 02 verification passed locally with Dockerized Postgres healthy on port `5434`, `npm run db:migrate -- --name init`, `npm run db:seed`, `npx prisma migrate status`, a Prisma read-count probe, `npm run typecheck`, and `npm run build`.
+- During Unit 02 verification, `localhost:5432` resolved to an existing host Postgres service. The local database contract was moved to `127.0.0.1:5434`.
+- `npm audit --omit=dev` reports moderate advisories in Prisma's dev server dependency and Next/PostCSS. The suggested fixes are breaking downgrades, so they were not applied in Unit 02.

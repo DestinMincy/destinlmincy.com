@@ -1,0 +1,237 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ClientRelationshipLifecycle {
+  LEAD
+  DISCOVERY
+  PROPOSAL
+  CONTRACTED
+  AWAITING_PAYMENT
+  ACTIVE
+  PAUSED
+  COMPLETED
+  ARCHIVED
+}
+
+enum ContractTemplateStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum PaymentGateStatus {
+  PENDING
+  ATTACHED
+  PAID
+  WAIVED
+}
+
+enum SubscriptionServiceType {
+  HOSTING
+  MAINTENANCE
+}
+
+enum SubscriptionReferenceStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  PAUSED
+  OVERRIDDEN
+}
+
+enum MilestoneStatus {
+  PLANNED
+  IN_PROGRESS
+  BLOCKED
+  COMPLETE
+}
+
+model ClientRelationship {
+  id          String                      @id @default(cuid())
+  name        String
+  slug        String                      @unique
+  lifecycle   ClientRelationshipLifecycle @default(LEAD)
+  summary     String?
+  createdAt   DateTime                    @default(now())
+  updatedAt   DateTime                    @updatedAt
+
+  users             ClientUser[]
+  applications      ApplicationSite[]
+  projects          Project[]
+  contractTemplates ContractTemplate[]
+  paymentGates      PaymentGate[]
+  subscriptions     SubscriptionReference[]
+  milestones        Milestone[]
+  deliverables      Deliverable[]
+
+  @@map("client_relationships")
+}
+
+model ClientUser {
+  id                   String             @id @default(cuid())
+  clientRelationshipId String
+  clerkUserId          String
+  email                String
+  name                 String?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  clientRelationship ClientRelationship @relation(fields: [clientRelationshipId], references: [id], onDelete: Cascade)
+
+  @@unique([clientRelationshipId, clerkUserId])
+  @@index([clerkUserId])
+  @@map("client_users")
+}
+
+model ApplicationSite {
+  id                   String   @id @default(cuid())
+  clientRelationshipId String
+  name                 String
+  primaryUrl           String?
+  notes                String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  clientRelationship ClientRelationship       @relation(fields: [clientRelationshipId], references: [id], onDelete: Cascade)
+  projects           Project[]
+  subscriptions      SubscriptionReference[]
+
+  @@index([clientRelationshipId])
+  @@map("application_sites")
+}
+
+model Project {
+  id                   String   @id @default(cuid())
+  clientRelationshipId String
+  applicationSiteId    String?
+  name                 String
+  summary              String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  clientRelationship ClientRelationship @relation(fields: [clientRelationshipId], references: [id], onDelete: Cascade)
+  applicationSite    ApplicationSite?   @relation(fields: [applicationSiteId], references: [id], onDelete: SetNull)
+  paymentGates       PaymentGate[]
+  subscriptions      SubscriptionReference[]
+  milestones         Milestone[]
+  deliverables       Deliverable[]
+
+  @@index([clientRelationshipId])
+  @@index([applicationSiteId])
+  @@map("projects")
+}
+
+model ContractTemplate {
+  id                   String                 @id @default(cuid())
+  clientRelationshipId String
+  name                 String
+  status               ContractTemplateStatus @default(DRAFT)
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+
+  clientRelationship ClientRelationship        @relation(fields: [clientRelationshipId], references: [id], onDelete: Cascade)
+  versions           ContractTemplateVersion[]
+
+  @@index([clientRelationshipId])
+  @@map("contract_templates")
+}
+
+model ContractTemplateVersion {
+  id                 String    @id @default(cuid())
+  contractTemplateId String
+  versionNumber      Int
+  snapshot           Json?
+  publishedAt        DateTime?
+  createdAt          DateTime  @default(now())
+
+  contractTemplate ContractTemplate @relation(fields: [contractTemplateId], references: [id], onDelete: Cascade)
+
+  @@unique([contractTemplateId, versionNumber])
+  @@map("contract_template_versions")
+}
+
+model PaymentGate {
+  id                   String            @id @default(cuid())
+  clientRelationshipId String
+  projectId            String?
+  label                String
+  status               PaymentGateStatus @default(PENDING)
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+
+  clientRelationship ClientRelationship @relation(fields: [clientRelationshipId], references: [id], onDelete: Cascade)
+  project            Project?           @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@index([clientRelationshipId])
+  @@index([projectId])
+  @@map("payment_gates")
+}
+
+model SubscriptionReference {
+  id                   String                      @id @default(cuid())
+  clientRelationshipId String
+  applicationSiteId    String?
+  projectId            String?
+  serviceType          SubscriptionServiceType
+  status               SubscriptionReferenceStatus @default(ACTIVE)
+  clerkSubscriptionId  String?
+  entitlementKey       String?
+  currentPeriodEndsAt  DateTime?
+  createdAt            DateTime                    @default(now())
+  updatedAt            DateTime                    @updatedAt
+
+  clientRelationship ClientRelationship @relation(fields: [clientRelationshipId], references: [id], onDelete: Cascade)
+  applicationSite    ApplicationSite?   @relation(fields: [applicationSiteId], references: [id], onDelete: SetNull)
+  project            Project?           @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@index([clientRelationshipId])
+  @@index([applicationSiteId])
+  @@index([projectId])
+  @@index([clerkSubscriptionId])
+  @@map("subscription_references")
+}
+
+model Milestone {
+  id                   String          @id @default(cuid())
+  clientRelationshipId String
+  projectId            String
+  title                String
+  status               MilestoneStatus @default(PLANNED)
+  targetDate           DateTime?
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+
+  clientRelationship ClientRelationship @relation(fields: [clientRelationshipId], references: [id], onDelete: Cascade)
+  project            Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  deliverables       Deliverable[]
+
+  @@index([clientRelationshipId])
+  @@index([projectId])
+  @@map("milestones")
+}
+
+model Deliverable {
+  id                   String   @id @default(cuid())
+  clientRelationshipId String
+  projectId            String?
+  milestoneId          String?
+  label                String
+  url                  String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  clientRelationship ClientRelationship @relation(fields: [clientRelationshipId], references: [id], onDelete: Cascade)
+  project            Project?           @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  milestone          Milestone?         @relation(fields: [milestoneId], references: [id], onDelete: SetNull)
+
+  @@index([clientRelationshipId])
+  @@index([projectId])
+  @@index([milestoneId])
+  @@map("deliverables")
+}

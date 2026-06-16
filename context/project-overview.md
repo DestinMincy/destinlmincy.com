@@ -6,7 +6,7 @@
 
 The primary business object is the **client relationship**. Contracts, applications/sites, projects, payments, subscriptions, milestones, approvals, and deliverables all hang off that relationship.
 
-Current repo fact: the site is still Eleventy/Nunjucks with static pages, dark sci-fi branding, Formspree contact handling, and S3/CloudFront deployment docs. The Next.js app has not been implemented yet.
+Current repo fact: the Next.js app foundation has been implemented alongside the legacy Eleventy source. Public marketing routes now exist in the App Router, and the data foundation uses Prisma with Dockerized local Postgres. The old Eleventy source and S3/CloudFront deployment docs remain as legacy assets until the cleanup and deployment units replace them.
 
 ## Goals
 

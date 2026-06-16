@@ -2,7 +2,7 @@
 
 ## Current State
 
-The repo currently contains an Eleventy 3.x static site under `src/`, generated into `_site/`, with deployment docs for S3 and CloudFront. The target architecture is a Next.js React application hosted on EC2. No Next.js code has been added yet.
+The repo contains the new Next.js App Router foundation under `app/`, `components/`, and `lib/`, staged alongside the legacy Eleventy 3.x source under `src/`. The data foundation uses Prisma with a Dockerized local Postgres service and an initial migration for the client relationship OS schema. The target production architecture remains a Next.js React application hosted on EC2 with RDS Postgres when deployment or client need justifies the cost.
 
 ## Target Stack
 
@@ -22,7 +22,7 @@ The repo currently contains an Eleventy 3.x static site under `src/`, generated 
 | Dev Database | Dockerized Postgres container | Local development without early RDS spend |
 | Production Database | RDS Postgres when justified | Durable managed database once deployment/client need exists |
 | Document Storage | Private S3 bucket | Generated and signed contract PDFs |
-| ORM | Undecided: Prisma or Drizzle | Must be selected before database-backed implementation |
+| ORM | Prisma | Type-safe database access, migrations, and local seed workflow |
 | Web Server | Nginx or Caddy in front of Node | HTTPS termination/proxy on EC2 |
 | Process | systemd or PM2 | Keep Next.js server running after deploy/reboot |
 
@@ -36,8 +36,9 @@ The repo currently contains an Eleventy 3.x static site under `src/`, generated 
 - `lib/billing/` - Clerk subscription entitlement helpers and Stripe payment-link/invoice helpers.
 - `lib/contracts/` - Template versioning, contract generation, PDF rendering, DocuSign orchestration.
 - `lib/storage/` - S3 object storage and signed URL helpers.
-- `lib/db/` - Data access, queries, transactions, and repositories after ORM selection.
-- `db/` or `prisma/` - Database schema and migrations after ORM choice.
+- `lib/db/` - Prisma client initialization and future data access helpers.
+- `prisma/` - Prisma schema, migrations, and seed workflow.
+- `docker-compose.yml` - Dockerized local Postgres development service.
 - `public/` - Static assets that must be served directly.
 - `context/` - Product, architecture, workflow, and unit specs. Not runtime application code.
 - `src/` - Current Eleventy source. It remains legacy until migration starts.
@@ -62,6 +63,16 @@ Primary relational model:
 - **PostgreSQL**: app-owned domain data, relationships, contract metadata, template versions, payment gate records, milestones, deliverables, audit-friendly records.
 - **S3 private bucket**: generated contract PDFs and final signed PDFs.
 - **Repo files**: blog content and public copy during the first implementation pass.
+
+## ORM And Migration Model
+
+- Prisma is the selected ORM.
+- `prisma/schema.prisma` defines the baseline relational schema.
+- `prisma/migrations/` stores checked-in SQL migrations.
+- `prisma/seed.ts` creates deterministic local development seed data.
+- `DATABASE_URL` is the database contract for local, CI, and production database access.
+- Local development uses Docker Compose Postgres on host port `5434` to avoid conflicts with other local Postgres services.
+- Production uses RDS Postgres later. Unit 02 does not provision RDS.
 
 ## Auth And Access Model
 
