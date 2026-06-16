@@ -1,6 +1,7 @@
 import "dotenv/config";
 
 import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
 
 import { PrismaClient } from "../lib/generated/prisma/client";
 
@@ -10,11 +11,13 @@ if (!databaseUrl) {
   throw new Error("DATABASE_URL is required to seed the database.");
 }
 
-const prisma = new PrismaClient({
-  adapter: new PrismaPg({
-    connectionString: databaseUrl,
-  }),
+const pool = new Pool({
+  connectionString: databaseUrl,
 });
+const adapter = new PrismaPg(pool, {
+  disposeExternalPool: true,
+});
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
   await prisma.clientRelationship.deleteMany({

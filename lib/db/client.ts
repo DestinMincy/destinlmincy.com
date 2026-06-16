@@ -1,4 +1,5 @@
 import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
 
 import { PrismaClient } from "@/lib/generated/prisma/client";
 
@@ -17,8 +18,11 @@ function getDatabaseUrl() {
 }
 
 function createPrismaClient() {
-  const adapter = new PrismaPg({
+  const pool = new Pool({
     connectionString: getDatabaseUrl(),
+  });
+  const adapter = new PrismaPg(pool, {
+    disposeExternalPool: true,
   });
 
   return new PrismaClient({ adapter });
