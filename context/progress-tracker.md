@@ -103,3 +103,4 @@ Update this file after every meaningful implementation change.
 - Unit 02 verification passed locally with Dockerized Postgres healthy on port `5434`, `npm run db:migrate -- --name init`, `npm run db:seed`, `npx prisma migrate status`, a Prisma read-count probe, `npm run typecheck`, and `npm run build`.
 - During Unit 02 verification, `localhost:5432` resolved to an existing host Postgres service. The local database contract was moved to `127.0.0.1:5434`.
 - `npm audit --omit=dev` reports moderate advisories in Prisma's dev server dependency and Next/PostCSS. The suggested fixes are breaking downgrades, so they were not applied in Unit 02.
+- Addressed committed CodeRabbit follow-up for Unit 02 by centralizing the `DATABASE_URL` invariant in a side-effect-free helper, reusing it from the Prisma client and seed script, and caching newly created Prisma clients on `globalThis`.

@@ -3,16 +3,14 @@ import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 
+import { getDatabaseUrl } from "../lib/db/database-url";
 import { PrismaClient } from "../lib/generated/prisma/client";
 
-const databaseUrl = process.env.DATABASE_URL;
-
-if (!databaseUrl) {
-  throw new Error("DATABASE_URL is required to seed the database.");
-}
-
 const pool = new Pool({
-  connectionString: databaseUrl,
+  connectionString: getDatabaseUrl(),
+});
+pool.on("error", (error) => {
+  console.error("Unexpected error on idle Postgres client", error);
 });
 const adapter = new PrismaPg(pool, {
   disposeExternalPool: true,
