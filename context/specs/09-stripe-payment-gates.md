@@ -12,7 +12,7 @@ Project payments are custom contract-specific obligations. They are separate fro
 
 ### Payment Gate Model
 
-- Attach payment gate to client relationship, project, and/or contract.
+- Attach payment gate to the contract it belongs to.
 - Support payment type: full upfront, deposit, milestone payment, other.
 - Store amount, currency, due date, required-before-work flag, Stripe URL, Stripe invoice/payment-link ID if available, and status.
 
@@ -35,7 +35,7 @@ Project payments are custom contract-specific obligations. They are separate fro
 
 ## Verify When Done
 
-- [ ] Admin can attach a Stripe invoice/payment link to a project or contract.
+- [ ] Admin can attach a Stripe invoice/payment link to a contract.
 - [ ] Payment gate status is visible to admin.
 - [ ] Payment gate status is visible to the correct client.
 - [ ] Required unpaid gate prevents project from being marked ready to start.

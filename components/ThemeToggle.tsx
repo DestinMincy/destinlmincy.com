@@ -2,9 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-type Theme = "light" | "dark";
-
-const storageKey = "dlm-theme";
+import { applyTheme, THEME_STORAGE_KEY, type Theme } from "@/lib/theme";
 
 /**
  * Determines the current theme setting.
@@ -19,14 +17,6 @@ function readTheme(): Theme {
   }
 
   return matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-}
-
-/**
- * Applies a theme to the document element.
- */
-function applyTheme(theme: Theme) {
-  document.documentElement.dataset.theme = theme;
-  document.documentElement.style.colorScheme = theme;
 }
 
 /**
@@ -46,7 +36,7 @@ export function ThemeToggle() {
     const nextTheme = (theme ?? readTheme()) === "dark" ? "light" : "dark";
 
     try {
-      localStorage.setItem(storageKey, nextTheme);
+      localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
     } catch {
       // Storage can be blocked; the UI should still apply the selected theme.
     }

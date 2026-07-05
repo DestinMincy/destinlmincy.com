@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -8,7 +9,7 @@ const workingRules = [
   "Bad fits get called early.",
 ];
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "About",
   description:
     "Founder and operator of Destin L Mincy Software and AI Agency in Maryville, Tennessee.",

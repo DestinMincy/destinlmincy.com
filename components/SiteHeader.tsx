@@ -24,8 +24,6 @@ export function SiteHeader() {
           <span className="brand__text">Destin L Mincy</span>
         </Link>
 
-        <ThemeToggle />
-
         <nav className="site-nav" aria-label="Primary navigation">
           {navItems.map((item) => (
             <Link key={item.href} href={item.href}>
@@ -33,6 +31,8 @@ export function SiteHeader() {
             </Link>
           ))}
         </nav>
+
+        <ThemeToggle />
       </div>
     </header>
   );

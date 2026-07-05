@@ -23,4 +23,15 @@ export const navItems = [
   { href: "/services", label: "Services" },
   { href: "/work", label: "Work" },
   { href: "/contact", label: "Contact" },
-];
+] as const;
+
+export const topicOptions = [
+  { value: "agent-build", label: "A new AI agent build" },
+  { value: "agent-ops", label: "Ongoing agent ops" },
+  { value: "elatum", label: "ELATUM for my rental" },
+  { value: "software-build", label: "Custom software or contract work" },
+  { value: "partnership", label: "Partnership or referral" },
+  { value: "other", label: "Something else" },
+] as const;
+
+export type TopicValue = (typeof topicOptions)[number]["value"];

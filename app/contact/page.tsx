@@ -1,4 +1,6 @@
-import { site } from "@/lib/site";
+import type { Metadata } from "next";
+
+import { site, topicOptions, type TopicValue } from "@/lib/site";
 
 const fits = [
   "You run a small business and want an AI agent that does real work.",
@@ -6,23 +8,13 @@ const fits = [
   "You have a software build that needs a senior pair of hands.",
 ];
 
-const topicOptions = [
-  { value: "agent-build", label: "A new AI agent build" },
-  { value: "elatum", label: "ELATUM for my rental" },
-  { value: "software-build", label: "Custom software or contract work" },
-  { value: "partnership", label: "Partnership or referral" },
-  { value: "other", label: "Something else" },
-] as const;
-
-type TopicValue = (typeof topicOptions)[number]["value"];
-
 type ContactPageProps = {
   searchParams?: Promise<{
     topic?: string | string[];
   }>;
 };
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Contact",
   description:
     "Get in touch about an AI agent build, ELATUM, custom software, or partnership work.",

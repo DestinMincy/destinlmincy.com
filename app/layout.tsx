@@ -6,6 +6,7 @@ import "@/app/globals.css";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { site } from "@/lib/site";
+import { THEME_STORAGE_KEY } from "@/lib/theme";
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
@@ -50,7 +51,7 @@ export const viewport: Viewport = {
 
 const themeScript = `
 (() => {
-  const storageKey = "dlm-theme";
+  const storageKey = ${JSON.stringify(THEME_STORAGE_KEY)};
 
   function getTheme() {
     const stored = localStorage.getItem(storageKey);

@@ -12,7 +12,7 @@ Do not provision RDS during development. The production target is RDS Postgres, 
 
 ### Database Setup
 
-- Choose Prisma or Drizzle.
+- Use Prisma as the ORM.
 - Add Dockerized Postgres development instructions.
 - Add a Docker Compose service for Postgres unless the Next.js foundation chooses an equivalent local container workflow.
 - Use a named Docker volume so local database state persists across container restarts.
@@ -36,7 +36,7 @@ Keep initial schema narrow enough to support later units without filling in ever
 
 ## Dependencies
 
-- ORM selected during implementation.
+- Prisma (ORM).
 - PostgreSQL driver.
 
 ## Verify When Done

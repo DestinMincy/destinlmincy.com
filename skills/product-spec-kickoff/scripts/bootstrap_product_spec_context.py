@@ -35,6 +35,10 @@ def main() -> int:
     if not target.is_dir():
         raise SystemExit(f"target is not a directory: {target}")
 
+    entry = Path(args.entry)
+    if entry.is_absolute() or any(part == ".." for part in entry.parts):
+        raise SystemExit("--entry must stay inside the target directory")
+
     files = {
         "AGENTS.md": args.entry,
         "context/project-overview.md": "context/project-overview.md",

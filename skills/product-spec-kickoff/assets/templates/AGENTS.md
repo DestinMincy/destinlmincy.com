@@ -10,6 +10,7 @@ Read these files in order before implementation or architecture decisions:
 4. `context/code-standards.md`
 5. `context/ai-workflow-rules.md`
 6. `context/progress-tracker.md`
+7. `context/current-issues.md`
 
 For scoped work, also read the active unit spec under `context/specs/`.
 

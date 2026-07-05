@@ -1,6 +1,16 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
-const services = [
+import type { TopicValue } from "@/lib/site";
+
+const services: Array<{
+  label: string;
+  title: string;
+  body: string;
+  bullets: string[];
+  topic: TopicValue;
+  cta: string;
+}> = [
   {
     label: "01",
     title: "Agent build",
@@ -11,7 +21,7 @@ const services = [
       "Production deployment",
       "Post-launch tuning",
     ],
-    href: "/contact?topic=agent-build",
+    topic: "agent-build",
     cta: "Start a build",
   },
   {
@@ -24,7 +34,7 @@ const services = [
       "Performance and cost review",
       "Direct access to the builder",
     ],
-    href: "/contact?topic=agent-ops",
+    topic: "agent-ops",
     cta: "Talk retainer",
   },
   {
@@ -37,12 +47,12 @@ const services = [
       "Documented handoff",
       "Scoped delivery",
     ],
-    href: "/contact?topic=software-build",
+    topic: "software-build",
     cta: "Scope a build",
   },
 ];
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Services",
   description:
     "Agent builds, agent operations, and custom software from Destin L Mincy Software and AI Agency.",
@@ -81,7 +91,10 @@ export default function ServicesPage() {
                   ))}
                 </ul>
               </div>
-              <Link className="button button--secondary" href={service.href}>
+              <Link
+                className="button button--secondary"
+                href={`/contact?topic=${service.topic}`}
+              >
                 {service.cta}
               </Link>
             </article>

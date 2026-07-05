@@ -1,8 +1,9 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { site } from "@/lib/site";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Work",
   description: "Featured agents and software builds from Destin L Mincy.",
 };
