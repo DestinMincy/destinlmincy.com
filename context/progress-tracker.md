@@ -4,11 +4,11 @@ Update this file after every meaningful implementation change.
 
 ## Current Phase
 
-- Unit 03 preparation for Clerk auth and access control.
+- Unit 04: client relationship core (admin-managed client relationships and client users).
 
 ## Current Goal
 
-- Prepare to add Clerk auth, server-side protected route structure, and admin email allowlist enforcement.
+- Add admin CRUD for client relationships and Clerk-backed client user attachment, building on the Unit 03 access rules.
 
 ## Completed
 
@@ -41,6 +41,12 @@ Update this file after every meaningful implementation change.
 - Implemented Unit 02 data foundation: Dockerized local Postgres on host port `5434`, Prisma config/schema, generated-client workflow, initial migration, deterministic seed data, and a server-side Prisma client helper.
 - Added baseline schema shells for client relationships, client users, applications/sites, projects, contract templates and versions, payment gates, subscription references, milestones, and deliverables.
 - Documented the local database workflow and RDS production target in `docs/data-foundation.md`.
+- Implemented Unit 03 Clerk auth and access control: `@clerk/nextjs` SDK, `proxy.ts` (Next.js 16 renamed `middleware.ts`) running `clerkMiddleware()` to require sign-in before `/portal` and `/admin` render, `<ClerkProvider>` in the root layout, and `/sign-in`/`/sign-up` routes using themed Clerk components (`SignIn`/`SignUp` with an `appearance.variables` mapping to the site's semantic tokens, not custom auth screens).
+- Added `lib/auth/admin-allowlist.ts` (parses the `ADMIN_EMAILS` env allowlist, case-insensitive/trimmed) and `lib/auth/client-membership.ts` (Prisma lookup of a Clerk user id against `ClientUser`/`ClientRelationship` from Unit 02).
+- Added spartan placeholder pages: `/portal` (shows the linked client relationship name, or a "no client relationship on file" contact message for signed-in users with no membership) and `/admin` (returns 404 via `notFound()` for signed-in non-admins; renders a minimal operator console for allowlisted admins). Real dashboards remain Unit 12/13 scope.
+- Documented Clerk env vars in `.env.example`: `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, `NEXT_PUBLIC_CLERK_SIGN_IN_URL`, `NEXT_PUBLIC_CLERK_SIGN_UP_URL`, `ADMIN_EMAILS`. Real keys live in gitignored `.env.local`, pulled via `clerk env pull` after linking the repo to the existing `destinlmincy.com` Clerk application.
+- Did not wire sign-in/portal/admin links into `SiteHeader`/`SiteFooter` nav; that was judged out of this unit's listed scope and is deferred to whichever unit builds the real portal/admin shells (Unit 12/13).
+- Discovered and fixed a Clerk instance configuration defect that would have broken real sign-ins: `organization_settings.force_organization_selection` defaulted to `true` on the new Clerk application, forcing every user through an organization setup screen this project's v1 does not use. Disabled it permanently on the development instance. If a production Clerk instance is created later (Unit 15), the same setting must be disabled there too.
 
 ## In Progress
 
@@ -48,9 +54,8 @@ Update this file after every meaningful implementation change.
 
 ## Next Up
 
-- Begin Unit 03: Clerk auth and access control.
-- Add Clerk environment contract and protected route structure.
-- Add server-side admin email allowlist enforcement.
+- Begin Unit 04: client relationship core (admin CRUD for client relationships, Clerk-backed client user attachment).
+- Extend admin-side access checks from Unit 03 to relationship-scoped data.
 
 ## Open Questions
 
@@ -83,6 +88,7 @@ Update this file after every meaningful implementation change.
 - Prisma is the selected ORM and migration system.
 - Local Docker Postgres uses host port `5434` to avoid conflicts with other local Postgres services.
 - UI implementation must avoid generic AI/SaaS visual tropes; gradients require a documented functional or brand reason.
+- Clerk is linked via the `clerk` CLI to the existing `destinlmincy.com` application (development instance); `/portal` is the client portal route name (architecture's "/portal or /dashboard" choice) and `/admin` is the operator route. Both are gated by `proxy.ts` (Next.js 16's renamed `middleware.ts`; `clerkMiddleware()` itself is unchanged) plus a server-side check in the page component (membership lookup for `/portal`, `ADMIN_EMAILS` allowlist for `/admin`).
 - Brand evolves the existing blue/gold/silver identity toward approachable/human/trustworthy rather than rebranding; the cold sci-fi execution (electric-blue glow, neural-canvas atmosphere, Orbitron) is retired.
 - Zilla Slab and Hanken Grotesk replace Orbitron and Rajdhani in the Next.js app.
 - Font roles are strict: Zilla Slab for display/headings/markers, Hanken Grotesk for body/UI.
@@ -105,3 +111,7 @@ Update this file after every meaningful implementation change.
 - `npm audit --omit=dev` reports moderate advisories in Prisma's dev server dependency and Next/PostCSS. The suggested fixes are breaking downgrades, so they were not applied in Unit 02.
 - Addressed committed CodeRabbit follow-up for Unit 02 by centralizing the `DATABASE_URL` invariant in a side-effect-free helper, reusing it from the Prisma client and seed script, and caching newly created Prisma clients on `globalThis`.
 - Addressed PR #5 CodeRabbit findings: shared contact topic options (adds `agent-ops`), typed page `metadata` exports, header DOM/tab order, shared theme storage key in `lib/theme.ts`, loopback-only Docker Postgres port, trimmed `DATABASE_URL` validation, `navItems` `as const`, compound `[id, clientRelationshipId]` constraints via the `enforce_relationship_scoped_compound_fks` migration (applied and reseeded locally without reset), Prisma locked in the Unit 02 spec, payment-gate spec narrowed to contract-scoped attachment per architecture, kickoff template read order now includes `context/current-issues.md`, and the kickoff bootstrap script rejects `--entry` paths that escape the target repo. The SVG apple-touch-icon finding is deferred to `context/current-issues.md` pending a committed square PNG asset.
+- Unit 03 verification: `npm run typecheck` and `npm run build` both pass (`proxy.ts` shows as `ƒ Proxy (Middleware)` in the build route summary; `/portal`, `/admin`, `/sign-in`, `/sign-up` render as dynamic `ƒ` routes). Live HTTP checks against a local `next start` server (port 3101, to avoid an unrelated process already on 3000) confirmed signed-out behavior: `/`, `/about`, `/services`, `/work`, `/contact`, `/sign-in`, `/sign-up` all return 200; `/portal` and `/admin` return 307 to `/sign-in?redirect_url=...`.
+- Signed-in behavior was verified live end-to-end (not just by construction) using three disposable Clerk dev-instance test users created and later deleted via the `clerk` CLI, driven through the real `<SignIn/>` UI with the gstack `/browse` headless browser: a user linked to the seeded `ClientUser` row saw the `DLM Demo Relationship` name on `/portal` and got a 404 on `/admin`; a user with no `ClientUser` row saw the "No client relationship on file" message on `/portal` and also 404 on `/admin`; a user added to `ADMIN_EMAILS` saw the operator console on `/admin` (200) and still got the "no relationship" message on `/portal` (proving the two checks are independent). All test users, the temporary DB link, and the temporary `ADMIN_EMAILS` addition were removed afterward; `npm run db:seed` was re-run to restore clean seed state.
+- The `findClientMembershipByClerkUserId` and `isAdminEmail` helpers were also verified directly (by construction) against the real local database and real env parsing via a throwaway probe script (`prisma/tmp-unit03-probe.ts`, deleted before commit): found/missing/unknown membership lookups and case-insensitive/whitespace-trimmed allowlist matching all behaved as expected.
+- Two Clerk development-instance settings had to be changed to complete a real password sign-in through the hosted `<SignIn/>` component: `auth_password.device_trust.enabled` (a "verify this new device" email-code challenge) was toggled off only for the duration of the browser test and restored to `true` afterward; `organization_settings.force_organization_selection` was toggled off and left off, because it forced every signed-in user through an organization-setup screen that this project's org-free v1 design does not use (see Architecture Decisions).

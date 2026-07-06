@@ -600,6 +600,11 @@ main {
   max-width: 13ch;
 }
 
+.auth-page {
+  display: grid;
+  justify-items: center;
+}
+
 .founder-layout {
   display: grid;
   grid-template-columns: minmax(240px, 360px) minmax(0, 1fr);

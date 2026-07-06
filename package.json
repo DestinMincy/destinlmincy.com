@@ -31,6 +31,7 @@
     "typescript": "^6.0.3"
   },
   "dependencies": {
+    "@clerk/nextjs": "^7.5.12",
     "@fontsource-variable/hanken-grotesk": "^5.2.8",
     "@fontsource/zilla-slab": "^5.2.8",
     "@prisma/adapter-pg": "^7.8.0",
