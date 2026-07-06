@@ -1,3 +1,4 @@
+import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import type { ReactNode } from "react";
@@ -92,9 +93,11 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <SiteHeader />
-        <main>{children}</main>
-        <SiteFooter />
+        <ClerkProvider>
+          <SiteHeader />
+          <main>{children}</main>
+          <SiteFooter />
+        </ClerkProvider>
       </body>
     </html>
   );

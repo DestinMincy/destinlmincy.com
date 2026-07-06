@@ -9,3 +9,4 @@ lib/generated/prisma/
 .env.local
 *.log
 tsconfig.tsbuildinfo
+.gstack/
