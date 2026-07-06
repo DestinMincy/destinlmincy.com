@@ -1,5 +1,7 @@
 const ADMIN_EMAILS_ENV_VAR = "ADMIN_EMAILS";
 
+let cachedAllowlist: string[] | null = null;
+
 function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
 }
@@ -7,18 +9,27 @@ function normalizeEmail(email: string): string {
 /**
  * Reads and parses the comma-separated `ADMIN_EMAILS` allowlist.
  * Entries are trimmed and lowercased; empty entries are dropped.
+ * The parsed result is cached for the process lifetime because the
+ * env var cannot change at runtime.
  */
 export function getAdminEmailAllowlist(): string[] {
+  if (cachedAllowlist) {
+    return cachedAllowlist;
+  }
+
   const raw = process.env[ADMIN_EMAILS_ENV_VAR]?.trim();
 
   if (!raw) {
-    return [];
+    cachedAllowlist = [];
+    return cachedAllowlist;
   }
 
-  return raw
+  cachedAllowlist = raw
     .split(",")
     .map((email) => normalizeEmail(email))
     .filter((email) => email.length > 0);
+
+  return cachedAllowlist;
 }
 
 /**
