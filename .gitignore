@@ -1,7 +1,11 @@
 node_modules/
 _site/
+.next/
+lib/generated/prisma/
+.claude/
 .cache/
 .DS_Store
 .env
 .env.local
 *.log
+tsconfig.tsbuildinfo

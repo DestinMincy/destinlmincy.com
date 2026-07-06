@@ -1,0 +1,4 @@
+interface:
+  display_name: "Product Spec Kickoff"
+  short_description: "Create six-file product spec packs."
+  default_prompt: "I am starting a new project or expanding a product idea. Use this workflow to brainstorm, define the product spine, and create the context/spec pack before coding."
