@@ -9,6 +9,12 @@ export interface ClientMembership {
 /**
  * Looks up the client relationship a Clerk user is attached to, if any.
  * A Clerk user with no matching `ClientUser` row has no portal access.
+ *
+ * The domain model intentionally allows one Clerk user to belong to
+ * multiple client relationships (no unique constraint on `clerkUserId`).
+ * Portal v1 surfaces a single relationship, so this helper returns the
+ * oldest membership deterministically; multi-relationship selection UX
+ * belongs to the client portal unit.
  */
 export async function findClientMembershipByClerkUserId(
   clerkUserId: string,
