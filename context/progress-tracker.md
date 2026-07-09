@@ -4,11 +4,11 @@ Update this file after every meaningful implementation change.
 
 ## Current Phase
 
-- Unit 04: client relationship core (admin-managed client relationships and client users).
+- Unit 05: applications/sites and projects.
 
 ## Current Goal
 
-- Add admin CRUD for client relationships and Clerk-backed client user attachment, building on the Unit 03 access rules.
+- Begin Unit 05 per `context/specs/05-applications-sites-projects.md`, building on the Unit 04 relationship core.
 
 ## Completed
 
@@ -47,6 +47,12 @@ Update this file after every meaningful implementation change.
 - Documented Clerk env vars in `.env.example`: `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, `NEXT_PUBLIC_CLERK_SIGN_IN_URL`, `NEXT_PUBLIC_CLERK_SIGN_UP_URL`, `ADMIN_EMAILS`. Real keys live in gitignored `.env.local`, pulled via `clerk env pull` after linking the repo to the existing `destinlmincy.com` Clerk application.
 - Did not wire sign-in/portal/admin links into `SiteHeader`/`SiteFooter` nav; that was judged out of this unit's listed scope and is deferred to whichever unit builds the real portal/admin shells (Unit 12/13).
 - Discovered and fixed a Clerk instance configuration defect that would have broken real sign-ins: `organization_settings.force_organization_selection` defaulted to `true` on the new Clerk application, forcing every user through an organization setup screen this project's v1 does not use. Disabled it permanently on the development instance. If a production Clerk instance is created later (Unit 15), the same setting must be disabled there too.
+- Implemented Unit 04 client relationship core: admin list/create/view/edit for client relationships under `/admin/relationships`, lifecycle updates from the detail view, and Clerk-backed client user attach/list/remove with shared access (no roles).
+- Extended the schema additively (migration `add_relationship_contact_and_client_user_status`): `ClientRelationship` gained `legalName`, `primaryContactName`, `primaryContactEmail`, `primaryContactPhone`; `ClientUser` gained `status` (`ClientUserStatus` enum: `ACTIVE`, `REMOVED`, default `ACTIVE`). The lifecycle enum already contained all nine spec states from Unit 02 and was not changed. Removal is a soft deactivate (`REMOVED`), so membership history is kept and re-attaching the same email reactivates the row instead of duplicating it.
+- `findClientMembershipByClerkUserId` now matches only `ACTIVE` memberships, so removing a client user actually revokes portal access.
+- All Unit 04 mutations are server actions in `app/admin/relationships/actions.ts`; every action re-checks the admin allowlist server-side (`lib/auth/require-admin.ts` wraps the Unit 03 pattern for pages and actions), validates input at the boundary (`lib/relationships/validation.ts`: required name, length ceilings, email shape, lifecycle enum membership), and returns field-level errors instead of throwing.
+- Client user attachment resolves the email against the Clerk development instance with `clerkClient().users.getUserList({ emailAddress })` and stores the Clerk user id, normalized email, and display name on `ClientUser`; an unknown email returns a clear form error ("No account with that email exists yet"), and duplicates are rejected.
+- Relationship slugs are generated server-side from the name (lowercase, diacritics stripped, numeric suffix on collision) and are intentionally stable across renames.
 
 ## In Progress
 
@@ -54,8 +60,8 @@ Update this file after every meaningful implementation change.
 
 ## Next Up
 
-- Begin Unit 04: client relationship core (admin CRUD for client relationships, Clerk-backed client user attachment).
-- Extend admin-side access checks from Unit 03 to relationship-scoped data.
+- Begin Unit 05: applications/sites and projects per `context/specs/05-applications-sites-projects.md`.
+- Reuse the Unit 04 admin surface patterns (server actions, boundary validation, `requireAdminForPage`) for the new admin workspaces.
 
 ## Open Questions
 
@@ -115,3 +121,7 @@ Update this file after every meaningful implementation change.
 - Signed-in behavior was verified live end-to-end (not just by construction) using three disposable Clerk dev-instance test users created and later deleted via the `clerk` CLI, driven through the real `<SignIn/>` UI with the gstack `/browse` headless browser: a user linked to the seeded `ClientUser` row saw the `DLM Demo Relationship` name on `/portal` and got a 404 on `/admin`; a user with no `ClientUser` row saw the "No client relationship on file" message on `/portal` and also 404 on `/admin`; a user added to `ADMIN_EMAILS` saw the operator console on `/admin` (200) and still got the "no relationship" message on `/portal` (proving the two checks are independent). All test users, the temporary DB link, and the temporary `ADMIN_EMAILS` addition were removed afterward; `npm run db:seed` was re-run to restore clean seed state.
 - The `findClientMembershipByClerkUserId` and `isAdminEmail` helpers were also verified directly (by construction) against the real local database and real env parsing via a throwaway probe script (`prisma/tmp-unit03-probe.ts`, deleted before commit): found/missing/unknown membership lookups and case-insensitive/whitespace-trimmed allowlist matching all behaved as expected.
 - Two Clerk development-instance settings had to be changed to complete a real password sign-in through the hosted `<SignIn/>` component: `auth_password.device_trust.enabled` (a "verify this new device" email-code challenge) was toggled off only for the duration of the browser test and restored to `true` afterward; `organization_settings.force_organization_selection` was toggled off and left off, because it forced every signed-in user through an organization-setup screen that this project's org-free v1 design does not use (see Architecture Decisions).
+- Unit 04 verification: `npm run typecheck` and `npm run build` pass; the build route summary lists `/admin/relationships`, `/admin/relationships/new`, `/admin/relationships/[id]`, and `/admin/relationships/[id]/edit` as dynamic routes. The `add_relationship_contact_and_client_user_status` migration applied cleanly via `npm run db:migrate` (non-interactive, no `migrate diff` workaround needed) and `npm run db:seed` remains deterministic (seed now fills the new contact fields and adds a `REMOVED`-status client user to exercise the status filter).
+- Unit 04 live verification ran against a production `next start` on port 3210 (port 3000 is occupied by an unrelated process) with two disposable Clerk dev-instance test users (deleted afterward) and the admin allowlist supplied via an `ADMIN_EMAILS` shell override so the committed `.env.local` was untouched. Verified in a real browser session (gstack `/browse`): admin created a relationship through the form (redirects to the detail view; slug `unit04-verification-co` generated server-side), edited it, moved lifecycle `LEAD` to `DISCOVERY` (persisted in Postgres), attached the Clerk-backed test client by email (row stored the real Clerk user id), saw it listed, removed it (row flipped to `REMOVED`, kept for audit), and re-attached it (same row reactivated, no duplicate). Invalid submissions returned field errors without crashing: empty name, malformed contact email, unknown attach email, duplicate attach.
+- Unit 04 access checks verified live: signed-out requests to all four new admin routes 307-redirect to `/sign-in`; the signed-in non-admin client user received 404 from `/admin`, `/admin/relationships`, the detail route, `/new`, and `/edit`; the same client user's `/portal` showed only their own relationship name. Server actions re-checking `isAdminEmail` before mutating is verified by construction (every action guards before touching Prisma). Device trust was again toggled off for the browser session and restored to `true` afterward; test DB rows were deleted and the database re-seeded.
+- Unit 04 admin UI design direction (per `frontend-design-taste.md` derivation): grounded, legible, calm. Existing semantic tokens only; blue for structure and links, gold reserved for the primary action and lifecycle hex markers, silver hairlines on rectangular panels; Zilla Slab headings over Hanken Grotesk UI; the repeated layout primitive is the hairline-bordered rectangular panel with uppercase table headers, and the hex appears only as small lifecycle status markers. Light and dark themes plus 375px mobile were checked via screenshots.

@@ -29,6 +29,10 @@ async function main() {
       lifecycle: "ACTIVE",
       name: "DLM Demo Relationship",
       slug: "dlm-demo",
+      legalName: "DLM Demo Relationship LLC",
+      primaryContactName: "Example Client",
+      primaryContactEmail: "client@example.test",
+      primaryContactPhone: "555-0100",
       summary: "Local seed relationship for Unit 02 database verification.",
     },
   });
@@ -39,6 +43,17 @@ async function main() {
       clerkUserId: "user_unit02_demo",
       email: "client@example.test",
       name: "Example Client",
+      status: "ACTIVE",
+    },
+  });
+
+  const removedUser = await prisma.clientUser.create({
+    data: {
+      clientRelationshipId: relationship.id,
+      clerkUserId: "user_unit04_removed_demo",
+      email: "former-client@example.test",
+      name: "Former Client Contact",
+      status: "REMOVED",
     },
   });
 
@@ -117,6 +132,7 @@ async function main() {
         applicationSiteId: application.id,
         clientRelationshipId: relationship.id,
         clientUserId: user.id,
+        removedClientUserId: removedUser.id,
         contractTemplateId: template.id,
         deliverableId: deliverable.id,
         milestoneId: milestone.id,
