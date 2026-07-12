@@ -22,6 +22,8 @@ import {
 const NOT_AUTHORIZED = "You are not authorized to do that.";
 const RELATIONSHIPS_PATH = "/admin/relationships";
 const MAX_EMAIL_LENGTH = 254;
+const ALREADY_ATTACHED =
+  "That person is already attached to this relationship.";
 
 function relationshipPath(id: string): string {
   return `${RELATIONSHIPS_PATH}/${id}`;
@@ -308,7 +310,7 @@ export async function attachClientUserAction(
     return {
       status: "error",
       email,
-      errors: { email: "That person is already attached to this relationship." },
+      errors: { email: ALREADY_ATTACHED },
     };
   }
 
@@ -332,6 +334,16 @@ export async function attachClientUserAction(
       });
     }
   } catch (error: unknown) {
+    // A concurrent attach can win the race between the findUnique check
+    // and this create, so the compound unique violation means the person
+    // is already attached rather than a generic failure.
+    if (isUniqueConstraintError(error)) {
+      return {
+        status: "error",
+        email,
+        errors: { email: ALREADY_ATTACHED },
+      };
+    }
     console.error("Failed to attach client user", error);
     return {
       status: "error",

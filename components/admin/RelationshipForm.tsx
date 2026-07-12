@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, type ReactNode } from "react";
 
 import type {
   RelationshipFormState,
@@ -17,6 +17,46 @@ interface RelationshipFormProps {
   action: RelationshipFormAction;
   initialValues: RelationshipFormValues;
   submitLabel: string;
+}
+
+interface FieldControlProps {
+  id: string;
+  name: string;
+  "aria-invalid": true | undefined;
+  "aria-describedby": string | undefined;
+}
+
+interface FormFieldProps {
+  id: string;
+  label: string;
+  error?: string;
+  children: (control: FieldControlProps) => ReactNode;
+}
+
+/**
+ * Shared label/control/error wrapper. The render prop receives the id,
+ * name, and aria attributes the control must spread so the error text
+ * stays associated with it.
+ */
+function FormField({ id, label, error, children }: FormFieldProps) {
+  const errorId = `${id}-error`;
+
+  return (
+    <div className="field">
+      <label htmlFor={id}>{label}</label>
+      {children({
+        id,
+        name: id,
+        "aria-invalid": error ? true : undefined,
+        "aria-describedby": error ? errorId : undefined,
+      })}
+      {error ? (
+        <p className="field-error" id={errorId}>
+          {error}
+        </p>
+      ) : null}
+    </div>
+  );
 }
 
 /**
@@ -46,160 +86,116 @@ export function RelationshipForm({
       ) : null}
 
       <div className="admin-form__row">
-        <div className="field">
-          <label htmlFor="name">Name</label>
-          <input
-            id="name"
-            name="name"
-            type="text"
-            required
-            maxLength={120}
-            defaultValue={values.name}
-            aria-invalid={state.errors.name ? true : undefined}
-            aria-describedby={state.errors.name ? "name-error" : undefined}
-          />
-          {state.errors.name ? (
-            <p className="field-error" id="name-error">
-              {state.errors.name}
-            </p>
-          ) : null}
-        </div>
+        <FormField id="name" label="Name" error={state.errors.name}>
+          {(control) => (
+            <input
+              {...control}
+              type="text"
+              required
+              maxLength={120}
+              defaultValue={values.name}
+            />
+          )}
+        </FormField>
 
-        <div className="field">
-          <label htmlFor="legalName">Company or legal name</label>
-          <input
-            id="legalName"
-            name="legalName"
-            type="text"
-            maxLength={200}
-            defaultValue={values.legalName}
-            aria-invalid={state.errors.legalName ? true : undefined}
-            aria-describedby={
-              state.errors.legalName ? "legalName-error" : undefined
-            }
-          />
-          {state.errors.legalName ? (
-            <p className="field-error" id="legalName-error">
-              {state.errors.legalName}
-            </p>
-          ) : null}
-        </div>
+        <FormField
+          id="legalName"
+          label="Company or legal name"
+          error={state.errors.legalName}
+        >
+          {(control) => (
+            <input
+              {...control}
+              type="text"
+              maxLength={200}
+              defaultValue={values.legalName}
+            />
+          )}
+        </FormField>
       </div>
 
       <div className="admin-form__row">
-        <div className="field">
-          <label htmlFor="primaryContactName">Primary contact name</label>
-          <input
-            id="primaryContactName"
-            name="primaryContactName"
-            type="text"
-            maxLength={120}
-            autoComplete="off"
-            defaultValue={values.primaryContactName}
-            aria-invalid={state.errors.primaryContactName ? true : undefined}
-            aria-describedby={
-              state.errors.primaryContactName
-                ? "primaryContactName-error"
-                : undefined
-            }
-          />
-          {state.errors.primaryContactName ? (
-            <p className="field-error" id="primaryContactName-error">
-              {state.errors.primaryContactName}
-            </p>
-          ) : null}
-        </div>
+        <FormField
+          id="primaryContactName"
+          label="Primary contact name"
+          error={state.errors.primaryContactName}
+        >
+          {(control) => (
+            <input
+              {...control}
+              type="text"
+              maxLength={120}
+              autoComplete="off"
+              defaultValue={values.primaryContactName}
+            />
+          )}
+        </FormField>
 
-        <div className="field">
-          <label htmlFor="lifecycle">Lifecycle</label>
-          <select
-            id="lifecycle"
-            name="lifecycle"
-            defaultValue={values.lifecycle}
-            aria-invalid={state.errors.lifecycle ? true : undefined}
-            aria-describedby={
-              state.errors.lifecycle ? "lifecycle-error" : undefined
-            }
-          >
-            {LIFECYCLE_VALUES.map((value) => (
-              <option key={value} value={value}>
-                {LIFECYCLE_LABELS[value]}
-              </option>
-            ))}
-          </select>
-          {state.errors.lifecycle ? (
-            <p className="field-error" id="lifecycle-error">
-              {state.errors.lifecycle}
-            </p>
-          ) : null}
-        </div>
+        <FormField
+          id="lifecycle"
+          label="Lifecycle"
+          error={state.errors.lifecycle}
+        >
+          {(control) => (
+            <select {...control} defaultValue={values.lifecycle}>
+              {LIFECYCLE_VALUES.map((value) => (
+                <option key={value} value={value}>
+                  {LIFECYCLE_LABELS[value]}
+                </option>
+              ))}
+            </select>
+          )}
+        </FormField>
       </div>
 
       <div className="admin-form__row">
-        <div className="field">
-          <label htmlFor="primaryContactEmail">Primary contact email</label>
-          <input
-            id="primaryContactEmail"
-            name="primaryContactEmail"
-            type="email"
-            maxLength={254}
-            autoComplete="off"
-            defaultValue={values.primaryContactEmail}
-            aria-invalid={state.errors.primaryContactEmail ? true : undefined}
-            aria-describedby={
-              state.errors.primaryContactEmail
-                ? "primaryContactEmail-error"
-                : undefined
-            }
-          />
-          {state.errors.primaryContactEmail ? (
-            <p className="field-error" id="primaryContactEmail-error">
-              {state.errors.primaryContactEmail}
-            </p>
-          ) : null}
-        </div>
+        <FormField
+          id="primaryContactEmail"
+          label="Primary contact email"
+          error={state.errors.primaryContactEmail}
+        >
+          {(control) => (
+            <input
+              {...control}
+              type="email"
+              maxLength={254}
+              autoComplete="off"
+              defaultValue={values.primaryContactEmail}
+            />
+          )}
+        </FormField>
 
-        <div className="field">
-          <label htmlFor="primaryContactPhone">Primary contact phone</label>
-          <input
-            id="primaryContactPhone"
-            name="primaryContactPhone"
-            type="tel"
-            maxLength={40}
-            autoComplete="off"
-            defaultValue={values.primaryContactPhone}
-            aria-invalid={state.errors.primaryContactPhone ? true : undefined}
-            aria-describedby={
-              state.errors.primaryContactPhone
-                ? "primaryContactPhone-error"
-                : undefined
-            }
-          />
-          {state.errors.primaryContactPhone ? (
-            <p className="field-error" id="primaryContactPhone-error">
-              {state.errors.primaryContactPhone}
-            </p>
-          ) : null}
-        </div>
+        <FormField
+          id="primaryContactPhone"
+          label="Primary contact phone"
+          error={state.errors.primaryContactPhone}
+        >
+          {(control) => (
+            <input
+              {...control}
+              type="tel"
+              maxLength={40}
+              autoComplete="off"
+              defaultValue={values.primaryContactPhone}
+            />
+          )}
+        </FormField>
       </div>
 
-      <div className="field">
-        <label htmlFor="summary">Notes and status summary</label>
-        <textarea
-          id="summary"
-          name="summary"
-          rows={5}
-          maxLength={2000}
-          defaultValue={values.summary}
-          aria-invalid={state.errors.summary ? true : undefined}
-          aria-describedby={state.errors.summary ? "summary-error" : undefined}
-        />
-        {state.errors.summary ? (
-          <p className="field-error" id="summary-error">
-            {state.errors.summary}
-          </p>
-        ) : null}
-      </div>
+      <FormField
+        id="summary"
+        label="Notes and status summary"
+        error={state.errors.summary}
+      >
+        {(control) => (
+          <textarea
+            {...control}
+            rows={5}
+            maxLength={2000}
+            defaultValue={values.summary}
+          />
+        )}
+      </FormField>
 
       <div className="button-row">
         <button

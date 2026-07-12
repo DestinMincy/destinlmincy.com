@@ -24,7 +24,7 @@ export async function findClientMembershipByClerkUserId(
 ): Promise<ClientMembership | null> {
   const clientUser = await prisma.clientUser.findFirst({
     where: { clerkUserId, status: "ACTIVE" },
-    orderBy: { createdAt: "asc" },
+    orderBy: [{ createdAt: "asc" }, { id: "asc" }],
     select: {
       id: true,
       clientRelationshipId: true,
