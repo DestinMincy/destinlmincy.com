@@ -16,7 +16,7 @@ const FIELD_MAX_LENGTHS = {
 } as const;
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const COMBINING_MARKS_PATTERN = /[̀-ͯ]/g;
+const COMBINING_MARKS_PATTERN = /[\u0300-\u036f]/g;
 
 function readField(formData: FormData, field: string): string {
   const value = formData.get(field);

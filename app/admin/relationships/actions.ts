@@ -244,12 +244,26 @@ export async function attachClientUserAction(
     };
   }
 
-  const relationship = await prisma.clientRelationship.findUnique({
-    where: { id: relationshipId },
-    select: { id: true },
-  });
+  let relationshipIdValue: string | null = null;
 
-  if (!relationship) {
+  try {
+    const relationship = await prisma.clientRelationship.findUnique({
+      where: { id: relationshipId },
+      select: { id: true },
+    });
+
+    relationshipIdValue = relationship?.id ?? null;
+  } catch (error: unknown) {
+    console.error("Failed to load relationship", error);
+    return {
+      status: "error",
+      email,
+      errors: {},
+      formError: "Something went wrong while saving. Try again.",
+    };
+  }
+
+  if (!relationshipIdValue) {
     return {
       status: "error",
       email,
@@ -268,7 +282,9 @@ export async function attachClientUserAction(
     });
     const match = candidates.find((candidate) =>
       candidate.emailAddresses.some(
-        (address) => address.emailAddress.toLowerCase() === email,
+        (address) =>
+          address.emailAddress.toLowerCase() === email &&
+          address.verification?.status === "verified",
       ),
     );
 
@@ -296,15 +312,27 @@ export async function attachClientUserAction(
     };
   }
 
-  const existing = await prisma.clientUser.findUnique({
-    where: {
-      clientRelationshipId_clerkUserId: {
-        clientRelationshipId: relationshipId,
-        clerkUserId,
+  let existing: { id: string; status: string } | null = null;
+
+  try {
+    existing = await prisma.clientUser.findUnique({
+      where: {
+        clientRelationshipId_clerkUserId: {
+          clientRelationshipId: relationshipId,
+          clerkUserId,
+        },
       },
-    },
-    select: { id: true, status: true },
-  });
+      select: { id: true, status: true },
+    });
+  } catch (error: unknown) {
+    console.error("Failed to check client user membership", error);
+    return {
+      status: "error",
+      email,
+      errors: {},
+      formError: "Something went wrong while saving. Try again.",
+    };
+  }
 
   if (existing?.status === "ACTIVE") {
     return {
@@ -368,14 +396,26 @@ export async function removeClientUserAction(
     return { status: "error", error: NOT_AUTHORIZED };
   }
 
-  const { count } = await prisma.clientUser.updateMany({
-    where: {
-      id: clientUserId,
-      clientRelationshipId: relationshipId,
-      status: "ACTIVE",
-    },
-    data: { status: "REMOVED" },
-  });
+  let count = 0;
+
+  try {
+    const result = await prisma.clientUser.updateMany({
+      where: {
+        id: clientUserId,
+        clientRelationshipId: relationshipId,
+        status: "ACTIVE",
+      },
+      data: { status: "REMOVED" },
+    });
+
+    count = result.count;
+  } catch (error: unknown) {
+    console.error("Failed to remove client user", error);
+    return {
+      status: "error",
+      error: "Something went wrong while saving. Try again.",
+    };
+  }
 
   if (count === 0) {
     return {
