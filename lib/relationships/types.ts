@@ -56,7 +56,7 @@ export const EMPTY_RELATIONSHIP_FORM_VALUES: RelationshipFormValues = {
   primaryContactPhone: "",
   summary: "",
   lifecycle: "LEAD",
-};
+} as const;
 
 export type RelationshipFieldName = keyof RelationshipFormValues;
 
@@ -71,7 +71,7 @@ export const IDLE_RELATIONSHIP_FORM_STATE: RelationshipFormState = {
   status: "idle",
   values: EMPTY_RELATIONSHIP_FORM_VALUES,
   errors: {},
-};
+} as const;
 
 export interface AttachClientUserFormState {
   status: "idle" | "error";
@@ -86,7 +86,7 @@ export const IDLE_ATTACH_CLIENT_USER_STATE: AttachClientUserFormState = {
   status: "idle",
   email: "",
   errors: {},
-};
+} as const;
 
 /** Minimal state for single-purpose actions (lifecycle update, removal). */
 export interface SimpleActionState {
@@ -96,4 +96,4 @@ export interface SimpleActionState {
 
 export const IDLE_SIMPLE_ACTION_STATE: SimpleActionState = {
   status: "idle",
-};
+} as const;

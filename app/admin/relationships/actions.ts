@@ -306,7 +306,7 @@ export async function attachClientUserAction(
         email,
         errors: {
           email:
-            "No account with that email exists yet. The person must sign up before they can be attached.",
+            "No account with a verified matching email was found. The person must sign up and verify that email before they can be attached.",
         },
       };
     }
