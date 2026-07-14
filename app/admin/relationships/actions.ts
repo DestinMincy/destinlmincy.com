@@ -78,29 +78,40 @@ function isRecordNotFoundError(error: unknown): boolean {
 /**
  * Picks a slug that is not already taken, appending a numeric suffix
  * when the base candidate collides with existing relationships.
+ *
+ * Candidate lookup is intentionally field-exact: near SLUG_MAX_LENGTH,
+ * truncating the suffix can change the prefix, so candidate uniqueness
+ * must be proven by the exact string rather than a broad startsWith query.
  */
 async function resolveUniqueSlug(name: string): Promise<string> {
   const base = slugifyRelationshipName(name);
-  const taken = new Set(
-    (
-      await prisma.clientRelationship.findMany({
-        where: { slug: { startsWith: base } },
-        select: { slug: true },
-      })
-    ).map((row) => row.slug),
-  );
 
-  if (!taken.has(base)) {
-    return base;
+  if (base.length <= SLUG_MAX_LENGTH) {
+    const existing = await prisma.clientRelationship.findUnique({
+      where: { slug: base },
+      select: { id: true },
+    });
+    if (!existing) {
+      return base;
+    }
   }
 
-  for (let suffix = 2; suffix <= taken.size + 1; suffix += 1) {
+  for (let suffix = 2; suffix <= 100; suffix += 1) {
     const suffixText = `-${suffix}`;
-    const candidate = `${base.slice(0, SLUG_MAX_LENGTH - suffixText.length)}${suffixText}`;
-    if (!taken.has(candidate)) {
+    const candidate =
+      base.length + suffixText.length <= SLUG_MAX_LENGTH
+        ? `${base}${suffixText}`
+        : `${base.slice(0, SLUG_MAX_LENGTH - suffixText.length)}${suffixText}`;
+
+    const existing = await prisma.clientRelationship.findUnique({
+      where: { slug: candidate },
+      select: { id: true },
+    });
+    if (!existing) {
       return candidate;
     }
   }
+
   throw new Error("Could not resolve a unique slug");
 }
 
