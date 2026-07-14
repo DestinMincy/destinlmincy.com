@@ -91,6 +91,7 @@ export const IDLE_ATTACH_CLIENT_USER_STATE: AttachClientUserFormState = {
 /** Minimal state for single-purpose actions (lifecycle update, removal). */
 export interface SimpleActionState {
   status: "idle" | "error";
+  lifecycle?: ClientRelationshipLifecycle;
   error?: string;
 }
 

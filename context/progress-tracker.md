@@ -129,3 +129,6 @@ Update this file after every meaningful implementation change.
 - CodeRabbit rate-limited during Unit 04 committed review on `unit-04-client-relationship-core` at commit `26e5be2`. Reported reset delay: 16 minutes from first limit hit. Manual rerun required after reset.
 - CodeRabbit rate-limited AGAIN during Unit 04 committed review at commit `b172fca` (2026-07-14 06:52 EDT / 10:52 UTC). The review suspended before completing — CodeRabbit reported "Review limit reached" and offered an **8-minute reset delay**. Partial findings were emitted before suspension. Manual action: wait for the reset, then re-run `coderabbit review --type committed --plain --base master` to obtain the complete finding set before merging Unit 04.
 - CodeRabbit rate-limited again at commit `b5605b6`; offered a **17-minute reset delay** as of 2026-07-14. Loop paused; awaiting retry.
+- Addressed sixth-pass Unit 04 review findings on commit `350df9b`: slug suffix ceiling, edit form remount key, disabled button hover handling, aria-invalid exposure, dynamic alert role, simplified contact rendering. All reported findings marked resolved in `current-issues.md`.
+- New review queued for ~8 minutes to confirm no remaining findings before PR/merge.
+- CodeRabbit rate-limited again at commit `350df9b`; offered an **11-minute reset delay**. Loop paused; automatic retry queued.

@@ -25,6 +25,7 @@ interface LifecycleControlProps {
 export function LifecycleControl({ action, current }: LifecycleControlProps) {
   const [state, formAction, isPending] = useActionState(action, {
     status: "idle",
+    lifecycle: current,
   });
 
   return (
@@ -36,7 +37,7 @@ export function LifecycleControl({ action, current }: LifecycleControlProps) {
         id="lifecycle-select"
         name="lifecycle"
         key={current}
-        defaultValue={current}
+        defaultValue={state.status === "idle" ? current : state.lifecycle}
         aria-invalid={state.error ? true : undefined}
         aria-describedby={state.error ? "lifecycle-select-error" : undefined}
       >
