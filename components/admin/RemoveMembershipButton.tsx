@@ -10,6 +10,7 @@ type RemoveMembershipAction = (
 
 interface RemoveMembershipButtonProps {
   action: RemoveMembershipAction;
+  label: string;
 }
 
 /**
@@ -18,6 +19,7 @@ interface RemoveMembershipButtonProps {
  */
 export function RemoveMembershipButton({
   action,
+  label,
 }: RemoveMembershipButtonProps) {
   const [state, formAction, isPending] = useActionState(action, {
     status: "idle",
@@ -25,7 +27,12 @@ export function RemoveMembershipButton({
 
   return (
     <form className="remove-form" action={formAction}>
-      <button className="link-button--danger" type="submit" disabled={isPending}>
+      <button
+        className="link-button--danger"
+        type="submit"
+        disabled={isPending}
+        aria-label={`Remove ${label}`}
+      >
         {isPending ? "Removing" : "Remove"}
       </button>
       {state.error ? (

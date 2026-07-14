@@ -171,6 +171,11 @@ export default async function RelationshipDetailPage({
                           relationship.id,
                           user.id,
                         )}
+                        label={
+                          user.name
+                            ? `${user.name} (${user.email})`
+                            : user.email
+                        }
                       />
                     </td>
                   </tr>
