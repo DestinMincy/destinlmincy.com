@@ -4,14 +4,11 @@ import Link from "next/link";
 import { LifecycleBadge } from "@/components/admin/LifecycleBadge";
 import { requireAdminForPage } from "@/lib/auth/require-admin";
 import { listClientRelationships } from "@/lib/relationships/queries";
+import { relationshipDateFormatter } from "@/lib/relationships/format";
 
 export const metadata: Metadata = {
   title: "Client relationships",
 };
-
-const dateFormatter = new Intl.DateTimeFormat("en-US", {
-  dateStyle: "medium",
-});
 
 export default async function RelationshipsPage() {
   await requireAdminForPage();
@@ -93,7 +90,7 @@ export default async function RelationshipsPage() {
                     )}
                   </td>
                   <td>{relationship._count.users}</td>
-                  <td>{dateFormatter.format(relationship.updatedAt)}</td>
+                  <td>{relationshipDateFormatter.format(relationship.updatedAt)}</td>
                 </tr>
               ))}
             </tbody>

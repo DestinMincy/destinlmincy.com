@@ -33,6 +33,8 @@ export async function getClientRelationshipWithUsers(id: string) {
     where: { id },
     include: {
       users: {
+        // ACTIVE is defined before REMOVED in ClientUserStatus, so
+        // `asc` sorting keeps active memberships first on the detail page.
         orderBy: [{ status: "asc" }, { createdAt: "asc" }],
       },
     },

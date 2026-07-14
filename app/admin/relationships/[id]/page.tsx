@@ -12,14 +12,11 @@ import { LifecycleControl } from "@/components/admin/LifecycleControl";
 import { RemoveMembershipButton } from "@/components/admin/RemoveMembershipButton";
 import { requireAdminForPage } from "@/lib/auth/require-admin";
 import { getClientRelationshipWithUsers } from "@/lib/relationships/queries";
+import { relationshipDateFormatter } from "@/lib/relationships/format";
 
 export const metadata: Metadata = {
   title: "Client relationship",
 };
-
-const dateFormatter = new Intl.DateTimeFormat("en-US", {
-  dateStyle: "medium",
-});
 
 interface RelationshipDetailPageProps {
   params: Promise<{ id: string }>;
@@ -116,11 +113,11 @@ export default async function RelationshipDetailPage({
             </div>
             <div>
               <dt>Created</dt>
-              <dd>{dateFormatter.format(relationship.createdAt)}</dd>
+              <dd>{relationshipDateFormatter.format(relationship.createdAt)}</dd>
             </div>
             <div>
               <dt>Updated</dt>
-              <dd>{dateFormatter.format(relationship.updatedAt)}</dd>
+              <dd>{relationshipDateFormatter.format(relationship.updatedAt)}</dd>
             </div>
           </dl>
         </div>
@@ -163,7 +160,7 @@ export default async function RelationshipDetailPage({
                         <span className="admin-table__none">None</span>
                       )}
                     </td>
-                    <td>{dateFormatter.format(user.createdAt)}</td>
+                    <td>{relationshipDateFormatter.format(user.createdAt)}</td>
                     <td className="admin-table__actions">
                       <RemoveMembershipButton
                         action={removeClientUserAction.bind(
