@@ -105,8 +105,8 @@ const SLUG_MAX_LENGTH = 64;
  */
 export function slugifyRelationshipName(name: string): string {
   const slug = name
-    .toLowerCase()
     .normalize("NFKD")
+    .toLowerCase()
     .replace(COMBINING_MARKS_PATTERN, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")

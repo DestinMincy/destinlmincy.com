@@ -4,11 +4,11 @@ Update this file after every meaningful implementation change.
 
 ## Current Phase
 
-- Unit 05: applications/sites and projects.
+- Unit 04: client relationship core review/merge pending.
 
 ## Current Goal
 
-- Begin Unit 05 per `context/specs/05-applications-sites-projects.md`, building on the Unit 04 relationship core.
+- Complete Unit 04 CodeRabbit review and merge `unit-04-client-relationship-core` to `master`.
 
 ## Completed
 
@@ -16,7 +16,7 @@ Update this file after every meaningful implementation change.
 - Created local branch `nextjs-application-overhaul`.
 - Captured the product pivot from static Eleventy marketing site to authenticated Next.js application.
 - Selected client relationship as the primary business object.
-- Defined V1 domain model: client relationships, client users, applications/sites, projects, contracts, payment gates, subscriptions, milestones, deliverables.
+- Defined V1 domain model: client relationships, client users, applications/sites, projects, contract templates and versions, payment gates, subscription references, milestones, deliverables.
 - Selected app-owned contract templates with DocuSign for signatures only.
 - Selected block-based contract editor with versioned database-managed templates.
 - Selected S3 private bucket for generated and signed PDFs.
@@ -30,7 +30,7 @@ Update this file after every meaningful implementation change.
 - Decided: the hexagon is a core, integrated motif and the signature layout primitive (brand mark plus hex geometry in page elements), never a glowing neural-canvas background; dashboards stay rectangular with hex used only as markers/accents.
 - Decided: Zilla Slab is the display/headings face and Hanken Grotesk is the body/UI face for the Next.js app.
 - Decided: fonts must be self-hosted from Fontsource WOFF2 files. Do not use Google Fonts or external font requests in production.
-- Decided: canonical brand colors are Blue `#2675e9`, Gold `#ffd700`, and Silver `#c0c0c0`.
+- Decided: canonical brand colors are Blue `#2675e9`, Gold `#ffd700`, Silver `#c0c0c0`.
 - Decided: Unit 01 will stage Next.js alongside the existing Eleventy site. This branch is the launch path; when merged to `master`, the Next.js app is intended to ship.
 - Decided: Unit 01 will include a restrained motion foundation: CSS motion tokens, `prefers-reduced-motion`, subtle hex-based public atmosphere, and small structural hover/focus transitions. It will not use particle fields, neural canvases, shimmer text, bouncing badges, blanket scroll fade-ups, or an animation dependency without a concrete CSS limitation.
 - Implemented Unit 01 foundation: Next.js App Router, strict TypeScript config, metadata defaults, semantic theme tokens, self-hosted Zilla Slab and Hanken Grotesk fonts, persisted light/dark theme control, CSS-only hex atmosphere, public header/footer, and migrated public routes for `/`, `/about`, `/services`, `/work`, and `/contact`.
@@ -60,6 +60,7 @@ Update this file after every meaningful implementation change.
 
 ## Next Up
 
+- Complete Unit 04 CodeRabbit review and merge `unit-04-client-relationship-core` to `master`.
 - Begin Unit 05: applications/sites and projects per `context/specs/05-applications-sites-projects.md`.
 - Reuse the Unit 04 admin surface patterns (server actions, boundary validation, `requireAdminForPage`) for the new admin workspaces.
 
@@ -125,3 +126,4 @@ Update this file after every meaningful implementation change.
 - Unit 04 live verification ran against a production `next start` on port 3210 (port 3000 is occupied by an unrelated process) with two disposable Clerk dev-instance test users (deleted afterward) and the admin allowlist supplied via an `ADMIN_EMAILS` shell override so the committed `.env.local` was untouched. Verified in a real browser session (gstack `/browse`): admin created a relationship through the form (redirects to the detail view; slug `unit04-verification-co` generated server-side), edited it, moved lifecycle `LEAD` to `DISCOVERY` (persisted in Postgres), attached the Clerk-backed test client by email (row stored the real Clerk user id), saw it listed, removed it (row flipped to `REMOVED`, kept for audit), and re-attached it (same row reactivated, no duplicate). Invalid submissions returned field errors without crashing: empty name, malformed contact email, unknown attach email, duplicate attach.
 - Unit 04 access checks verified live: signed-out requests to all four new admin routes 307-redirect to `/sign-in`; the signed-in non-admin client user received 404 from `/admin`, `/admin/relationships`, the detail route, `/new`, and `/edit`; the same client user's `/portal` showed only their own relationship name. Server actions re-checking `isAdminEmail` before mutating is verified by construction (every action guards before touching Prisma). Device trust was again toggled off for the browser session and restored to `true` afterward; test DB rows were deleted and the database re-seeded.
 - Unit 04 admin UI design direction (per `frontend-design-taste.md` derivation): grounded, legible, calm. Existing semantic tokens only; blue for structure and links, gold reserved for the primary action and lifecycle hex markers, silver hairlines on rectangular panels; Zilla Slab headings over Hanken Grotesk UI; the repeated layout primitive is the hairline-bordered rectangular panel with uppercase table headers, and the hex appears only as small lifecycle status markers. Light and dark themes plus 375px mobile were checked via screenshots.
+- CodeRabbit rate-limited during Unit 04 committed review on `unit-04-client-relationship-core` at commit `26e5be2`. Reported reset delay: 16 minutes from first limit hit. Loop will auto-retry once delay has passed.

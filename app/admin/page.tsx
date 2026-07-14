@@ -21,7 +21,7 @@ export default async function AdminPage() {
         </p>
       </header>
 
-      <div className="admin-panel">
+      <nav className="admin-panel" aria-label="Workspaces">
         <h2 className="admin-panel__title">Workspaces</h2>
         <ul className="admin-nav-list">
           <li>
@@ -31,7 +31,7 @@ export default async function AdminPage() {
             </span>
           </li>
         </ul>
-      </div>
+      </nav>
     </div>
   );
 }
