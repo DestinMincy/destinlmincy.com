@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 
-import { FormField } from "@/components/admin/RelationshipForm";
+import { FormField } from "@/components/admin/FormField";
 import type { AttachClientUserFormState } from "@/lib/relationships/types";
 
 type AttachClientUserAction = (

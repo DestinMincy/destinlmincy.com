@@ -19,7 +19,12 @@ export async function getAdminUser() {
     return null;
   }
 
-  if (!isAdminEmail(user.primaryEmailAddress?.emailAddress ?? null)) {
+  const primaryEmail = user.primaryEmailAddress;
+
+  if (
+    primaryEmail?.verification?.status !== "verified" ||
+    !isAdminEmail(primaryEmail.emailAddress)
+  ) {
     return null;
   }
 
@@ -38,7 +43,12 @@ export async function requireAdminForPage() {
     redirect("/sign-in");
   }
 
-  if (!isAdminEmail(user.primaryEmailAddress?.emailAddress ?? null)) {
+  const primaryEmail = user.primaryEmailAddress;
+
+  if (
+    primaryEmail?.verification?.status !== "verified" ||
+    !isAdminEmail(primaryEmail.emailAddress)
+  ) {
     notFound();
   }
 
