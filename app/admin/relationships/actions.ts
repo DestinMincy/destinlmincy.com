@@ -30,11 +30,41 @@ function relationshipPath(id: string): string {
   return `${RELATIONSHIPS_PATH}/${id}`;
 }
 
-function isUniqueConstraintError(error: unknown): boolean {
-  return (
-    error instanceof Prisma.PrismaClientKnownRequestError &&
-    error.code === "P2002"
-  );
+type RelationshipFormValues = ReturnType<typeof parseRelationshipForm>["values"];
+
+function relationshipDataFromValues(
+  values: RelationshipFormValues,
+): Prisma.ClientRelationshipCreateInput | Prisma.ClientRelationshipUpdateInput {
+  return {
+    name: values.name,
+    lifecycle: values.lifecycle,
+    legalName: values.legalName || null,
+    primaryContactName: values.primaryContactName || null,
+    primaryContactEmail: values.primaryContactEmail || null,
+    primaryContactPhone: values.primaryContactPhone || null,
+    summary: values.summary || null,
+  };
+}
+
+function isUniqueConstraintError(
+  error: unknown,
+  ...fields: string[]
+): boolean {
+  if (
+    !(
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    )
+  ) {
+    return false;
+  }
+
+  if (fields.length === 0) {
+    return true;
+  }
+
+  const target = String(error.meta?.target ?? "");
+  return fields.some((field) => target.includes(field));
 }
 
 function isRecordNotFoundError(error: unknown): boolean {
@@ -92,14 +122,8 @@ export async function createRelationshipAction(
     try {
       const created = await prisma.clientRelationship.create({
         data: {
-          name: values.name,
+          ...relationshipDataFromValues(values),
           slug: await resolveUniqueSlug(values.name),
-          lifecycle: values.lifecycle,
-          legalName: values.legalName || null,
-          primaryContactName: values.primaryContactName || null,
-          primaryContactEmail: values.primaryContactEmail || null,
-          primaryContactPhone: values.primaryContactPhone || null,
-          summary: values.summary || null,
         },
         select: { id: true },
       });
@@ -155,15 +179,7 @@ export async function updateRelationshipAction(
   try {
     await prisma.clientRelationship.update({
       where: { id: relationshipId },
-      data: {
-        name: values.name,
-        lifecycle: values.lifecycle,
-        legalName: values.legalName || null,
-        primaryContactName: values.primaryContactName || null,
-        primaryContactEmail: values.primaryContactEmail || null,
-        primaryContactPhone: values.primaryContactPhone || null,
-        summary: values.summary || null,
-      },
+      data: relationshipDataFromValues(values),
       select: { id: true },
     });
   } catch (error: unknown) {
@@ -377,7 +393,7 @@ export async function attachClientUserAction(
     // A concurrent attach can win the race between the findUnique check
     // and this create, so the compound unique violation means the person
     // is already attached rather than a generic failure.
-    if (isUniqueConstraintError(error)) {
+    if (isUniqueConstraintError(error, "clerkUserId")) {
       return {
         status: "error",
         email,
