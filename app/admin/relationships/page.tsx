@@ -77,19 +77,17 @@ export default async function RelationshipsPage() {
                     <LifecycleBadge lifecycle={relationship.lifecycle} />
                   </td>
                   <td>
-                    {relationship.primaryContactName ||
-                    relationship.primaryContactEmail ? (
+                    {relationship.primaryContactName ? (
                       <>
                         {relationship.primaryContactName}
-                        {relationship.primaryContactName &&
-                        relationship.primaryContactEmail ? (
+                        {relationship.primaryContactEmail ? (
                           <span className="admin-table__sub">
                             {relationship.primaryContactEmail}
                           </span>
-                        ) : (
-                          relationship.primaryContactEmail
-                        )}
+                        ) : null}
                       </>
+                    ) : relationship.primaryContactEmail ? (
+                      relationship.primaryContactEmail
                     ) : (
                       <span className="admin-table__none">None</span>
                     )}

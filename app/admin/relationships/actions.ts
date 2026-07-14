@@ -94,7 +94,7 @@ async function resolveUniqueSlug(name: string): Promise<string> {
   }
 
   for (let suffix = 2; ; suffix += 1) {
-    const candidate = `${base}-${suffix}`;
+    const candidate = `${base}-${suffix}`.slice(0, SLUG_MAX_LENGTH);
     if (!taken.has(candidate)) {
       return candidate;
     }

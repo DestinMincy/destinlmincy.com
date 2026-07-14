@@ -45,6 +45,7 @@ export default async function EditRelationshipPage({
 
       <div className="admin-panel">
         <RelationshipForm
+          key={relationship.id}
           action={updateRelationshipAction.bind(null, relationship.id)}
           initialValues={{
             name: relationship.name,

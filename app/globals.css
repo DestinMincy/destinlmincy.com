@@ -427,6 +427,7 @@ main {
   cursor: default;
   opacity: 0.65;
   transform: none;
+  pointer-events: none;
 }
 
 .hero-panel {

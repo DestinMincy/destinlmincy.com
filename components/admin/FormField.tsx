@@ -36,7 +36,7 @@ export function FormField({ id, name, label, error, children }: FormFieldProps) 
         "aria-describedby": error ? errorId : undefined,
       })}
       {error ? (
-        <p className="field-error" id={errorId}>
+        <p className="field-error" id={errorId} role="alert">
           {error}
         </p>
       ) : null}

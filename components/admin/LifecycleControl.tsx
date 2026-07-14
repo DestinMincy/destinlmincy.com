@@ -37,6 +37,7 @@ export function LifecycleControl({ action, current }: LifecycleControlProps) {
         name="lifecycle"
         key={current}
         defaultValue={current}
+        aria-invalid={state.error ? true : undefined}
         aria-describedby={state.error ? "lifecycle-select-error" : undefined}
       >
         {LIFECYCLE_VALUES.map((value) => (
