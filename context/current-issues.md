@@ -21,3 +21,10 @@
 - **trivial — Maintainability**: `lib/relationships/validation.ts` lacks unit tests for pure validation/slugify functions. **Deferred:** not blocking; noted for future test unit.
 - **minor — Maintainability**: `components/admin/AttachClientUserForm.tsx` imports `FormField` from `RelationshipForm.tsx`, creating awkward dependency direction. **Resolved:** extracted into shared `components/admin/FormField.tsx`.
 - **major — Security**: `lib/auth/require-admin.ts` getAdminUser/requireAdminForPage trust primary email without checking verification status. **Resolved:** requires verified primary email before comparing against allowlist.
+- **minor — Data Integrity**: `app/admin/relationships/actions.ts:96-99` slug collision suffix may exceed 64-char ceiling. **Resolved:** candidates truncated before lookup with `.slice(0, SLUG_MAX_LENGTH)`.
+- **major — Functional Correctness**: `app/admin/relationships/[id]/edit/page.tsx:48-57` RelationshipForm may reuse stale state across relationships. **Resolved:** keyed by `relationship.id`.
+- **minor — Functional Correctness**: `.button:disabled` allows hover styling to continue. **Resolved:** added `pointer-events: none`.
+- **minor — Functional Correctness**: `components/admin/LifecycleControl.tsx:35-41` lifecycle select missing `aria-invalid` on server error. **Resolved:** exposed via `aria-invalid={state.error ? true : undefined}`.
+- **trivial — Maintainability**: `components/admin/FormField.tsx:38-41` validation errors not dynamically announced. **Resolved:** added `role="alert"` to error `<p>`.
+- **minor — Maintainability**: `app/admin/relationships/page.tsx:79-96` primary-contact rendering triple-nested. **Resolved:** simplified to flat conditional.
+- **trivial — Maintainability**: `lib/relationships/types.ts` shared default state objects should guard against mutation. **Deferred:** noted, no code change needed.

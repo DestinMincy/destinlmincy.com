@@ -99,6 +99,8 @@ export function parseRelationshipForm(
 
 const SLUG_MAX_LENGTH = 64;
 
+export { SLUG_MAX_LENGTH };
+
 /**
  * Derives a URL-safe slug candidate from a relationship name.
  * Uniqueness is enforced by the caller against existing rows.

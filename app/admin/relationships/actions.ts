@@ -17,6 +17,7 @@ import {
   isValidEmail,
   parseRelationshipForm,
   slugifyRelationshipName,
+  SLUG_MAX_LENGTH,
 } from "@/lib/relationships/validation";
 
 const NOT_AUTHORIZED = "You are not authorized to do that.";
@@ -93,12 +94,14 @@ async function resolveUniqueSlug(name: string): Promise<string> {
     return base;
   }
 
-  for (let suffix = 2; ; suffix += 1) {
-    const candidate = `${base}-${suffix}`.slice(0, SLUG_MAX_LENGTH);
+  for (let suffix = 2; suffix <= taken.size + 1; suffix += 1) {
+    const suffixText = `-${suffix}`;
+    const candidate = `${base.slice(0, SLUG_MAX_LENGTH - suffixText.length)}${suffixText}`;
     if (!taken.has(candidate)) {
       return candidate;
     }
   }
+  throw new Error("Could not resolve a unique slug");
 }
 
 export async function createRelationshipAction(
