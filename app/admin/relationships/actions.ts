@@ -137,7 +137,7 @@ export async function createRelationshipAction(
       // uniqueness read and this insert. Re-resolving against fresh
       // data on the next attempt absorbs the collision without making
       // the user retry manually.
-      if (isUniqueConstraintError(error) && attempt < MAX_SLUG_ATTEMPTS) {
+      if (isUniqueConstraintError(error, "slug") && attempt < MAX_SLUG_ATTEMPTS) {
         continue;
       }
       console.error("Failed to create client relationship", error);

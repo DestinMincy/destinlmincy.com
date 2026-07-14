@@ -17,14 +17,16 @@
 
 - **minor — Maintainability**: `context/progress-tracker.md` has contradictory retry instructions about rate-limit handling. **Resolved:** clarified wording; manual rerun required after reset.
 - **minor — Functional Correctness**: `app/admin/relationships/actions.ts` attach error message says account does not exist, but Clerk exact match with unverified email can still return a user. **Resolved:** copy clarifies both signup and verified email required.
-- **trivial — Maintainability**: `lib/relationships/types.ts` shared default state objects should be frozen to prevent accidental mutation. **Resolved:** `as const` guards.
-- **trivial — Maintainability**: `lib/relationships/validation.ts` lacks unit tests for pure validation/slugify functions. **Deferred:** not blocking; noted for future test unit.
+- **trivial — Maintainability**: `lib/relationships/types.ts` shared default state objects use `as const` for compile-time readonly guarantees but are not runtime-frozen. **Acknowledged:** acceptable for current usage; no mutation path observed in reviews.
+- **trivial — Maintainability**: `lib/relationships/validation.ts` lacks unit tests for pure validation/slugify functions, which are the shared boundary for create/edit flows. **Deferred:** not blocking; noted for future test unit.
+- **trivial — Functional Correctness**: `app/admin/relationships/actions.ts:137` slug-collision retry calls `isUniqueConstraintError(error)` without field scope, so unrelated `P2002` violations could trigger unnecessary slug regeneration. **Resolved:** narrowed retry to `isUniqueConstraintError(error, "slug")`.
 - **minor — Maintainability**: `components/admin/AttachClientUserForm.tsx` imports `FormField` from `RelationshipForm.tsx`, creating awkward dependency direction. **Resolved:** extracted into shared `components/admin/FormField.tsx`.
 - **major — Security**: `lib/auth/require-admin.ts` getAdminUser/requireAdminForPage trust primary email without checking verification status. **Resolved:** requires verified primary email before comparing against allowlist.
-- **minor — Data Integrity**: `app/admin/relationships/actions.ts:96-99` slug collision suffix may exceed 64-char ceiling. **Resolved:** candidates truncated before lookup with `.slice(0, SLUG_MAX_LENGTH)`.
+- **minor — Data Integrity**: `app/admin/relationships/actions.ts:96-99` slug collision suffix may exceed 64-char ceiling. **Resolved:** candidates truncated/reserved before lookup with `SLUG_MAX_LENGTH`.
 - **major — Functional Correctness**: `app/admin/relationships/[id]/edit/page.tsx:48-57` RelationshipForm may reuse stale state across relationships. **Resolved:** keyed by `relationship.id`.
 - **minor — Functional Correctness**: `.button:disabled` allows hover styling to continue. **Resolved:** added `pointer-events: none`.
 - **minor — Functional Correctness**: `components/admin/LifecycleControl.tsx:35-41` lifecycle select missing `aria-invalid` on server error. **Resolved:** exposed via `aria-invalid={state.error ? true : undefined}`.
 - **trivial — Maintainability**: `components/admin/FormField.tsx:38-41` validation errors not dynamically announced. **Resolved:** added `role="alert"` to error `<p>`.
 - **minor — Maintainability**: `app/admin/relationships/page.tsx:79-96` primary-contact rendering triple-nested. **Resolved:** simplified to flat conditional.
-- **trivial — Maintainability**: `lib/relationships/types.ts` shared default state objects should guard against mutation. **Deferred:** noted, no code change needed.
+- **critical — Data Integrity**: `app/admin/relationships/actions.ts` slug collision loop could corrupt suffixed slugs past 64 chars. **Resolved:** exported `SLUG_MAX_LENGTH` and reserved room for suffix before slicing.
+- **critical — Functional Correctness**: `components/admin/LifecycleControl.tsx` lifecycle select resets to original value on failed submit, disconnecting error from user choice. **Resolved:** `useActionState` now retains submitted lifecycle on error.
