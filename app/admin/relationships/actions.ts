@@ -136,7 +136,7 @@ export async function createRelationshipAction(
     try {
       const created = await prisma.clientRelationship.create({
         data: {
-          ...relationshipDataFromValues(values),
+          ...(relationshipDataFromValues(values) as Prisma.ClientRelationshipCreateInput),
           slug: await resolveUniqueSlug(values.name),
         },
         select: { id: true },
