@@ -22,6 +22,7 @@ import {
 const NOT_AUTHORIZED = "You are not authorized to do that.";
 const RELATIONSHIPS_PATH = "/admin/relationships";
 const MAX_EMAIL_LENGTH = 254;
+const MAX_SLUG_ATTEMPTS = 3;
 const ALREADY_ATTACHED =
   "That person is already attached to this relationship.";
 
@@ -85,33 +86,44 @@ export async function createRelationshipAction(
     return { status: "error", values, errors };
   }
 
-  let createdId: string;
+  let createdId: string | null = null;
 
-  try {
-    const created = await prisma.clientRelationship.create({
-      data: {
-        name: values.name,
-        slug: await resolveUniqueSlug(values.name),
-        lifecycle: values.lifecycle,
-        legalName: values.legalName || null,
-        primaryContactName: values.primaryContactName || null,
-        primaryContactEmail: values.primaryContactEmail || null,
-        primaryContactPhone: values.primaryContactPhone || null,
-        summary: values.summary || null,
-      },
-      select: { id: true },
-    });
-    createdId = created.id;
-  } catch (error: unknown) {
-    if (isUniqueConstraintError(error)) {
+  for (let attempt = 1; attempt <= MAX_SLUG_ATTEMPTS; attempt += 1) {
+    try {
+      const created = await prisma.clientRelationship.create({
+        data: {
+          name: values.name,
+          slug: await resolveUniqueSlug(values.name),
+          lifecycle: values.lifecycle,
+          legalName: values.legalName || null,
+          primaryContactName: values.primaryContactName || null,
+          primaryContactEmail: values.primaryContactEmail || null,
+          primaryContactPhone: values.primaryContactPhone || null,
+          summary: values.summary || null,
+        },
+        select: { id: true },
+      });
+      createdId = created.id;
+      break;
+    } catch (error: unknown) {
+      // A concurrent create can claim the candidate slug between the
+      // uniqueness read and this insert. Re-resolving against fresh
+      // data on the next attempt absorbs the collision without making
+      // the user retry manually.
+      if (isUniqueConstraintError(error) && attempt < MAX_SLUG_ATTEMPTS) {
+        continue;
+      }
+      console.error("Failed to create client relationship", error);
       return {
         status: "error",
         values,
         errors: {},
-        formError: "A relationship with a very similar name was just created. Try again.",
+        formError: "Something went wrong while saving. Try again.",
       };
     }
-    console.error("Failed to create client relationship", error);
+  }
+
+  if (createdId === null) {
     return {
       status: "error",
       values,

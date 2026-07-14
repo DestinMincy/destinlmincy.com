@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 
+import { FormField } from "@/components/admin/RelationshipForm";
 import type { AttachClientUserFormState } from "@/lib/relationships/types";
 
 type AttachClientUserAction = (
@@ -34,22 +35,23 @@ export function AttachClientUserForm({ action }: AttachClientUserFormProps) {
       ) : null}
 
       <div className="attach-form__row">
-        <div className="field">
-          <label htmlFor="attach-email">Account email</label>
-          <input
-            id="attach-email"
-            name="email"
-            type="email"
-            required
-            maxLength={254}
-            autoComplete="off"
-            defaultValue={state.email}
-            aria-invalid={state.errors.email ? true : undefined}
-            aria-describedby={
-              state.errors.email ? "attach-email-error" : undefined
-            }
-          />
-        </div>
+        <FormField
+          id="attach-email"
+          name="email"
+          label="Account email"
+          error={state.errors.email}
+        >
+          {(control) => (
+            <input
+              {...control}
+              type="email"
+              required
+              maxLength={254}
+              autoComplete="off"
+              defaultValue={state.email}
+            />
+          )}
+        </FormField>
         <button
           className="button button--secondary button--compact"
           type="submit"
@@ -58,11 +60,6 @@ export function AttachClientUserForm({ action }: AttachClientUserFormProps) {
           {isPending ? "Checking" : "Attach user"}
         </button>
       </div>
-      {state.errors.email ? (
-        <p className="field-error" id="attach-email-error">
-          {state.errors.email}
-        </p>
-      ) : null}
     </form>
   );
 }

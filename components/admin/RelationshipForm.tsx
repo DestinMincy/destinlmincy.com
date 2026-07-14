@@ -28,17 +28,19 @@ interface FieldControlProps {
 
 interface FormFieldProps {
   id: string;
+  name?: string;
   label: string;
   error?: string;
   children: (control: FieldControlProps) => ReactNode;
 }
 
 /**
- * Shared label/control/error wrapper. The render prop receives the id,
- * name, and aria attributes the control must spread so the error text
- * stays associated with it.
+ * Shared label/control/error wrapper for admin forms. The render prop
+ * receives the id, name, and aria attributes the control must spread so
+ * the error text stays associated with it. The submitted field name
+ * defaults to the id; pass `name` when the two must differ.
  */
-function FormField({ id, label, error, children }: FormFieldProps) {
+export function FormField({ id, name, label, error, children }: FormFieldProps) {
   const errorId = `${id}-error`;
 
   return (
@@ -46,7 +48,7 @@ function FormField({ id, label, error, children }: FormFieldProps) {
       <label htmlFor={id}>{label}</label>
       {children({
         id,
-        name: id,
+        name: name ?? id,
         "aria-invalid": error ? true : undefined,
         "aria-describedby": error ? errorId : undefined,
       })}
