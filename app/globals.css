@@ -1000,6 +1000,7 @@ textarea:focus {
 }
 
 .admin-table td {
+  border-bottom: 1px solid var(--border);
   border-bottom: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
   padding: 13px 16px;
   font-size: 0.96rem;
@@ -1015,6 +1016,7 @@ textarea:focus {
 }
 
 .admin-table tbody tr:hover {
+  background: var(--surface-elevated);
   background: color-mix(in srgb, var(--surface-elevated) 62%, transparent);
 }
 

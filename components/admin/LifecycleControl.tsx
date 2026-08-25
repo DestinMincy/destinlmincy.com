@@ -27,6 +27,8 @@ export function LifecycleControl({ action, current }: LifecycleControlProps) {
     status: "idle",
     lifecycle: current,
   });
+  const selectedLifecycle =
+    state.status === "error" ? (state.lifecycle ?? current) : current;
 
   return (
     <form className="lifecycle-form" action={formAction}>
@@ -37,7 +39,7 @@ export function LifecycleControl({ action, current }: LifecycleControlProps) {
         id="lifecycle-select"
         name="lifecycle"
         key={current}
-        defaultValue={state.status === "idle" ? current : state.lifecycle}
+        defaultValue={selectedLifecycle}
         aria-invalid={state.error ? true : undefined}
         aria-describedby={state.error ? "lifecycle-select-error" : undefined}
       >

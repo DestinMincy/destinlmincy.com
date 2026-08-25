@@ -32,10 +32,20 @@ function relationshipPath(id: string): string {
 }
 
 type RelationshipFormValues = ReturnType<typeof parseRelationshipForm>["values"];
+type RelationshipWritableFields = Pick<
+  Prisma.ClientRelationshipCreateInput,
+  | "name"
+  | "lifecycle"
+  | "legalName"
+  | "primaryContactName"
+  | "primaryContactEmail"
+  | "primaryContactPhone"
+  | "summary"
+>;
 
 function relationshipDataFromValues(
   values: RelationshipFormValues,
-): Prisma.ClientRelationshipCreateInput | Prisma.ClientRelationshipUpdateInput {
+): RelationshipWritableFields {
   return {
     name: values.name,
     lifecycle: values.lifecycle,
@@ -136,7 +146,7 @@ export async function createRelationshipAction(
     try {
       const created = await prisma.clientRelationship.create({
         data: {
-          ...(relationshipDataFromValues(values) as Prisma.ClientRelationshipCreateInput),
+          ...relationshipDataFromValues(values),
           slug: await resolveUniqueSlug(values.name),
         },
         select: { id: true },
@@ -245,10 +255,18 @@ export async function updateLifecycleAction(
     });
   } catch (error: unknown) {
     if (isRecordNotFoundError(error)) {
-      return { status: "error", error: "That relationship no longer exists." };
+      return {
+        status: "error",
+        lifecycle,
+        error: "That relationship no longer exists.",
+      };
     }
     console.error("Failed to update relationship lifecycle", error);
-    return { status: "error", error: "Something went wrong while saving. Try again." };
+    return {
+      status: "error",
+      lifecycle,
+      error: "Something went wrong while saving. Try again.",
+    };
   }
 
   revalidatePath(RELATIONSHIPS_PATH);
@@ -423,6 +441,7 @@ export async function attachClientUserAction(
     };
   }
 
+  revalidatePath(RELATIONSHIPS_PATH);
   revalidatePath(relationshipPath(relationshipId));
   return { status: "idle", email: "", errors: {} };
 }
@@ -466,6 +485,7 @@ export async function removeClientUserAction(
     };
   }
 
+  revalidatePath(RELATIONSHIPS_PATH);
   revalidatePath(relationshipPath(relationshipId));
   return { status: "idle" };
 }

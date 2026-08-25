@@ -44,6 +44,7 @@ export function AttachClientUserForm({ action }: AttachClientUserFormProps) {
           {(control) => (
             <input
               {...control}
+              key={`${state.status}:${state.email}`}
               type="email"
               required
               maxLength={254}
