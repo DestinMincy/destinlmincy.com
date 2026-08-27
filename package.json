@@ -40,5 +40,8 @@
     "pg": "^8.21.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
+  },
+  "overrides": {
+    "deepmerge-ts": "8.0.2"
   }
 }
