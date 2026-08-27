@@ -14,6 +14,7 @@ Applications/sites are ongoing assets. Projects are scoped work efforts. This se
 
 - Admin can create, edit, list, and archive applications/sites under a client relationship.
 - Include type: website, web application, internal tool, other.
+- Use status: active or archived. Archiving preserves the record and its project history.
 - Include operational fields: production URL, staging URL, repository URL, notes.
 - Clients cannot create applications/sites in v1.
 
@@ -22,7 +23,9 @@ Applications/sites are ongoing assets. Projects are scoped work efforts. This se
 - Admin can create, edit, list, and archive projects under a client relationship.
 - Project can optionally attach to an existing application/site.
 - Project can indicate whether it creates a new asset.
-- Include status, summary, start/target dates, and client-facing description.
+- Use status: planned, in progress, paused, completed, or archived.
+- Include internal summary, start/target dates, and a separate client-facing description.
+- A project cannot both attach to an existing application/site and indicate that it creates a new asset at creation time. The resulting application/site can be attached later.
 
 ## Dependencies
 
