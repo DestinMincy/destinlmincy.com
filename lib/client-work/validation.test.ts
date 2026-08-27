@@ -96,6 +96,8 @@ test("project form rejects contradictory asset choices and reversed dates", () =
 });
 
 test("date parsing rejects calendar overflow", () => {
+  assert.equal(isDateInput("0099-01-01"), true);
+  assert.equal(dateInputToDate("0099-01-01")?.toISOString(), "0099-01-01T00:00:00.000Z");
   assert.equal(isDateInput("2026-02-29"), false);
   assert.equal(isDateInput("2028-02-29"), true);
   assert.equal(dateInputToDate("2028-02-29")?.toISOString(), "2028-02-29T00:00:00.000Z");
