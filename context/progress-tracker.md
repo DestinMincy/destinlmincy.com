@@ -4,11 +4,11 @@ Update this file after every meaningful implementation change.
 
 ## Current Phase
 
-- Unit 04: client relationship core (admin-managed client relationships and client users).
+- Unit 04: client relationship core review/merge pending.
 
 ## Current Goal
 
-- Add admin CRUD for client relationships and Clerk-backed client user attachment, building on the Unit 03 access rules.
+- Complete Unit 04 CodeRabbit review and merge `unit-04-client-relationship-core` to `master`.
 
 ## Completed
 
@@ -16,7 +16,7 @@ Update this file after every meaningful implementation change.
 - Created local branch `nextjs-application-overhaul`.
 - Captured the product pivot from static Eleventy marketing site to authenticated Next.js application.
 - Selected client relationship as the primary business object.
-- Defined V1 domain model: client relationships, client users, applications/sites, projects, contracts, payment gates, subscriptions, milestones, deliverables.
+- Defined V1 domain model: client relationships, client users, applications/sites, projects, contract templates and versions, payment gates, subscription references, milestones, deliverables.
 - Selected app-owned contract templates with DocuSign for signatures only.
 - Selected block-based contract editor with versioned database-managed templates.
 - Selected S3 private bucket for generated and signed PDFs.
@@ -30,7 +30,7 @@ Update this file after every meaningful implementation change.
 - Decided: the hexagon is a core, integrated motif and the signature layout primitive (brand mark plus hex geometry in page elements), never a glowing neural-canvas background; dashboards stay rectangular with hex used only as markers/accents.
 - Decided: Zilla Slab is the display/headings face and Hanken Grotesk is the body/UI face for the Next.js app.
 - Decided: fonts must be self-hosted from Fontsource WOFF2 files. Do not use Google Fonts or external font requests in production.
-- Decided: canonical brand colors are Blue `#2675e9`, Gold `#ffd700`, and Silver `#c0c0c0`.
+- Decided: canonical brand colors are Blue `#2675e9`, Gold `#ffd700`, Silver `#c0c0c0`.
 - Decided: Unit 01 will stage Next.js alongside the existing Eleventy site. This branch is the launch path; when merged to `master`, the Next.js app is intended to ship.
 - Decided: Unit 01 will include a restrained motion foundation: CSS motion tokens, `prefers-reduced-motion`, subtle hex-based public atmosphere, and small structural hover/focus transitions. It will not use particle fields, neural canvases, shimmer text, bouncing badges, blanket scroll fade-ups, or an animation dependency without a concrete CSS limitation.
 - Implemented Unit 01 foundation: Next.js App Router, strict TypeScript config, metadata defaults, semantic theme tokens, self-hosted Zilla Slab and Hanken Grotesk fonts, persisted light/dark theme control, CSS-only hex atmosphere, public header/footer, and migrated public routes for `/`, `/about`, `/services`, `/work`, and `/contact`.
@@ -47,6 +47,12 @@ Update this file after every meaningful implementation change.
 - Documented Clerk env vars in `.env.example`: `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, `NEXT_PUBLIC_CLERK_SIGN_IN_URL`, `NEXT_PUBLIC_CLERK_SIGN_UP_URL`, `ADMIN_EMAILS`. Real keys live in gitignored `.env.local`, pulled via `clerk env pull` after linking the repo to the existing `destinlmincy.com` Clerk application.
 - Did not wire sign-in/portal/admin links into `SiteHeader`/`SiteFooter` nav; that was judged out of this unit's listed scope and is deferred to whichever unit builds the real portal/admin shells (Unit 12/13).
 - Discovered and fixed a Clerk instance configuration defect that would have broken real sign-ins: `organization_settings.force_organization_selection` defaulted to `true` on the new Clerk application, forcing every user through an organization setup screen this project's v1 does not use. Disabled it permanently on the development instance. If a production Clerk instance is created later (Unit 15), the same setting must be disabled there too.
+- Implemented Unit 04 client relationship core: admin list/create/view/edit for client relationships under `/admin/relationships`, lifecycle updates from the detail view, and Clerk-backed client user attach/list/remove with shared access (no roles).
+- Extended the schema additively (migration `add_relationship_contact_and_client_user_status`): `ClientRelationship` gained `legalName`, `primaryContactName`, `primaryContactEmail`, `primaryContactPhone`; `ClientUser` gained `status` (`ClientUserStatus` enum: `ACTIVE`, `REMOVED`, default `ACTIVE`). The lifecycle enum already contained all nine spec states from Unit 02 and was not changed. Removal is a soft deactivate (`REMOVED`), so membership history is kept and re-attaching the same email reactivates the row instead of duplicating it.
+- `findClientMembershipByClerkUserId` now matches only `ACTIVE` memberships, so removing a client user actually revokes portal access.
+- All Unit 04 mutations are server actions in `app/admin/relationships/actions.ts`; every action re-checks the admin allowlist server-side (`lib/auth/require-admin.ts` wraps the Unit 03 pattern for pages and actions), validates input at the boundary (`lib/relationships/validation.ts`: required name, length ceilings, email shape, lifecycle enum membership), and returns field-level errors instead of throwing.
+- Client user attachment resolves the email against the Clerk development instance with `clerkClient().users.getUserList({ emailAddress })` and stores the Clerk user id, normalized email, and display name on `ClientUser`; an unmatched or unverified email returns a clear form error requiring signup and verification, and duplicates are rejected.
+- Relationship slugs are generated server-side from the name (lowercase, diacritics stripped, numeric suffix on collision) and are intentionally stable across renames.
 
 ## In Progress
 
@@ -54,8 +60,9 @@ Update this file after every meaningful implementation change.
 
 ## Next Up
 
-- Begin Unit 04: client relationship core (admin CRUD for client relationships, Clerk-backed client user attachment).
-- Extend admin-side access checks from Unit 03 to relationship-scoped data.
+- Complete Unit 04 CodeRabbit review and merge `unit-04-client-relationship-core` to `master`.
+- Begin Unit 05: applications/sites and projects per `context/specs/05-applications-sites-projects.md`.
+- Reuse the Unit 04 admin surface patterns (server actions, boundary validation, `requireAdminForPage`) for the new admin workspaces.
 
 ## Open Questions
 
@@ -115,3 +122,19 @@ Update this file after every meaningful implementation change.
 - Signed-in behavior was verified live end-to-end (not just by construction) using three disposable Clerk dev-instance test users created and later deleted via the `clerk` CLI, driven through the real `<SignIn/>` UI with the gstack `/browse` headless browser: a user linked to the seeded `ClientUser` row saw the `DLM Demo Relationship` name on `/portal` and got a 404 on `/admin`; a user with no `ClientUser` row saw the "No client relationship on file" message on `/portal` and also 404 on `/admin`; a user added to `ADMIN_EMAILS` saw the operator console on `/admin` (200) and still got the "no relationship" message on `/portal` (proving the two checks are independent). All test users, the temporary DB link, and the temporary `ADMIN_EMAILS` addition were removed afterward; `npm run db:seed` was re-run to restore clean seed state.
 - The `findClientMembershipByClerkUserId` and `isAdminEmail` helpers were also verified directly (by construction) against the real local database and real env parsing via a throwaway probe script (`prisma/tmp-unit03-probe.ts`, deleted before commit): found/missing/unknown membership lookups and case-insensitive/whitespace-trimmed allowlist matching all behaved as expected.
 - Two Clerk development-instance settings had to be changed to complete a real password sign-in through the hosted `<SignIn/>` component: `auth_password.device_trust.enabled` (a "verify this new device" email-code challenge) was toggled off only for the duration of the browser test and restored to `true` afterward; `organization_settings.force_organization_selection` was toggled off and left off, because it forced every signed-in user through an organization-setup screen that this project's org-free v1 design does not use (see Architecture Decisions).
+- Unit 04 verification: `npm run typecheck` and `npm run build` pass; the build route summary lists `/admin/relationships`, `/admin/relationships/new`, `/admin/relationships/[id]`, and `/admin/relationships/[id]/edit` as dynamic routes. The `add_relationship_contact_and_client_user_status` migration applied cleanly via `npm run db:migrate` (non-interactive, no `migrate diff` workaround needed) and `npm run db:seed` remains deterministic (seed now fills the new contact fields and adds a `REMOVED`-status client user to exercise the status filter).
+- Unit 04 live verification ran against a production `next start` on port 3210 (port 3000 is occupied by an unrelated process) with two disposable Clerk dev-instance test users (deleted afterward) and the admin allowlist supplied via an `ADMIN_EMAILS` shell override so the committed `.env.local` was untouched. Verified in a real browser session (gstack `/browse`): admin created a relationship through the form (redirects to the detail view; slug `unit04-verification-co` generated server-side), edited it, moved lifecycle `LEAD` to `DISCOVERY` (persisted in Postgres), attached the Clerk-backed test client by email (row stored the real Clerk user id), saw it listed, removed it (row flipped to `REMOVED`, kept for audit), and re-attached it (same row reactivated, no duplicate). Invalid submissions returned field errors without crashing: empty name, malformed contact email, unknown attach email, duplicate attach.
+- Unit 04 access checks verified live: signed-out requests to all four new admin routes 307-redirect to `/sign-in`; the signed-in non-admin client user received 404 from `/admin`, `/admin/relationships`, the detail route, `/new`, and `/edit`; the same client user's `/portal` showed only their own relationship name. Server actions re-checking `isAdminEmail` before mutating is verified by construction (every action guards before touching Prisma). Device trust was again toggled off for the browser session and restored to `true` afterward; test DB rows were deleted and the database re-seeded.
+- Unit 04 admin UI design direction (per `frontend-design-taste.md` derivation): grounded, legible, calm. Existing semantic tokens only; blue for structure and links, gold reserved for the primary action and lifecycle hex markers, silver hairlines on rectangular panels; Zilla Slab headings over Hanken Grotesk UI; the repeated layout primitive is the hairline-bordered rectangular panel with uppercase table headers, and the hex appears only as small lifecycle status markers. Light and dark themes plus 375px mobile were checked via screenshots.
+- CodeRabbit rate-limited during Unit 04 committed review on `unit-04-client-relationship-core` at commit `26e5be2`. Reported reset delay: 16 minutes from first limit hit. Manual rerun required after reset.
+- CodeRabbit rate-limited AGAIN during Unit 04 committed review at commit `b172fca` (2026-07-14 06:52 EDT / 10:52 UTC). The review suspended before completing — CodeRabbit reported "Review limit reached" and offered an **8-minute reset delay**. Partial findings were emitted before suspension. Manual action: wait for the reset, then re-run `coderabbit review --type committed --plain --base master` to obtain the complete finding set before merging Unit 04.
+- CodeRabbit rate-limited again at commit `b5605b6`; offered a **17-minute reset delay** as of 2026-07-14. Loop paused; awaiting retry.
+- Addressed sixth-pass Unit 04 review findings on commit `350df9b`: slug suffix ceiling, edit form remount key, disabled button hover handling, aria-invalid exposure, dynamic alert role, simplified contact rendering. Findings tracked and resolved in `context/current-issues.md`.
+- Addressed seventh-pass CodeRabbit findings on commits `7e102de` and `c1e7f2c`: exported `SLUG_MAX_LENGTH` with collision-safe slug candidate generation, and retained submitted lifecycle value on failed `LifecycleControl` submit via `useActionState`. `context/current-issues.md` updated; `context/progress-tracker.md` aligned.
+- CodeRabbit rate-limited again at commit `c1e7f2c`; offered a **12-minute reset delay**. Automatic retry queued (`proc_7e2afcddcc7e`). Loop resumes on completion.
+- Addressed eighth-pass Unit 04 review on commit `fb23233`: narrowed slug-collision retry to `isUniqueConstraintError(error, "slug")` so unrelated `P2002` violations no longer burn retries. Next step: final coderabbit review to confirm clean status before PR/merge.
+- Addressed ninth/tenth-pass findings on commit `a68d38b`: exact-candidate slug collision lookup via `findUnique` instead of broad `startsWith`, and aligned `.link-button--danger:disabled` with `pointer-events: none`.
+- Addressed eleventh-pass finding on commit `35879ed`: remove membership buttons now carry contextual `aria-label` props for screen reader clarity. Final review in flight.
+- CodeRabbit rate-limited again at commit `35879ed`; offered an **17-minute reset delay**. Automatic retry queued (`proc_9b493e36cc67`). Loop resumes on completion.
+- Addressed twelfth-pass findings on commit `ec320bc`: extracted shared `relationshipDateFormatter` into `lib/relationships/format.ts`, added enum-order dependency comment in `queries.ts`, consolidated duplicate entries in `context/current-issues.md`. Final review queued.
+- Addressed follow-up CodeRabbit findings: attach/remove actions now invalidate the relationships list as well as detail pages; lifecycle database failures retain the validated submitted lifecycle while invalid raw values remain untyped and fall back to the current value in the control; the attach email input remounts only after action-state changes so successful attaches clear it and errors retain it. Also replaced the Prisma create/update union cast with one shared writable-fields type and added CSS fallbacks for table `color-mix()` rules.

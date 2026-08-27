@@ -1,32 +1,37 @@
-import { currentUser } from "@clerk/nextjs/server";
 import type { Metadata } from "next";
-import { notFound, redirect } from "next/navigation";
+import Link from "next/link";
 
-import { isAdminEmail } from "@/lib/auth/admin-allowlist";
+import { requireAdminForPage } from "@/lib/auth/require-admin";
 
 export const metadata: Metadata = {
   title: "Admin",
 };
 
 export default async function AdminPage() {
-  const user = await currentUser();
-
-  if (!user) {
-    redirect("/sign-in");
-  }
-
-  if (!isAdminEmail(user.primaryEmailAddress?.emailAddress ?? null)) {
-    notFound();
-  }
+  await requireAdminForPage();
 
   return (
-    <div className="container section section--tight narrow">
-      <p className="eyebrow">Admin</p>
-      <h1>Operator console</h1>
-      <p className="lead">
-        Client relationships, contracts, and payment gates get a real
-        workspace here in a later unit.
-      </p>
+    <div className="container section section--tight narrow admin-screen">
+      <header>
+        <p className="eyebrow">Admin</p>
+        <h1 className="admin-title">Operator console</h1>
+        <p className="lead">
+          Client relationships are live. Contracts, projects, and payment
+          gates get their workspaces in later units.
+        </p>
+      </header>
+
+      <nav className="admin-panel" aria-label="Workspaces">
+        <h2 className="admin-panel__title">Workspaces</h2>
+        <ul className="admin-nav-list">
+          <li>
+            <Link href="/admin/relationships">Client relationships</Link>
+            <span className="admin-head__meta">
+              Create relationships, track lifecycle, manage portal access.
+            </span>
+          </li>
+        </ul>
+      </nav>
     </div>
   );
 }
