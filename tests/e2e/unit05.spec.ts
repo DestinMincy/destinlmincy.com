@@ -9,10 +9,36 @@ const clientImpersonationUrl = process.env.UNIT05_CLIENT_IMPERSONATION_URL;
 const clientUserId = process.env.UNIT05_CLIENT_USER_ID;
 const clientEmail = process.env.UNIT05_CLIENT_EMAIL;
 const databaseUrl = process.env.DATABASE_URL;
-const pool = new Pool({ connectionString: databaseUrl });
+const destructiveDatabaseAccessEnabled =
+  process.env.UNIT05_ALLOW_DESTRUCTIVE_E2E === "true";
+
+function isAllowedE2EDatabaseTarget(connectionString: string | undefined) {
+  if (!connectionString) {
+    return false;
+  }
+
+  try {
+    const url = new URL(connectionString);
+    const databaseName = decodeURIComponent(url.pathname.slice(1));
+    const schemaName = url.searchParams.get("schema");
+
+    return (
+      ["postgres:", "postgresql:"].includes(url.protocol) &&
+      (databaseName === "destinlmincy_test" || schemaName === "unit05_e2e")
+    );
+  } catch {
+    return false;
+  }
+}
+
+const databaseTargetIsAllowed = isAllowedE2EDatabaseTarget(databaseUrl);
+const pool =
+  destructiveDatabaseAccessEnabled && databaseTargetIsAllowed
+    ? new Pool({ connectionString: databaseUrl })
+    : null;
 
 async function clearBrowserRecords() {
-  if (!relationshipId) {
+  if (!relationshipId || !pool) {
     return;
   }
 
@@ -33,12 +59,13 @@ test.describe("Unit 05 applications, sites, and projects", () => {
       !clientImpersonationUrl ||
       !clientUserId ||
       !clientEmail ||
-      !databaseUrl,
-    "Unit 05 disposable Clerk fixture variables and DATABASE_URL are required.",
+      !destructiveDatabaseAccessEnabled ||
+      !databaseTargetIsAllowed,
+    "Unit 05 disposable Clerk fixtures, destructive-test opt-in, and an allowlisted test database or schema are required.",
   );
 
   test.beforeAll(async () => {
-    if (!relationshipId || !clientUserId || !clientEmail || !databaseUrl) {
+    if (!relationshipId || !clientUserId || !clientEmail || !pool) {
       return;
     }
 
@@ -54,14 +81,14 @@ test.describe("Unit 05 applications, sites, and projects", () => {
   });
 
   test.afterAll(async () => {
-    if (relationshipId && clientUserId) {
+    if (relationshipId && clientUserId && pool) {
       await clearBrowserRecords();
       await pool.query(
         'DELETE FROM "client_users" WHERE "clientRelationshipId" = $1 AND "clerkUserId" = $2',
         [relationshipId, clientUserId],
       );
     }
-    await pool.end();
+    await pool?.end();
   });
 
   test("admin manages work and client sees only read-only active records", async ({
