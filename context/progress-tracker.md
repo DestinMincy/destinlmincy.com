@@ -58,7 +58,7 @@ Update this file after every meaningful implementation change.
 - Added the square DLM logo asset to `master` at commit `047f510`.
 - Implemented Unit 05 applications/sites and projects: additive Prisma models and migration, relationship-scoped admin list/create/edit/archive workspaces, project-to-application attachment, new-asset tracking, operational URLs and dates, and read-only active work in the client portal.
 - Added reusable Unit 05 boundary validation plus unit, PostgreSQL integration, and Playwright E2E coverage. Live E2E verified authorized admin CRUD/archive, invalid URL rejection, contradictory create-state rejection, form-value retention after errors, project attachment, client read-only visibility, archived-record filtering, and signed-in non-admin 404 behavior.
-- Made project create/update writes serializable so an application/site cannot be archived between selection validation and persistence; added a concurrent archive/save integration regression test. Typecheck, unit tests, PostgreSQL integration, production build, and the uncommitted CodeRabbit review all pass.
+- Made project create/update writes serializable so an application/site cannot be archived between selection validation and persistence; added a concurrent archive/save integration regression test. Typecheck, unit tests, PostgreSQL integration, production build, and the uncommitted CodeRabbit review all pass. The final committed review's one minor finding was resolved by requiring `DATABASE_URL` in the Unit 05 E2E fixture guard.
 
 ## In Progress
 

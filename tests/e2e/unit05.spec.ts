@@ -8,7 +8,8 @@ const adminImpersonationUrl = process.env.UNIT05_ADMIN_IMPERSONATION_URL;
 const clientImpersonationUrl = process.env.UNIT05_CLIENT_IMPERSONATION_URL;
 const clientUserId = process.env.UNIT05_CLIENT_USER_ID;
 const clientEmail = process.env.UNIT05_CLIENT_EMAIL;
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const databaseUrl = process.env.DATABASE_URL;
+const pool = new Pool({ connectionString: databaseUrl });
 
 async function clearBrowserRecords() {
   if (!relationshipId) {
@@ -31,12 +32,13 @@ test.describe("Unit 05 applications, sites, and projects", () => {
       !adminImpersonationUrl ||
       !clientImpersonationUrl ||
       !clientUserId ||
-      !clientEmail,
-    "Unit 05 disposable Clerk fixture variables are required.",
+      !clientEmail ||
+      !databaseUrl,
+    "Unit 05 disposable Clerk fixture variables and DATABASE_URL are required.",
   );
 
   test.beforeAll(async () => {
-    if (!relationshipId || !clientUserId || !clientEmail) {
+    if (!relationshipId || !clientUserId || !clientEmail || !databaseUrl) {
       return;
     }
 
