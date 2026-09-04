@@ -10,6 +10,7 @@ import {
   getProject,
   getRelationshipIdentity,
 } from "./queries";
+import { createProjectForRelationship } from "./project-writes";
 
 const slugPrefix = `unit05-integration-${Date.now()}`;
 
@@ -96,5 +97,43 @@ test("client work stays relationship-scoped and hides archived records", async (
   assert.deepEqual(
     visible.projects.map((project) => project.name),
     ["Active project"],
+  );
+
+  const concurrentApplication = await prisma.applicationSite.create({
+    data: {
+      clientRelationshipId: relationshipA.id,
+      name: "Concurrent site",
+    },
+  });
+  const concurrentProjectName = "Concurrent project save";
+
+  const [saveResult, archiveResult] = await Promise.all([
+    createProjectForRelationship(relationshipA.id, {
+      applicationSiteId: concurrentApplication.id,
+      name: concurrentProjectName,
+      status: "PLANNED",
+      summary: null,
+      clientDescription: null,
+      createsNewAsset: false,
+      startsAt: null,
+      targetDate: null,
+    }),
+    prisma.applicationSite.updateMany({
+      where: {
+        id: concurrentApplication.id,
+        clientRelationshipId: relationshipA.id,
+        status: "ACTIVE",
+      },
+      data: { status: "ARCHIVED" },
+    }),
+  ]);
+
+  assert.equal(archiveResult.count, 1);
+  assert.ok(
+    saveResult === "saved" || saveResult === "application-not-selectable",
+  );
+  assert.equal(
+    await prisma.project.count({ where: { name: concurrentProjectName } }),
+    saveResult === "saved" ? 1 : 0,
   );
 });

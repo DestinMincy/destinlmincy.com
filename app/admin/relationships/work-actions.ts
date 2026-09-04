@@ -4,6 +4,10 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { getAdminUser } from "@/lib/auth/require-admin";
+import {
+  createProjectForRelationship,
+  updateProjectForRelationship,
+} from "@/lib/client-work/project-writes";
 import { dateInputToDate, parseApplicationSiteForm, parseProjectForm } from "@/lib/client-work/validation";
 import { prisma } from "@/lib/db/client";
 import type {
@@ -39,32 +43,6 @@ async function relationshipExists(clientRelationshipId: string) {
     where: { id: clientRelationshipId },
     select: { id: true },
   });
-}
-
-async function applicationSiteIsSelectable(
-  clientRelationshipId: string,
-  applicationSiteId: string,
-  currentApplicationSiteId?: string | null,
-): Promise<boolean> {
-  if (!applicationSiteId) {
-    return true;
-  }
-
-  const application = await prisma.applicationSite.findFirst({
-    where: {
-      id: applicationSiteId,
-      clientRelationshipId,
-      OR: [
-        { status: "ACTIVE" },
-        ...(currentApplicationSiteId === applicationSiteId
-          ? [{ id: applicationSiteId }]
-          : []),
-      ],
-    },
-    select: { id: true },
-  });
-
-  return Boolean(application);
 }
 
 export async function createApplicationSiteAction(
@@ -213,7 +191,18 @@ export async function createProjectAction(
   }
 
   try {
-    if (!(await relationshipExists(clientRelationshipId))) {
+    const result = await createProjectForRelationship(clientRelationshipId, {
+      applicationSiteId: values.applicationSiteId,
+      name: values.name,
+      status: values.status,
+      summary: values.summary || null,
+      clientDescription: values.clientDescription || null,
+      createsNewAsset: values.createsNewAsset,
+      startsAt: dateInputToDate(values.startsAt),
+      targetDate: dateInputToDate(values.targetDate),
+    });
+
+    if (result === "relationship-missing") {
       return {
         status: "error",
         values,
@@ -222,12 +211,7 @@ export async function createProjectAction(
       };
     }
 
-    if (
-      !(await applicationSiteIsSelectable(
-        clientRelationshipId,
-        values.applicationSiteId,
-      ))
-    ) {
+    if (result === "application-not-selectable") {
       return {
         status: "error",
         values,
@@ -237,21 +221,6 @@ export async function createProjectAction(
         },
       };
     }
-
-    await prisma.project.create({
-      data: {
-        clientRelationshipId,
-        applicationSiteId: values.applicationSiteId || null,
-        name: values.name,
-        status: values.status,
-        summary: values.summary || null,
-        clientDescription: values.clientDescription || null,
-        createsNewAsset: values.createsNewAsset,
-        startsAt: dateInputToDate(values.startsAt),
-        targetDate: dateInputToDate(values.targetDate),
-      },
-      select: { id: true },
-    });
   } catch (error: unknown) {
     console.error("Failed to create project", error);
     return { status: "error", values, errors: {}, formError: SAVE_ERROR };
@@ -281,41 +250,11 @@ export async function updateProjectAction(
   }
 
   try {
-    const existing = await prisma.project.findFirst({
-      where: { id: projectId, clientRelationshipId },
-      select: { id: true, applicationSiteId: true },
-    });
-
-    if (!existing) {
-      return {
-        status: "error",
-        values,
-        errors: {},
-        formError: "That project no longer exists.",
-      };
-    }
-
-    if (
-      !(await applicationSiteIsSelectable(
-        clientRelationshipId,
-        values.applicationSiteId,
-        existing.applicationSiteId,
-      ))
-    ) {
-      return {
-        status: "error",
-        values,
-        errors: {
-          applicationSiteId:
-            "Pick an active application or site from this relationship.",
-        },
-      };
-    }
-
-    const result = await prisma.project.updateMany({
-      where: { id: projectId, clientRelationshipId },
-      data: {
-        applicationSiteId: values.applicationSiteId || null,
+    const result = await updateProjectForRelationship(
+      clientRelationshipId,
+      projectId,
+      {
+        applicationSiteId: values.applicationSiteId,
         name: values.name,
         status: values.status,
         summary: values.summary || null,
@@ -324,14 +263,25 @@ export async function updateProjectAction(
         startsAt: dateInputToDate(values.startsAt),
         targetDate: dateInputToDate(values.targetDate),
       },
-    });
+    );
 
-    if (result.count === 0) {
+    if (result === "project-missing") {
       return {
         status: "error",
         values,
         errors: {},
         formError: "That project no longer exists.",
+      };
+    }
+
+    if (result === "application-not-selectable") {
+      return {
+        status: "error",
+        values,
+        errors: {
+          applicationSiteId:
+            "Pick an active application or site from this relationship.",
+        },
       };
     }
   } catch (error: unknown) {
