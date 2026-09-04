@@ -99,6 +99,24 @@ test("client work stays relationship-scoped and hides archived records", async (
     ["Active project"],
   );
 
+  const invalidProjectName = "Contradictory asset project";
+  const invalidResult = await createProjectForRelationship(relationshipA.id, {
+    applicationSiteId: activeApplication.id,
+    name: invalidProjectName,
+    status: "PLANNED",
+    summary: null,
+    clientDescription: null,
+    createsNewAsset: true,
+    startsAt: null,
+    targetDate: null,
+  });
+
+  assert.equal(invalidResult, "invalid-asset-selection");
+  assert.equal(
+    await prisma.project.count({ where: { name: invalidProjectName } }),
+    0,
+  );
+
   const concurrentApplication = await prisma.applicationSite.create({
     data: {
       clientRelationshipId: relationshipA.id,

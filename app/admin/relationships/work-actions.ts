@@ -211,6 +211,19 @@ export async function createProjectAction(
       };
     }
 
+    if (result === "invalid-asset-selection") {
+      return {
+        status: "error",
+        values,
+        errors: {
+          applicationSiteId:
+            "A new-asset project cannot attach to an existing application or site yet.",
+          createsNewAsset:
+            "Clear the existing application or site before selecting this option.",
+        },
+      };
+    }
+
     if (result === "application-not-selectable") {
       return {
         status: "error",

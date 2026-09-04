@@ -17,6 +17,7 @@ export type ProjectWriteResult =
   | "saved"
   | "relationship-missing"
   | "project-missing"
+  | "invalid-asset-selection"
   | "application-not-selectable";
 
 async function applicationSiteIsSelectable(
@@ -50,6 +51,10 @@ export async function createProjectForRelationship(
   clientRelationshipId: string,
   input: ProjectWriteInput,
 ): Promise<ProjectWriteResult> {
+  if (input.applicationSiteId && input.createsNewAsset) {
+    return "invalid-asset-selection";
+  }
+
   return prisma.$transaction(
     async (transaction) => {
       const relationship = await transaction.clientRelationship.findUnique({

@@ -4,6 +4,7 @@ import { useActionState } from "react";
 
 import { FormField } from "@/components/admin/FormField";
 import type {
+  ApplicationSiteStatus,
   ProjectFormState,
   ProjectFormValues,
 } from "@/lib/client-work/types";
@@ -20,7 +21,7 @@ type ProjectFormAction = (
 interface ApplicationSiteOption {
   id: string;
   name: string;
-  status: "ACTIVE" | "ARCHIVED";
+  status: ApplicationSiteStatus;
 }
 
 interface ProjectFormProps {
