@@ -4,11 +4,11 @@ Update this file after every meaningful implementation change.
 
 ## Current Phase
 
-- Unit 05: applications/sites and projects implementation.
+- Post-Unit 05 dependency security maintenance.
 
 ## Current Goal
 
-- Complete the Unit 05 review gate and merge `unit-05-applications-sites-projects`.
+- Merge the scoped `mysql2` advisory remediation before beginning Unit 06.
 
 ## Completed
 
@@ -59,14 +59,15 @@ Update this file after every meaningful implementation change.
 - Implemented Unit 05 applications/sites and projects: additive Prisma models and migration, relationship-scoped admin list/create/edit/archive workspaces, project-to-application attachment, new-asset tracking, operational URLs and dates, and read-only active work in the client portal.
 - Added reusable Unit 05 boundary validation plus unit, PostgreSQL integration, and Playwright E2E coverage. Live E2E verified authorized admin CRUD/archive, invalid URL rejection, contradictory create-state rejection, form-value retention after errors, project attachment, client read-only visibility, archived-record filtering, and signed-in non-admin 404 behavior.
 - Made project create/update writes serializable so an application/site cannot be archived between selection validation and persistence; added a concurrent archive/save integration regression test. Typecheck, unit tests, PostgreSQL integration, production build, and the uncommitted CodeRabbit review all pass. Committed-review findings were resolved by enforcing the create-time new-asset/attachment invariant inside the write boundary with an integration regression test, typing project application options from the shared generated status contract, and preventing Unit 05 E2E database setup unless destructive access is explicitly enabled for the exact `destinlmincy_test` database or `unit05_e2e` schema.
+- Unit 05 passed its final committed CodeRabbit review with zero findings and merged to `master` through PR #9 (`86cb7a2`).
+- Remediated Dependabot alert #131 by overriding Prisma's development-only transitive `mysql2` dependency from `3.15.3` to `3.24.3`. `npm audit` reports zero vulnerabilities; typecheck, unit tests, PostgreSQL integration, production build, and the safely skipped E2E gate pass.
 
 ## In Progress
 
-- Unit 05 final committed review and merge gate.
+- Final review and merge of `codex/fix-mysql2-advisory`.
 
 ## Next Up
 
-- Run the Unit 05 review gate and merge it before beginning Unit 06.
 - Begin Unit 06: contract template editor per `context/specs/06-contract-template-editor.md`.
 
 ## Open Questions

@@ -46,6 +46,7 @@
     "react-dom": "^19.2.7"
   },
   "overrides": {
-    "deepmerge-ts": "8.0.2"
+    "deepmerge-ts": "8.0.2",
+    "mysql2": "3.24.3"
   }
 }
