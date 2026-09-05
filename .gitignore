@@ -10,3 +10,5 @@ lib/generated/prisma/
 *.log
 tsconfig.tsbuildinfo
 .gstack/
+playwright-report/
+test-results/

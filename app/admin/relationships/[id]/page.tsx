@@ -11,6 +11,7 @@ import { AttachClientUserForm } from "@/components/admin/AttachClientUserForm";
 import { LifecycleControl } from "@/components/admin/LifecycleControl";
 import { RemoveMembershipButton } from "@/components/admin/RemoveMembershipButton";
 import { requireAdminForPage } from "@/lib/auth/require-admin";
+import { getRelationshipIdentity } from "@/lib/client-work/queries";
 import { getClientRelationshipWithUsers } from "@/lib/relationships/queries";
 import { relationshipDateFormatter } from "@/lib/relationships/format";
 
@@ -28,9 +29,12 @@ export default async function RelationshipDetailPage({
   await requireAdminForPage();
 
   const { id } = await params;
-  const relationship = await getClientRelationshipWithUsers(id);
+  const [relationship, workSummary] = await Promise.all([
+    getClientRelationshipWithUsers(id),
+    getRelationshipIdentity(id),
+  ]);
 
-  if (!relationship) {
+  if (!relationship || !workSummary) {
     notFound();
   }
 
@@ -122,6 +126,27 @@ export default async function RelationshipDetailPage({
           </dl>
         </div>
       </div>
+
+      <section className="admin-panel" aria-labelledby="client-work-heading">
+        <div className="admin-panel__head">
+          <h2 className="admin-panel__title" id="client-work-heading">
+            Client work
+          </h2>
+          <p className="admin-head__meta">
+            Ongoing assets and the scoped projects that create or change them.
+          </p>
+        </div>
+        <div className="admin-work-links">
+          <Link href={`/admin/relationships/${relationship.id}/applications`}>
+            <span>Applications and sites</span>
+            <strong>{workSummary._count.applications}</strong>
+          </Link>
+          <Link href={`/admin/relationships/${relationship.id}/projects`}>
+            <span>Projects</span>
+            <strong>{workSummary._count.projects}</strong>
+          </Link>
+        </div>
+      </section>
 
       <section className="admin-panel" aria-labelledby="client-users-heading">
         <div className="admin-panel__head">

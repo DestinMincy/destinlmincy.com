@@ -61,7 +61,12 @@ async function main() {
     data: {
       clientRelationshipId: relationship.id,
       name: "destinlmincy.com",
-      primaryUrl: "https://destinlmincy.com",
+      type: "WEBSITE",
+      status: "ACTIVE",
+      productionUrl: "https://destinlmincy.com",
+      stagingUrl: "https://staging.destinlmincy.com",
+      repositoryUrl: "https://github.com/DestinMincy/destinlmincy.com",
+      notes: "Primary agency site and client relationship OS.",
     },
   });
 
@@ -70,7 +75,13 @@ async function main() {
       applicationSiteId: application.id,
       clientRelationshipId: relationship.id,
       name: "Next.js Relationship OS Foundation",
+      status: "IN_PROGRESS",
       summary: "Seed project proving the app/site and project shell.",
+      clientDescription:
+        "Rebuilding the public site and adding secure client operations.",
+      createsNewAsset: false,
+      startsAt: new Date("2026-06-15T00:00:00.000Z"),
+      targetDate: new Date("2026-09-30T00:00:00.000Z"),
     },
   });
 

@@ -976,6 +976,33 @@ textarea:focus {
   text-decoration: underline;
 }
 
+.admin-work-links {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.admin-work-links a {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--border);
+  padding: 14px 16px;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.admin-work-links a:hover {
+  border-color: var(--accent);
+}
+
+.admin-work-links strong {
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+}
+
 .admin-table-wrap {
   border: 1px solid var(--border);
   background: var(--surface-panel);
@@ -1094,6 +1121,23 @@ textarea:focus {
   gap: 18px;
 }
 
+.checkbox-field-wrap {
+  justify-items: start;
+}
+
+.checkbox-field {
+  display: inline-flex;
+  gap: 10px;
+  align-items: flex-start;
+  cursor: pointer;
+}
+
+.checkbox-field input {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+}
+
 .field-error {
   margin: 0;
   color: var(--danger);
@@ -1160,6 +1204,54 @@ textarea:focus {
   display: grid;
   gap: 6px;
   justify-items: end;
+}
+
+.archive-form {
+  display: grid;
+  gap: 6px;
+  justify-items: end;
+}
+
+.portal-work-list {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.portal-work-list li {
+  display: flex;
+  gap: 20px;
+  align-items: start;
+  justify-content: space-between;
+  border-top: 1px solid var(--border);
+  padding-block: 14px;
+}
+
+.portal-work-list li:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.portal-work-list li:last-child {
+  padding-bottom: 0;
+}
+
+.portal-work-list li > div {
+  display: grid;
+  gap: 3px;
+}
+
+.portal-work-list span,
+.portal-work-list p {
+  color: var(--text-muted);
+  font-size: 0.93rem;
+}
+
+.portal-work-list p {
+  max-width: 64ch;
+  margin-top: 6px;
 }
 
 .link-button--danger {
@@ -1248,7 +1340,8 @@ textarea:focus {
   .work-item,
   .site-footer__inner,
   .admin-grid,
-  .admin-form__row {
+  .admin-form__row,
+  .admin-work-links {
     grid-template-columns: 1fr;
   }
 

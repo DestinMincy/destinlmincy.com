@@ -4,11 +4,11 @@ Update this file after every meaningful implementation change.
 
 ## Current Phase
 
-- Unit 04: client relationship core review/merge pending.
+- Unit 05: applications/sites and projects implementation.
 
 ## Current Goal
 
-- Complete Unit 04 CodeRabbit review and merge `unit-04-client-relationship-core` to `master`.
+- Complete the Unit 05 review gate and merge `unit-05-applications-sites-projects`.
 
 ## Completed
 
@@ -53,16 +53,21 @@ Update this file after every meaningful implementation change.
 - All Unit 04 mutations are server actions in `app/admin/relationships/actions.ts`; every action re-checks the admin allowlist server-side (`lib/auth/require-admin.ts` wraps the Unit 03 pattern for pages and actions), validates input at the boundary (`lib/relationships/validation.ts`: required name, length ceilings, email shape, lifecycle enum membership), and returns field-level errors instead of throwing.
 - Client user attachment resolves the email against the Clerk development instance with `clerkClient().users.getUserList({ emailAddress })` and stores the Clerk user id, normalized email, and display name on `ClientUser`; an unmatched or unverified email returns a clear form error requiring signup and verification, and duplicates are rejected.
 - Relationship slugs are generated server-side from the name (lowercase, diacritics stripped, numeric suffix on collision) and are intentionally stable across renames.
+- Unit 04 CodeRabbit follow-up completed cleanly at commit `1841883`, then Unit 04 merged to `master` through PR #7 (`63e4f90`).
+- Dependabot security remediation merged through PR #8 (`88de819`).
+- Added the square DLM logo asset to `master` at commit `047f510`.
+- Implemented Unit 05 applications/sites and projects: additive Prisma models and migration, relationship-scoped admin list/create/edit/archive workspaces, project-to-application attachment, new-asset tracking, operational URLs and dates, and read-only active work in the client portal.
+- Added reusable Unit 05 boundary validation plus unit, PostgreSQL integration, and Playwright E2E coverage. Live E2E verified authorized admin CRUD/archive, invalid URL rejection, contradictory create-state rejection, form-value retention after errors, project attachment, client read-only visibility, archived-record filtering, and signed-in non-admin 404 behavior.
+- Made project create/update writes serializable so an application/site cannot be archived between selection validation and persistence; added a concurrent archive/save integration regression test. Typecheck, unit tests, PostgreSQL integration, production build, and the uncommitted CodeRabbit review all pass. Committed-review findings were resolved by enforcing the create-time new-asset/attachment invariant inside the write boundary with an integration regression test, typing project application options from the shared generated status contract, and preventing Unit 05 E2E database setup unless destructive access is explicitly enabled for the exact `destinlmincy_test` database or `unit05_e2e` schema.
 
 ## In Progress
 
-- None.
+- Unit 05 final committed review and merge gate.
 
 ## Next Up
 
-- Complete Unit 04 CodeRabbit review and merge `unit-04-client-relationship-core` to `master`.
-- Begin Unit 05: applications/sites and projects per `context/specs/05-applications-sites-projects.md`.
-- Reuse the Unit 04 admin surface patterns (server actions, boundary validation, `requireAdminForPage`) for the new admin workspaces.
+- Run the Unit 05 review gate and merge it before beginning Unit 06.
+- Begin Unit 06: contract template editor per `context/specs/06-contract-template-editor.md`.
 
 ## Open Questions
 

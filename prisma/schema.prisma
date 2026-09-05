@@ -57,6 +57,26 @@ enum ClientUserStatus {
   REMOVED
 }
 
+enum ApplicationSiteType {
+  WEBSITE
+  WEB_APPLICATION
+  INTERNAL_TOOL
+  OTHER
+}
+
+enum ApplicationSiteStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum ProjectStatus {
+  PLANNED
+  IN_PROGRESS
+  PAUSED
+  COMPLETED
+  ARCHIVED
+}
+
 model ClientRelationship {
   id                  String                      @id @default(cuid())
   name                String
@@ -100,13 +120,17 @@ model ClientUser {
 }
 
 model ApplicationSite {
-  id                   String   @id @default(cuid())
+  id                   String                @id @default(cuid())
   clientRelationshipId String
   name                 String
-  primaryUrl           String?
+  type                 ApplicationSiteType   @default(WEBSITE)
+  status               ApplicationSiteStatus @default(ACTIVE)
+  productionUrl        String?
+  stagingUrl           String?
+  repositoryUrl        String?
   notes                String?
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
 
   clientRelationship ClientRelationship      @relation(fields: [clientRelationshipId], references: [id], onDelete: Cascade)
   projects           Project[]
@@ -118,13 +142,18 @@ model ApplicationSite {
 }
 
 model Project {
-  id                   String   @id @default(cuid())
+  id                   String        @id @default(cuid())
   clientRelationshipId String
   applicationSiteId    String?
   name                 String
+  status               ProjectStatus @default(PLANNED)
   summary              String?
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  clientDescription    String?
+  createsNewAsset      Boolean       @default(false)
+  startsAt             DateTime?
+  targetDate           DateTime?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
 
   clientRelationship ClientRelationship      @relation(fields: [clientRelationshipId], references: [id], onDelete: Cascade)
   applicationSite    ApplicationSite?        @relation(fields: [applicationSiteId, clientRelationshipId], references: [id, clientRelationshipId], onDelete: Restrict)

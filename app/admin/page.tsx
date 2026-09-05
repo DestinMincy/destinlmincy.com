@@ -16,8 +16,8 @@ export default async function AdminPage() {
         <p className="eyebrow">Admin</p>
         <h1 className="admin-title">Operator console</h1>
         <p className="lead">
-          Client relationships are live. Contracts, projects, and payment
-          gates get their workspaces in later units.
+          Manage client relationships, their applications and sites, and the
+          projects attached to them.
         </p>
       </header>
 
@@ -27,7 +27,7 @@ export default async function AdminPage() {
           <li>
             <Link href="/admin/relationships">Client relationships</Link>
             <span className="admin-head__meta">
-              Create relationships, track lifecycle, manage portal access.
+              Track lifecycle, portal access, applications, sites, and projects.
             </span>
           </li>
         </ul>
