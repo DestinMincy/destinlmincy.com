@@ -119,3 +119,36 @@ export async function requestMilestoneChanges(
   revalidatePath(`/portal/projects`);
   return { status: "success", errors: {} };
 }
+
+// ── Portal component action adapters ─────────────────────────────────────────
+// These wrappers expose the simple { success, error? } shape that
+// ApprovalForm.tsx calls from the client.
+
+export async function approveMilestoneAction(
+  milestoneId: string,
+  clientRelationshipId: string,
+): Promise<{ success: boolean; error?: string }> {
+  const result = await approveMilestone(milestoneId, clientRelationshipId);
+  if (result.status === "success") return { success: true };
+  return { success: false, error: result.error };
+}
+
+export async function requestMilestoneChangesAction(
+  milestoneId: string,
+  clientRelationshipId: string,
+  notes: string,
+): Promise<{ success: boolean; error?: string }> {
+  const formData = new FormData();
+  formData.set("note", notes);
+  const result = await requestMilestoneChanges(
+    milestoneId,
+    clientRelationshipId,
+    { status: "idle", errors: {} },
+    formData,
+  );
+  if (result.status === "success") return { success: true };
+  return {
+    success: false,
+    error: result.formError ?? result.errors.note ?? "Something went wrong.",
+  };
+}
