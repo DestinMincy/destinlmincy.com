@@ -60,3 +60,25 @@ export async function getPrivateDownloadUrl(
   const command = new GetObjectCommand({ Bucket: bucket, Key: key });
   return getSignedUrl(client, command, { expiresIn: expiresInSeconds });
 }
+
+/**
+ * Downloads an object from the private S3 bucket and returns it as a Buffer.
+ */
+export async function downloadFromPrivateS3(key: string): Promise<Buffer> {
+  const client = getS3Client();
+  const bucket = getPrivateBucket();
+
+  const response = await client.send(
+    new GetObjectCommand({ Bucket: bucket, Key: key }),
+  );
+
+  if (!response.Body) {
+    throw new Error(`S3 object ${key} has no body`);
+  }
+
+  const chunks: Uint8Array[] = [];
+  for await (const chunk of response.Body as AsyncIterable<Uint8Array>) {
+    chunks.push(chunk);
+  }
+  return Buffer.concat(chunks);
+}

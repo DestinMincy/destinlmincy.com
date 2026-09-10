@@ -12,8 +12,9 @@ import type {
   TemplateSnapshot,
 } from "@/lib/contracts/types";
 import { generateContractPdf } from "@/lib/pdf/generate";
-import { uploadToPrivateS3, getPrivateDownloadUrl } from "@/lib/storage/s3";
+import { uploadToPrivateS3 } from "@/lib/storage/s3";
 import { downloadSignedPdf, sendEnvelopeForSigning } from "@/lib/docusign/client";
+import { downloadFromPrivateS3 } from "@/lib/storage/s3";
 
 const NOT_AUTHORIZED = "You are not authorized to do that.";
 const SAVE_ERROR = "Something went wrong while saving. Try again.";
@@ -499,13 +500,8 @@ export async function sendContractToDocuSignAction(
       };
     }
 
-    // Download PDF from S3 via presigned URL then fetch it.
-    const presignedUrl = await getPrivateDownloadUrl(contract.s3Key);
-    const pdfResponse = await fetch(presignedUrl);
-    if (!pdfResponse.ok) {
-      return { status: "error", error: "Failed to retrieve contract PDF from storage." };
-    }
-    const pdfBuffer = Buffer.from(await pdfResponse.arrayBuffer());
+    // Download PDF directly from S3.
+    const pdfBuffer = await downloadFromPrivateS3(contract.s3Key);
 
     const templateName =
       contract.templateVersion?.contractTemplate?.name ?? "Contract";
