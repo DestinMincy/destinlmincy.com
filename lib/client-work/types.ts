@@ -36,6 +36,9 @@ export const PROJECT_STATUS_VALUES: ProjectStatus[] = Object.values(WorkStatus);
 
 export const PROJECT_STATUS_LABELS: Record<ProjectStatus, string> = {
   PLANNED: "Planned",
+  ACTIVE: "Active",
+  ON_HOLD: "On hold",
+  COMPLETE: "Complete",
   IN_PROGRESS: "In progress",
   PAUSED: "Paused",
   COMPLETED: "Completed",
@@ -47,6 +50,9 @@ export const PROJECT_STATUS_TONE: Record<
   "neutral" | "signal" | "success" | "muted"
 > = {
   PLANNED: "neutral",
+  ACTIVE: "signal",
+  ON_HOLD: "muted",
+  COMPLETE: "success",
   IN_PROGRESS: "signal",
   PAUSED: "muted",
   COMPLETED: "success",

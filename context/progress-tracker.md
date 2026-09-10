@@ -62,6 +62,8 @@ Update this file after every meaningful implementation change.
 - Unit 05 passed its final committed CodeRabbit review with zero findings and merged to `master` through PR #9 (`86cb7a2`).
 - Remediated Dependabot alert #131 by overriding Prisma's development-only transitive `mysql2` dependency from `3.15.3` to `3.24.3`. `npm audit` reports zero vulnerabilities; typecheck, unit tests, PostgreSQL integration, production build, and the safely skipped E2E gate pass.
 
+- Implemented backend data layer for Units 05-11: extended Prisma schema with ApplicationSiteType (already existed), ProjectStatus (added ACTIVE, ON_HOLD, COMPLETE), ContractStatus, PaymentGateType, MilestoneApprovalAction, DeliverableType, DeliverableVisibility enums; added Contract and MilestoneApproval models; extended ApplicationSite (archivedAt), Project (startDate, clientFacingDescription, archivedAt), ContractTemplateVersion (blocks, variables, archivedAt), PaymentGate (paymentType, amount, currency, dueDate, requiredBeforeWork, stripeUrl, stripeId), Milestone (clientFacingUpdate, paymentDependencyId, approvalRequired), Deliverable (type, notes, visibility); created query files in lib/applications/, lib/projects/, lib/contracts/, lib/payments/, lib/milestones/; created server action files for applications, projects, contracts, payment gates, milestones under app/admin/relationships/[id]/; created lib/portal/actions.ts for client approval flow.
+
 ## In Progress
 
 - Final review and merge of `codex/fix-mysql2-advisory`.
