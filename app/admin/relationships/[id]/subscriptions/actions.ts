@@ -81,6 +81,18 @@ export async function createSubscriptionAction(
     currentPeriodEndsAt = parsed;
   }
 
+  const relationship = await prisma.clientRelationship.findUnique({
+    where: { id: clientRelationshipId },
+    select: { id: true },
+  });
+  if (!relationship) {
+    return {
+      status: "error",
+      errors: {},
+      formError: "That relationship no longer exists.",
+    };
+  }
+
   try {
     await prisma.subscriptionReference.create({
       data: {
