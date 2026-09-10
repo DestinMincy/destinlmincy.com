@@ -86,7 +86,8 @@ export async function sendEnvelopeForSigning(
         {
           anchorString: "Client signature",
           anchorXOffset: "0",
-          anchorYOffset: "-5",
+          // Offset upward past the label to land on the signature line above it.
+          anchorYOffset: "-40",
           anchorUnits: "pixels",
         } as docusign.SignHere,
       ],
@@ -103,7 +104,8 @@ export async function sendEnvelopeForSigning(
         {
           anchorString: "Admin signature",
           anchorXOffset: "0",
-          anchorYOffset: "-5",
+          // Offset upward past the label to land on the signature line above it.
+          anchorYOffset: "-40",
           anchorUnits: "pixels",
         } as docusign.SignHere,
       ],

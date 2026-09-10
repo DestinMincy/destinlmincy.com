@@ -325,10 +325,8 @@ export async function startNewDraftVersionAction(
 /**
  * Form-safe server action for generating a Contract from a published template
  * version. Reads versionId, signerEmail, and contract variable fields from
- * formData, then creates the Contract record and redirects to the contracts
- * list.
- *
- * TODO: PDF generation deferred to Unit 07 implementation.
+ * formData, then generates a PDF, stores it in S3, creates the Contract record,
+ * and redirects to the contracts list.
  */
 export async function createContractFormAction(
   clientRelationshipId: string,
@@ -496,7 +494,8 @@ export async function sendContractToDocuSignAction(
     if (!contract.s3Key || !contract.s3Bucket) {
       return {
         status: "error",
-        error: "No PDF on file. Regenerate the contract first.",
+        error:
+          "No PDF on file — check AWS_REGION/S3_PRIVATE_BUCKET configuration and create the contract again.",
       };
     }
 
@@ -514,6 +513,14 @@ export async function sendContractToDocuSignAction(
     const adminEmail = process.env.DOCUSIGN_ADMIN_EMAIL ?? "";
     const adminName = process.env.DOCUSIGN_ADMIN_NAME ?? "Admin";
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
+
+    if (!adminEmail) {
+      return { status: "error", error: "DOCUSIGN_ADMIN_EMAIL is not configured." };
+    }
+    if (!appUrl) {
+      return { status: "error", error: "NEXT_PUBLIC_APP_URL is not configured." };
+    }
+
     const webhookUrl = `${appUrl}/api/webhooks/docusign`;
 
     const { envelopeId, status } = await sendEnvelopeForSigning({

@@ -152,6 +152,16 @@ function renderBlock(
               <Text style={styles.signatureLabel}>Date</Text>
             </View>
           </View>
+          <View style={[styles.signatureRow, { marginTop: 24 }]}>
+            <View>
+              <View style={styles.signatureLine} />
+              <Text style={styles.signatureLabel}>Admin signature</Text>
+            </View>
+            <View>
+              <View style={styles.signatureLine} />
+              <Text style={styles.signatureLabel}>Date</Text>
+            </View>
+          </View>
         </View>
       );
     default:

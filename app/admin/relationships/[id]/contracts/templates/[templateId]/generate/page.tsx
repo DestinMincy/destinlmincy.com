@@ -90,10 +90,9 @@ export default async function GenerateContractPage({
       </header>
 
       <div className="admin-panel">
-        {/* TODO: PDF generation deferred to Unit 07 implementation */}
         <p className="admin-head__meta">
-          This creates a contract record from the published template. PDF
-          generation and DocuSign signing are implemented in Unit 07 and Unit 08.
+          This creates a contract record from the published template, generates
+          a PDF, and stores it ready for DocuSign signing.
         </p>
       </div>
 

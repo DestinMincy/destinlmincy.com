@@ -1,3 +1,5 @@
+import crypto from "node:crypto";
+
 import { NextRequest, NextResponse } from "next/server";
 
 import { prisma } from "@/lib/db/client";
@@ -13,9 +15,47 @@ interface DocuSignConnectEvent {
   status?: string;
 }
 
+/**
+ * Verify the DocuSign Connect HMAC-SHA256 signature when a key is configured.
+ * Returns true if the key is not configured (permissive) or the signature matches.
+ */
+async function verifyHmac(rawBody: string, signature: string | null): Promise<boolean> {
+  const key = process.env.DOCUSIGN_CONNECT_HMAC_KEY;
+  if (!key) return true; // HMAC not configured — skip verification
+  if (!signature) return false;
+  const expected = crypto
+    .createHmac("sha256", key)
+    .update(rawBody)
+    .digest("base64");
+  const expectedBuf = Buffer.from(expected, "base64");
+  try {
+    const actualBuf = Buffer.from(signature, "base64");
+    if (expectedBuf.length !== actualBuf.length) return false;
+    return crypto.timingSafeEqual(expectedBuf, actualBuf);
+  } catch {
+    return false;
+  }
+}
+
 function parseConnectEvent(body: unknown): DocuSignConnectEvent {
   if (typeof body !== "object" || body === null) return {};
   const b = body as Record<string, unknown>;
+
+  // DocuSign JSON Connect format: { data: { envelopeId, envelopeSummary: { status } } }
+  if (typeof b["data"] === "object" && b["data"] !== null) {
+    const data = b["data"] as Record<string, unknown>;
+    if (typeof data["envelopeId"] === "string") {
+      let nestedStatus: string | undefined;
+      if (typeof data["envelopeSummary"] === "object" && data["envelopeSummary"] !== null) {
+        const summary = data["envelopeSummary"] as Record<string, unknown>;
+        nestedStatus =
+          typeof summary["status"] === "string" ? summary["status"] : undefined;
+      }
+      return { envelopeId: data["envelopeId"], status: nestedStatus };
+    }
+  }
+
+  // Flat PascalCase (DocuSign legacy JSON) takes precedence over camelCase.
   const envelopeId =
     typeof b["EnvelopeID"] === "string"
       ? b["EnvelopeID"]
@@ -53,19 +93,32 @@ export async function POST(req: NextRequest) {
   let parsed: DocuSignConnectEvent = {};
 
   const contentType = req.headers.get("content-type") ?? "";
+  // Read the raw body first so we can verify the HMAC signature.
+  const rawBody = await req.text();
+
+  const hmacSignature = req.headers.get("x-docusign-signature-1");
+  const hmacValid = await verifyHmac(rawBody, hmacSignature);
+  if (!hmacValid) {
+    return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+  }
 
   if (contentType.includes("application/json")) {
     try {
-      const body: unknown = await req.json();
+      const body: unknown = JSON.parse(rawBody);
       parsed = parseConnectEvent(body);
     } catch {
       return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
     }
   } else {
-    // DocuSign Connect default sends XML; parse envelope ID and status from text.
-    const text = await req.text();
-    const envelopeIdMatch = /<EnvelopeID>([^<]+)<\/EnvelopeID>/i.exec(text);
-    const statusMatch = /<Status>([^<]+)<\/Status>/i.exec(text);
+    // DocuSign Connect default sends XML.
+    // Strip <RecipientStatuses>…</RecipientStatuses> so that the envelope-level
+    // <Status> is not shadowed by a recipient-level <Status> that appears first.
+    const strippedXml = rawBody.replace(
+      /<RecipientStatuses[\s\S]*?<\/RecipientStatuses>/gi,
+      "",
+    );
+    const envelopeIdMatch = /<EnvelopeID>([^<]+)<\/EnvelopeID>/i.exec(strippedXml);
+    const statusMatch = /<Status>([^<]+)<\/Status>/i.exec(strippedXml);
     parsed = {
       envelopeId: envelopeIdMatch?.[1],
       status: statusMatch?.[1],
@@ -85,6 +138,11 @@ export async function POST(req: NextRequest) {
 
   if (!contract) {
     // Unknown envelope — acknowledge and ignore.
+    return NextResponse.json({ ok: true });
+  }
+
+  // Monotonic status advancement: never regress from a terminal state.
+  if (contract.status === "COMPLETE" || contract.status === "VOIDED") {
     return NextResponse.json({ ok: true });
   }
 
