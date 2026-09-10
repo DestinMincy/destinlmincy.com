@@ -76,11 +76,23 @@ Comma-separated list of Clerk user emails that get admin access. Checked server-
 ```
 DOCUSIGN_INTEGRATION_KEY=
 DOCUSIGN_ACCOUNT_ID=
-DOCUSIGN_PRIVATE_KEY_PATH=/etc/secrets/docusign-rsa-key.pem
-DOCUSIGN_OAUTH_BASE_PATH=https://account.docusign.com
+# RSA private key content — paste the full PEM with newlines escaped as \n
+DOCUSIGN_PRIVATE_KEY=
+DOCUSIGN_IMPERSONATED_USER_ID=
+# Use account-d.docusign.com for sandbox, account.docusign.com for production
+DOCUSIGN_OAUTH_BASE_PATH=account.docusign.com
+DOCUSIGN_ADMIN_EMAIL=
+DOCUSIGN_ADMIN_NAME=
+NEXT_PUBLIC_APP_URL=https://destinlmincy.com
+# DocuSign Connect HMAC key (copy from Connect configuration page)
+DOCUSIGN_CONNECT_HMAC_KEY=
 ```
 
-Store the RSA private key outside the project directory. Reference it by absolute path.
+**JWT consent**: Before the first JWT token request succeeds, the impersonated user must grant consent. Visit:
+`https://account-d.docusign.com/oauth/auth?response_type=code&scope=signature%20impersonation&client_id=<DOCUSIGN_INTEGRATION_KEY>&redirect_uri=https://destinlmincy.com/api/auth/callback`
+(replace `account-d` with `account` for production). Accept the consent prompt once; subsequent JWT requests succeed without user interaction.
+
+**DocuSign Connect**: Register a Connect endpoint in the DocuSign admin console pointing to `https://destinlmincy.com/api/webhooks/docusign`. Enable HMAC Security and copy the generated key to `DOCUSIGN_CONNECT_HMAC_KEY`. When the key is set the webhook will reject unsigned requests.
 
 ### Stripe (optional, required for payment links)
 

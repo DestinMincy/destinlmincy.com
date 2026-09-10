@@ -14,15 +14,15 @@ Update this file after every meaningful implementation change.
 
 - Units 01-05: Foundation, data layer, Clerk auth, client relationships, applications/sites and projects.
 - Units 06-11 backend implementation: contract template editor with versioning, payment gates with full field set, subscriptions, milestones with approvals, deliverables with visibility filtering, client portal with real contract and milestone data.
+- Unit 07: PDF generation for contracts — @react-pdf/renderer renders template blocks to PDF; uploaded to private S3 bucket on contract creation.
+- Unit 08: DocuSign JWT auth, envelope creation with anchor-tab signing (client + admin countersignature), Connect webhook with HMAC verification, signed PDF archival on completion.
+- Unit 10: Clerk Billing entitlement checks wired in portal — `has({ feature: entitlementKey })` per subscription; CANCELED subscriptions show "Access has ended" when past period end.
 - Sitemap, robots.txt, and RSS feed metadata.
 - Deployment artifacts: Nginx config, PM2 ecosystem, deploy script, updated .env.example.
 
 ## What Still Needs Work (deferred to later units)
 
-- Unit 07: PDF generation for contracts (Contract record created, PDF generation not yet wired).
-- Unit 08: DocuSign envelope creation and signing webhook (action stub exists; real API call not implemented).
 - Unit 09: Stripe API invoice/payment-link creation (manual attachment works; API creation deferred).
-- Unit 10: Clerk Billing subscription entitlement checks (schema and data layer done; Clerk entitlement sync not implemented).
 - Unit 16: Legacy Eleventy cleanup.
 
 ## Completed
