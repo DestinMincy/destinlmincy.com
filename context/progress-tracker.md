@@ -4,11 +4,26 @@ Update this file after every meaningful implementation change.
 
 ## Current Phase
 
-- Post-Unit 05 dependency security maintenance.
+- Post-judge-review fixes applied to Units 05-11 implementation. Build stable, addressing correctness findings before final deployment.
 
 ## Current Goal
 
-- Merge the scoped `mysql2` advisory remediation before beginning Unit 06.
+- Verify build and typecheck pass after judge-review fixes, then merge to master and deploy.
+
+## What Is Complete
+
+- Units 01-05: Foundation, data layer, Clerk auth, client relationships, applications/sites and projects.
+- Units 06-11 backend implementation: contract template editor with versioning, payment gates with full field set, subscriptions, milestones with approvals, deliverables with visibility filtering, client portal with real contract and milestone data.
+- Sitemap, robots.txt, and RSS feed metadata.
+- Deployment artifacts: Nginx config, PM2 ecosystem, deploy script, updated .env.example.
+
+## What Still Needs Work (deferred to later units)
+
+- Unit 07: PDF generation for contracts (Contract record created, PDF generation not yet wired).
+- Unit 08: DocuSign envelope creation and signing webhook (action stub exists; real API call not implemented).
+- Unit 09: Stripe API invoice/payment-link creation (manual attachment works; API creation deferred).
+- Unit 10: Clerk Billing subscription entitlement checks (schema and data layer done; Clerk entitlement sync not implemented).
+- Unit 16: Legacy Eleventy cleanup.
 
 ## Completed
 
@@ -66,11 +81,11 @@ Update this file after every meaningful implementation change.
 
 ## In Progress
 
-- Final review and merge of `codex/fix-mysql2-advisory`.
+- Applying post-judge-review fixes on `claude/project-summary-xtmKQ` branch.
 
 ## Next Up
 
-- Begin Unit 06: contract template editor per `context/specs/06-contract-template-editor.md`.
+- Merge fixes to master, deploy to EC2, verify production build.
 
 ## Open Questions
 

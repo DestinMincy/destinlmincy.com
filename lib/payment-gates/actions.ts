@@ -8,8 +8,12 @@ import { prisma } from "@/lib/db/client";
 import type {
   PaymentGateFormState,
   PaymentGateStatus,
+  PaymentGateType,
 } from "@/lib/payment-gates/types";
-import { PAYMENT_GATE_STATUS_VALUES } from "@/lib/payment-gates/types";
+import {
+  PAYMENT_GATE_STATUS_VALUES,
+  PAYMENT_GATE_TYPE_VALUES,
+} from "@/lib/payment-gates/types";
 
 const NOT_AUTHORIZED = "You are not authorized to do that.";
 const SAVE_ERROR = "Something went wrong while saving. Try again.";
@@ -20,16 +24,36 @@ function paymentGatesPath(clientRelationshipId: string): string {
 
 function parsePaymentGateForm(formData: FormData): {
   values: import("@/lib/payment-gates/types").PaymentGateFormValues;
-  errors: Partial<Record<"label" | "projectId" | "status", string>>;
+  errors: Partial<
+    Record<"label" | "projectId" | "status" | "paymentType" | "amount", string>
+  >;
 } {
   const label = String(formData.get("label") ?? "").trim();
   const projectId = String(formData.get("projectId") ?? "").trim();
   const statusRaw = String(formData.get("status") ?? "PENDING");
+  const paymentTypeRaw = String(
+    formData.get("paymentType") ?? "FULL_UPFRONT",
+  );
+  const amountRaw = String(formData.get("amount") ?? "").trim();
+  const currency = String(formData.get("currency") ?? "USD").trim() || "USD";
+  const dueDate = String(formData.get("dueDate") ?? "").trim();
+  const requiredBeforeWork = formData.get("requiredBeforeWork") === "true";
+  const stripeUrl = String(formData.get("stripeUrl") ?? "").trim();
+  const stripeId = String(formData.get("stripeId") ?? "").trim();
 
-  const errors: Partial<Record<"label" | "projectId" | "status", string>> = {};
+  const errors: Partial<
+    Record<"label" | "projectId" | "status" | "paymentType" | "amount", string>
+  > = {};
 
   if (!label) errors.label = "Label is required.";
-  if (label.length > 200) errors.label = "Label must be 200 characters or fewer.";
+  if (label.length > 200)
+    errors.label = "Label must be 200 characters or fewer.";
+
+  if (amountRaw) {
+    const parsed = parseFloat(amountRaw);
+    if (isNaN(parsed) || parsed < 0)
+      errors.amount = "Amount must be a positive number.";
+  }
 
   const status = PAYMENT_GATE_STATUS_VALUES.includes(
     statusRaw as PaymentGateStatus,
@@ -37,7 +61,27 @@ function parsePaymentGateForm(formData: FormData): {
     ? (statusRaw as PaymentGateStatus)
     : "PENDING";
 
-  return { values: { label, projectId, status }, errors };
+  const paymentType = PAYMENT_GATE_TYPE_VALUES.includes(
+    paymentTypeRaw as PaymentGateType,
+  )
+    ? (paymentTypeRaw as PaymentGateType)
+    : "FULL_UPFRONT";
+
+  return {
+    values: {
+      label,
+      projectId,
+      status,
+      paymentType,
+      amount: amountRaw,
+      currency,
+      dueDate,
+      requiredBeforeWork,
+      stripeUrl,
+      stripeId,
+    },
+    errors,
+  };
 }
 
 export async function createPaymentGateAction(
@@ -75,7 +119,15 @@ export async function createPaymentGateAction(
         clientRelationshipId,
         label: values.label,
         status: values.status,
+        paymentType: values.paymentType,
         projectId: values.projectId || null,
+        amount: values.amount ? parseFloat(values.amount) : null,
+        currency: values.currency,
+        dueDate:
+          values.dueDate ? new Date(values.dueDate + "T00:00:00Z") : null,
+        requiredBeforeWork: values.requiredBeforeWork,
+        stripeUrl: values.stripeUrl || null,
+        stripeId: values.stripeId || null,
       },
       select: { id: true },
     });

@@ -14,19 +14,25 @@ export interface PortalContract {
 export async function listPortalContracts(
   clientRelationshipId: string,
 ): Promise<PortalContract[]> {
-  const rows = await prisma.contractTemplate.findMany({
+  const rows = await prisma.contract.findMany({
     where: { clientRelationshipId },
     orderBy: { createdAt: "desc" },
     select: {
       id: true,
-      name: true,
       status: true,
       createdAt: true,
+      templateVersion: {
+        select: {
+          contractTemplate: {
+            select: { name: true },
+          },
+        },
+      },
     },
   });
   return rows.map((r) => ({
     id: r.id,
-    templateName: r.name,
+    templateName: r.templateVersion?.contractTemplate?.name ?? "Unknown",
     status: r.status,
     createdAt: r.createdAt,
   }));
@@ -127,6 +133,14 @@ export async function listPortalProjects(
 // Single project with milestones + deliverables
 // ------------------------------------------------------------------
 
+export interface PortalApproval {
+  id: string;
+  actorName: string | null;
+  action: string;
+  note: string | null;
+  createdAt: Date;
+}
+
 export interface PortalMilestone {
   id: string;
   title: string;
@@ -134,6 +148,7 @@ export interface PortalMilestone {
   targetDate: Date | null;
   approvalRequired: boolean;
   clientFacingUpdate: string | null;
+  approvals: PortalApproval[];
   deliverables: PortalDeliverable[];
 }
 
@@ -167,7 +182,20 @@ export async function getPortalProjectDetail(
           title: true,
           status: true,
           targetDate: true,
+          approvalRequired: true,
+          clientFacingUpdate: true,
+          approvals: {
+            orderBy: { createdAt: "desc" },
+            select: {
+              id: true,
+              actorName: true,
+              action: true,
+              note: true,
+              createdAt: true,
+            },
+          },
           deliverables: {
+            where: { visibility: "CLIENT" },
             select: {
               id: true,
               label: true,
@@ -177,6 +205,7 @@ export async function getPortalProjectDetail(
         },
       },
       deliverables: {
+        where: { visibility: "CLIENT" },
         select: {
           id: true,
           label: true,
@@ -188,16 +217,7 @@ export async function getPortalProjectDetail(
 
   if (!project) return null;
 
-  // The schema doesn't have approvalRequired or clientFacingUpdate yet;
-  // stub them as false/null until the backend migration lands.
-  return {
-    ...project,
-    milestones: project.milestones.map((m) => ({
-      ...m,
-      approvalRequired: false as boolean,
-      clientFacingUpdate: null as string | null,
-    })),
-  };
+  return project;
 }
 
 // ------------------------------------------------------------------

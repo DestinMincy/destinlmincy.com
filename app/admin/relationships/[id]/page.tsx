@@ -97,37 +97,19 @@ export default async function RelationshipDetailPage({
       </header>
 
       {/* Section navigation */}
-      <nav
-        aria-label="Sections"
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "8px",
-          borderBottom: "1px solid var(--border)",
-          paddingBottom: "16px",
-        }}
-      >
+      <nav aria-label="Sections" className="admin-section-nav">
         {[
           { href: "#overview", label: "Overview" },
           { href: "#applications", label: "Applications" },
           { href: "#projects", label: "Projects" },
           { href: "#contracts", label: "Contracts" },
           { href: "#payment-gates", label: "Payment gates" },
+          { href: "#milestones", label: "Milestones" },
+          { href: "#subscriptions", label: "Subscriptions" },
+          { href: "#deliverables", label: "Deliverables" },
           { href: "#users", label: "Users" },
         ].map(({ href, label }) => (
-          <a
-            key={href}
-            href={href}
-            style={{
-              padding: "5px 12px",
-              border: "1px solid var(--border)",
-              background: "var(--surface-panel)",
-              color: "var(--text-muted)",
-              fontSize: "0.86rem",
-              fontWeight: 650,
-              textDecoration: "none",
-            }}
-          >
+          <a key={href} href={href} className="admin-section-nav__link">
             {label}
           </a>
         ))}
@@ -136,10 +118,9 @@ export default async function RelationshipDetailPage({
       {/* Action items */}
       {hasActionItems ? (
         <section
-          className="admin-panel"
+          className="admin-panel admin-panel--signal"
           id="action-items"
           aria-labelledby="action-items-heading"
-          style={{ borderColor: "var(--signal)" }}
         >
           <h2 className="admin-panel__title" id="action-items-heading">
             Action items
@@ -150,16 +131,9 @@ export default async function RelationshipDetailPage({
               <h3 className="admin-panel__subtitle">
                 Pending payment gates ({pendingPaymentGates.length})
               </h3>
-              <ul
-                style={{
-                  margin: "8px 0 0",
-                  paddingLeft: "20px",
-                  display: "grid",
-                  gap: "4px",
-                }}
-              >
+              <ul className="admin-action-list">
                 {pendingPaymentGates.map((gate) => (
-                  <li key={gate.id} style={{ fontSize: "0.96rem" }}>
+                  <li key={gate.id}>
                     <Link
                       href={`/admin/relationships/${id}/payment-gates`}
                     >
@@ -176,16 +150,9 @@ export default async function RelationshipDetailPage({
               <h3 className="admin-panel__subtitle">
                 Overdue milestones ({overdueMilestones.length})
               </h3>
-              <ul
-                style={{
-                  margin: "8px 0 0",
-                  paddingLeft: "20px",
-                  display: "grid",
-                  gap: "4px",
-                }}
-              >
+              <ul className="admin-action-list">
                 {overdueMilestones.map((milestone) => (
-                  <li key={milestone.id} style={{ fontSize: "0.96rem" }}>
+                  <li key={milestone.id}>
                     <Link
                       href={`/admin/relationships/${id}/projects/${milestone.projectId}/milestones/${milestone.id}`}
                     >
@@ -345,11 +312,18 @@ export default async function RelationshipDetailPage({
       </section>
 
       {/* Milestones */}
-      {overdueMilestones.length > 0 ? (
-        <section className="admin-panel" aria-labelledby="milestones-summary-heading">
-          <h2 className="admin-panel__title" id="milestones-summary-heading">
-            Overdue milestones
+      <section className="admin-panel" id="milestones" aria-labelledby="milestones-heading">
+        <div className="admin-panel__head">
+          <h2 className="admin-panel__title" id="milestones-heading">
+            Milestones
           </h2>
+          {overdueMilestones.length > 0 ? (
+            <p className="admin-head__meta">
+              {overdueMilestones.length} overdue
+            </p>
+          ) : null}
+        </div>
+        {overdueMilestones.length > 0 ? (
           <div className="admin-table-wrap">
             <table className="admin-table">
               <thead>
@@ -386,8 +360,45 @@ export default async function RelationshipDetailPage({
               </tbody>
             </table>
           </div>
-        </section>
-      ) : null}
+        ) : (
+          <div className="admin-work-links">
+            <Link href={`/admin/relationships/${id}/projects`}>
+              <span>Milestones are managed per project</span>
+              <strong>{hubData.relationship._count.milestones}</strong>
+            </Link>
+          </div>
+        )}
+      </section>
+
+      {/* Subscriptions */}
+      <section className="admin-panel" id="subscriptions" aria-labelledby="subscriptions-heading">
+        <div className="admin-panel__head">
+          <h2 className="admin-panel__title" id="subscriptions-heading">
+            Subscriptions
+          </h2>
+        </div>
+        <div className="admin-work-links">
+          <Link href={`/admin/relationships/${id}/projects`}>
+            <span>Active subscriptions</span>
+            <strong>{hubData.relationship._count.subscriptions}</strong>
+          </Link>
+        </div>
+      </section>
+
+      {/* Deliverables */}
+      <section className="admin-panel" id="deliverables" aria-labelledby="deliverables-heading">
+        <div className="admin-panel__head">
+          <h2 className="admin-panel__title" id="deliverables-heading">
+            Deliverables
+          </h2>
+        </div>
+        <div className="admin-work-links">
+          <Link href={`/admin/relationships/${id}/projects`}>
+            <span>All deliverables</span>
+            <strong>{hubData.relationship._count.deliverables}</strong>
+          </Link>
+        </div>
+      </section>
 
       {/* Client users */}
       <section

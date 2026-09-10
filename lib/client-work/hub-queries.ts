@@ -28,6 +28,8 @@ export async function getRelationshipHubData(clientRelationshipId: string) {
           contractTemplates: true,
           paymentGates: true,
           milestones: true,
+          subscriptions: true,
+          deliverables: true,
         },
       },
     },

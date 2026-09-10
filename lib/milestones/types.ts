@@ -26,6 +26,9 @@ export interface MilestoneFormValues {
   title: string;
   status: MilestoneStatus;
   targetDate: string;
+  approvalRequired: boolean;
+  clientFacingUpdate: string;
+  paymentDependencyId: string;
 }
 
 export type MilestoneFieldName = keyof MilestoneFormValues;
@@ -41,6 +44,9 @@ export const EMPTY_MILESTONE_FORM_VALUES: MilestoneFormValues = {
   title: "",
   status: "PLANNED",
   targetDate: "",
+  approvalRequired: false,
+  clientFacingUpdate: "",
+  paymentDependencyId: "",
 } as const;
 
 export interface DeliverableFormValues {

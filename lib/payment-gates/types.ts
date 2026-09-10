@@ -1,7 +1,10 @@
-import type { PaymentGateStatus } from "@/lib/generated/prisma/enums";
-import { PaymentGateStatus as GateStatus } from "@/lib/generated/prisma/enums";
+import type { PaymentGateStatus, PaymentGateType } from "@/lib/generated/prisma/enums";
+import {
+  PaymentGateStatus as GateStatus,
+  PaymentGateType as GateType,
+} from "@/lib/generated/prisma/enums";
 
-export type { PaymentGateStatus };
+export type { PaymentGateStatus, PaymentGateType };
 
 export const PAYMENT_GATE_STATUS_VALUES: PaymentGateStatus[] =
   Object.values(GateStatus);
@@ -23,19 +26,27 @@ export const PAYMENT_GATE_STATUS_TONE: Record<
   WAIVED: "muted",
 };
 
-/** Payment type labels used in the form. Stored as a plain string until the
- * schema migration adds a `paymentType` enum column. */
-export const PAYMENT_TYPE_OPTIONS = [
-  { value: "full_upfront", label: "Full upfront" },
-  { value: "deposit", label: "Deposit" },
-  { value: "milestone_payment", label: "Milestone payment" },
-  { value: "other", label: "Other" },
-] as const;
+export const PAYMENT_GATE_TYPE_VALUES: PaymentGateType[] =
+  Object.values(GateType);
+
+export const PAYMENT_GATE_TYPE_LABELS: Record<PaymentGateType, string> = {
+  FULL_UPFRONT: "Full upfront",
+  DEPOSIT: "Deposit",
+  MILESTONE_PAYMENT: "Milestone payment",
+  OTHER: "Other",
+};
 
 export interface PaymentGateFormValues {
   label: string;
   projectId: string;
   status: PaymentGateStatus;
+  paymentType: PaymentGateType;
+  amount: string;
+  currency: string;
+  dueDate: string;
+  requiredBeforeWork: boolean;
+  stripeUrl: string;
+  stripeId: string;
 }
 
 export type PaymentGateFieldName = keyof PaymentGateFormValues;
@@ -51,4 +62,11 @@ export const EMPTY_PAYMENT_GATE_FORM_VALUES: PaymentGateFormValues = {
   label: "",
   projectId: "",
   status: "PENDING",
+  paymentType: "FULL_UPFRONT",
+  amount: "",
+  currency: "USD",
+  dueDate: "",
+  requiredBeforeWork: false,
+  stripeUrl: "",
+  stripeId: "",
 } as const;

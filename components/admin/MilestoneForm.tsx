@@ -17,15 +17,22 @@ type MilestoneAction = (
   formData: FormData,
 ) => Promise<MilestoneFormState>;
 
+export interface PaymentGateOption {
+  id: string;
+  label: string;
+}
+
 interface MilestoneFormProps {
   action: MilestoneAction;
   initialValues: MilestoneFormValues;
+  paymentGates: PaymentGateOption[];
   submitLabel: string;
 }
 
 export function MilestoneForm({
   action,
   initialValues,
+  paymentGates,
   submitLabel,
 }: MilestoneFormProps) {
   const [state, formAction, isPending] = useActionState(action, {
@@ -80,6 +87,59 @@ export function MilestoneForm({
               type="date"
               defaultValue={values.targetDate}
             />
+          )}
+        </FormField>
+      </div>
+
+      <FormField
+        id="clientFacingUpdate"
+        label="Client-facing update"
+        error={state.errors.clientFacingUpdate}
+      >
+        {(control) => (
+          <textarea
+            {...control}
+            rows={3}
+            defaultValue={values.clientFacingUpdate}
+            placeholder="What clients see in the portal about this milestone"
+          />
+        )}
+      </FormField>
+
+      <div className="admin-form__row">
+        <FormField
+          id="paymentDependencyId"
+          label="Payment dependency (optional)"
+          error={state.errors.paymentDependencyId}
+        >
+          {(control) => (
+            <select {...control} defaultValue={values.paymentDependencyId}>
+              <option value="">No dependency</option>
+              {paymentGates.map((gate) => (
+                <option key={gate.id} value={gate.id}>
+                  {gate.label}
+                </option>
+              ))}
+            </select>
+          )}
+        </FormField>
+
+        <FormField
+          id="approvalRequired"
+          label="Client approval"
+          error={state.errors.approvalRequired}
+        >
+          {(control) => (
+            <label className="checkbox-label">
+              <input
+                id={control.id}
+                name={control.name}
+                type="checkbox"
+                value="true"
+                defaultChecked={values.approvalRequired}
+              />
+              Require client approval before proceeding
+            </label>
           )}
         </FormField>
       </div>

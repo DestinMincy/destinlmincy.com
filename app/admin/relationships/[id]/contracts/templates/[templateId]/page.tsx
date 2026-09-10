@@ -10,6 +10,7 @@ import { getRelationshipIdentity } from "@/lib/client-work/queries";
 import {
   archiveContractTemplateAction,
   publishContractTemplateVersionFormAction,
+  startNewDraftVersionAction,
 } from "@/lib/contracts/actions";
 import { getContractTemplate } from "@/lib/contracts/queries";
 import {
@@ -83,12 +84,27 @@ export default async function ContractTemplatePage({
               ) : null}
             </>
           ) : template.status === "PUBLISHED" ? (
-            <Link
-              className="button button--primary"
-              href={`/admin/relationships/${id}/contracts/templates/${templateId}/generate`}
-            >
-              Generate contract
-            </Link>
+            <>
+              <Link
+                className="button button--primary"
+                href={`/admin/relationships/${id}/contracts/templates/${templateId}/generate`}
+              >
+                Generate contract
+              </Link>
+              {!hasDraft ? (
+                <form
+                  action={startNewDraftVersionAction.bind(
+                    null,
+                    id,
+                    templateId,
+                  )}
+                >
+                  <button className="button button--secondary" type="submit">
+                    Start new draft version
+                  </button>
+                </form>
+              ) : null}
+            </>
           ) : null}
         </div>
       </header>
@@ -146,17 +162,41 @@ export default async function ContractTemplatePage({
                 </li>
               ) : null}
               {template.status === "PUBLISHED" ? (
-                <li>
-                  <Link
-                    href={`/admin/relationships/${id}/contracts/templates/${templateId}/generate`}
-                  >
-                    Generate a contract
-                  </Link>
-                  <span className="admin-head__meta">
-                    Fill in the contract fields and create a contract from the
-                    latest published version.
-                  </span>
-                </li>
+                <>
+                  <li>
+                    <Link
+                      href={`/admin/relationships/${id}/contracts/templates/${templateId}/generate`}
+                    >
+                      Generate a contract
+                    </Link>
+                    <span className="admin-head__meta">
+                      Fill in the contract fields and create a contract from the
+                      latest published version.
+                    </span>
+                  </li>
+                  {!hasDraft ? (
+                    <li>
+                      <form
+                        action={startNewDraftVersionAction.bind(
+                          null,
+                          id,
+                          templateId,
+                        )}
+                      >
+                        <button
+                          className="button button--secondary button--compact"
+                          type="submit"
+                        >
+                          Start new draft version
+                        </button>
+                      </form>
+                      <span className="admin-head__meta">
+                        Begin iterating on the template content without losing the
+                        published version.
+                      </span>
+                    </li>
+                  ) : null}
+                </>
               ) : null}
             </ul>
 

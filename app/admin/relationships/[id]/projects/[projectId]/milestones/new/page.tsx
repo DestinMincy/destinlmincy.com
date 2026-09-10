@@ -7,6 +7,7 @@ import { requireAdminForPage } from "@/lib/auth/require-admin";
 import { getProject, getRelationshipIdentity } from "@/lib/client-work/queries";
 import { createMilestoneAction } from "@/lib/milestones/actions";
 import { EMPTY_MILESTONE_FORM_VALUES } from "@/lib/milestones/types";
+import { listPaymentGates } from "@/lib/payments/queries";
 
 export const metadata: Metadata = {
   title: "New milestone",
@@ -22,14 +23,20 @@ export default async function NewMilestonePage({
   await requireAdminForPage();
 
   const { id, projectId } = await params;
-  const [relationship, project] = await Promise.all([
+  const [relationship, project, allPaymentGates] = await Promise.all([
     getRelationshipIdentity(id),
     getProject(id, projectId),
+    listPaymentGates(id),
   ]);
 
   if (!relationship || !project) {
     notFound();
   }
+
+  const paymentGates = allPaymentGates.map((g) => ({
+    id: g.id,
+    label: g.label,
+  }));
 
   return (
     <div className="container section section--tight narrow admin-screen">
@@ -51,6 +58,7 @@ export default async function NewMilestonePage({
         <MilestoneForm
           action={createMilestoneAction.bind(null, id, projectId)}
           initialValues={EMPTY_MILESTONE_FORM_VALUES}
+          paymentGates={paymentGates}
           submitLabel="Add milestone"
         />
       </div>

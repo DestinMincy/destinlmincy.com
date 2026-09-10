@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { requireAdminForPage } from "@/lib/auth/require-admin";
 import { getRelationshipIdentity } from "@/lib/client-work/queries";
+import { createContractFormAction } from "@/lib/contracts/actions";
 import { getContractTemplate } from "@/lib/contracts/queries";
 import type { TemplateSnapshot, TemplateVariable } from "@/lib/contracts/types";
 
@@ -89,15 +90,19 @@ export default async function GenerateContractPage({
       </header>
 
       <div className="admin-panel">
+        {/* TODO: PDF generation deferred to Unit 07 implementation */}
         <p className="admin-head__meta">
-          Contract generation requires a Contract database model. This UI is
-          ready to submit once the backend agent provisions the Contract table
-          and action. Fill in the fields below.
+          This creates a contract record from the published template. PDF
+          generation and DocuSign signing are implemented in Unit 07 and Unit 08.
         </p>
       </div>
 
       <div className="admin-panel">
-        <form className="admin-form" noValidate>
+        <form
+          className="admin-form"
+          action={createContractFormAction.bind(null, id, templateId)}
+          noValidate
+        >
           <div className="admin-form__row">
             <div className="field">
               <label htmlFor="versionId">Version</label>
@@ -123,23 +128,11 @@ export default async function GenerateContractPage({
           </div>
 
           {customVariables.length > 0 ? (
-            <fieldset
-              style={{
-                border: "1px solid var(--border)",
-                padding: "16px",
-                margin: 0,
-              }}
-            >
-              <legend
-                style={{
-                  padding: "0 8px",
-                  fontWeight: 750,
-                  fontSize: "0.9rem",
-                }}
-              >
+            <fieldset className="admin-panel">
+              <legend className="admin-panel__title">
                 Contract variables
               </legend>
-              <div style={{ display: "grid", gap: "14px", marginTop: "12px" }}>
+              <div className="admin-form">
                 {customVariables.map((variable) => (
                   <div className="field" key={variable.key}>
                     <label htmlFor={`var-${variable.key}`}>
@@ -162,8 +155,6 @@ export default async function GenerateContractPage({
             <button
               className="button button--primary"
               type="submit"
-              disabled
-              title="Contract model not yet available"
             >
               Generate contract
             </button>

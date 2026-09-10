@@ -12,6 +12,9 @@ export const metadata: Metadata = {
     description: `Writing from ${site.name} on AI agents, software, and building for small business.`,
     url: `${site.url}/blog`,
   },
+  alternates: {
+    types: { "application/rss+xml": "/blog/feed.xml" },
+  },
 };
 
 const postDateFormatter = new Intl.DateTimeFormat("en-US", {

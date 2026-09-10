@@ -242,6 +242,151 @@ export async function archiveContractTemplateAction(
 }
 
 /**
+ * Starts a new draft version after a template has been published.
+ * Copies snapshot/blocks/variables from the last published version as a
+ * starting point, sets the template status back to DRAFT, and redirects to
+ * the template detail page so the editor can be opened.
+ */
+export async function startNewDraftVersionAction(
+  clientRelationshipId: string,
+  templateId: string,
+  _formData: FormData,
+): Promise<void> {
+  const admin = await getAdminUser();
+  if (!admin) return;
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      const template = await tx.contractTemplate.findFirst({
+        where: { id: templateId, clientRelationshipId },
+        select: { id: true, status: true },
+      });
+
+      if (!template || template.status !== "PUBLISHED") return;
+
+      // Check there is no existing unpublished draft already.
+      const existingDraft = await tx.contractTemplateVersion.findFirst({
+        where: { contractTemplateId: templateId, publishedAt: null },
+        select: { id: true },
+      });
+      if (existingDraft) return;
+
+      // Find the highest version number and copy the last published version.
+      const lastPublished = await tx.contractTemplateVersion.findFirst({
+        where: {
+          contractTemplateId: templateId,
+          publishedAt: { not: null },
+        },
+        orderBy: { versionNumber: "desc" },
+        select: {
+          versionNumber: true,
+          snapshot: true,
+          blocks: true,
+          variables: true,
+        },
+      });
+
+      const nextVersion = (lastPublished?.versionNumber ?? 0) + 1;
+
+      await tx.contractTemplateVersion.create({
+        data: {
+          contractTemplateId: templateId,
+          versionNumber: nextVersion,
+          snapshot: lastPublished?.snapshot !== null && lastPublished?.snapshot !== undefined
+            ? (lastPublished.snapshot as Prisma.InputJsonValue)
+            : undefined,
+          blocks: lastPublished?.blocks !== null && lastPublished?.blocks !== undefined
+            ? (lastPublished.blocks as Prisma.InputJsonValue)
+            : undefined,
+          variables: lastPublished?.variables !== null && lastPublished?.variables !== undefined
+            ? (lastPublished.variables as Prisma.InputJsonValue)
+            : undefined,
+          publishedAt: null,
+        },
+      });
+
+      await tx.contractTemplate.update({
+        where: { id: templateId },
+        data: { status: "DRAFT" },
+      });
+    });
+  } catch (error: unknown) {
+    console.error("Failed to start new draft version", error);
+    return;
+  }
+
+  revalidatePath(contractsPath(clientRelationshipId));
+  revalidatePath(templatePath(clientRelationshipId, templateId));
+}
+
+/**
+ * Form-safe server action for generating a Contract from a published template
+ * version. Reads versionId, signerEmail, and contract variable fields from
+ * formData, then creates the Contract record and redirects to the contracts
+ * list.
+ *
+ * TODO: PDF generation deferred to Unit 07 implementation.
+ */
+export async function createContractFormAction(
+  clientRelationshipId: string,
+  templateId: string,
+  formData: FormData,
+): Promise<void> {
+  const admin = await getAdminUser();
+  if (!admin) return;
+
+  const versionId = String(formData.get("versionId") ?? "").trim();
+  const signerEmail = String(formData.get("signerEmail") ?? "")
+    .trim()
+    .toLowerCase();
+
+  if (!versionId || !signerEmail) return;
+
+  // Collect variable overrides (fields prefixed with "var_").
+  const fieldValues: Record<string, string> = {};
+  for (const [key, value] of formData.entries()) {
+    if (key.startsWith("var_")) {
+      fieldValues[key.slice(4)] = String(value);
+    }
+  }
+
+  try {
+    // Verify the version belongs to this template and relationship.
+    const version = await prisma.contractTemplateVersion.findFirst({
+      where: {
+        id: versionId,
+        contractTemplateId: templateId,
+        contractTemplate: { clientRelationshipId },
+        publishedAt: { not: null },
+      },
+      select: { id: true },
+    });
+
+    if (!version) return;
+
+    await prisma.contract.create({
+      data: {
+        clientRelationshipId,
+        contractTemplateVersionId: versionId,
+        signerEmail,
+        fieldValues:
+          Object.keys(fieldValues).length > 0
+            ? (fieldValues as Prisma.InputJsonValue)
+            : undefined,
+        status: "DRAFT",
+      },
+      select: { id: true },
+    });
+  } catch (error: unknown) {
+    console.error("Failed to generate contract", error);
+    return;
+  }
+
+  revalidatePath(contractsPath(clientRelationshipId));
+  redirect(contractsPath(clientRelationshipId));
+}
+
+/**
  * Simple form-safe server action for publishing a template version.
  * Used in `<form action={...}>` contexts where useActionState is not in play.
  */

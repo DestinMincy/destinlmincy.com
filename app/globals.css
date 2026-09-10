@@ -823,6 +823,41 @@ textarea:focus {
 
 /* Admin workspace (Unit 04): rectangular, hairline-bordered, motion-light. */
 
+.admin-section-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 16px;
+}
+
+.admin-section-nav__link {
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  background: var(--surface-panel);
+  color: var(--text-muted);
+  font-size: 0.86rem;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.admin-section-nav__link:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.admin-panel--signal {
+  border-color: var(--signal);
+}
+
+.admin-action-list {
+  display: grid;
+  gap: 4px;
+  margin: 8px 0 0;
+  padding-left: 20px;
+  font-size: 0.96rem;
+}
+
 .admin-screen {
   display: grid;
   gap: 26px;
