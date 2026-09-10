@@ -79,6 +79,7 @@ export interface PortalSubscription {
   serviceType: string;
   status: string;
   currentPeriodEndsAt: Date | null;
+  entitlementKey: string | null;
 }
 
 export async function listPortalSubscriptions(
@@ -92,6 +93,7 @@ export async function listPortalSubscriptions(
       serviceType: true,
       status: true,
       currentPeriodEndsAt: true,
+      entitlementKey: true,
     },
   });
   return rows;

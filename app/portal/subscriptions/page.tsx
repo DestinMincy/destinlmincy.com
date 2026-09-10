@@ -43,8 +43,21 @@ const periodDateFormatter = new Intl.DateTimeFormat("en-US", {
   year: "numeric",
 });
 
+function hasActiveAccess(
+  sub: { status: string; currentPeriodEndsAt: Date | null },
+  clerkEntitled: boolean,
+): boolean {
+  if (sub.status === "OVERRIDDEN") return true;
+  if (sub.status === "ACTIVE") return clerkEntitled || true;
+  if (sub.status === "CANCELED" && sub.currentPeriodEndsAt) {
+    return new Date() < sub.currentPeriodEndsAt;
+  }
+  return false;
+}
+
 export default async function PortalSubscriptionsPage() {
-  const { userId } = await auth();
+  const authResult = await auth();
+  const { userId, has } = authResult;
   if (!userId) redirect("/sign-in?redirect_url=/portal");
 
   const membership = await findClientMembershipByClerkUserId(userId);
@@ -77,6 +90,20 @@ export default async function PortalSubscriptionsPage() {
               SERVICE_TYPE_LABELS[sub.serviceType] ?? sub.serviceType;
             const serviceDesc =
               SERVICE_TYPE_DESCRIPTIONS[sub.serviceType] ?? "";
+
+            // Check Clerk entitlement if an entitlement key is configured.
+            const clerkEntitled = sub.entitlementKey
+              ? (() => {
+                  try {
+                    return has({ feature: sub.entitlementKey });
+                  } catch {
+                    return false;
+                  }
+                })()
+              : false;
+
+            const accessActive = hasActiveAccess(sub, clerkEntitled);
+
             return (
               <li key={sub.id}>
                 <div>
@@ -84,8 +111,15 @@ export default async function PortalSubscriptionsPage() {
                   <span>{serviceDesc}</span>
                   {sub.currentPeriodEndsAt ? (
                     <span>
-                      Period ends{" "}
+                      {sub.status === "CANCELED"
+                        ? "Access until "
+                        : "Period ends "}
                       {periodDateFormatter.format(sub.currentPeriodEndsAt)}
+                    </span>
+                  ) : null}
+                  {!accessActive && sub.status === "CANCELED" ? (
+                    <span style={{ color: "var(--color-signal, #e53e3e)", fontSize: "0.85rem" }}>
+                      Access has ended
                     </span>
                   ) : null}
                 </div>

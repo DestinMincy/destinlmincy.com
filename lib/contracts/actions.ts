@@ -11,6 +11,9 @@ import type {
   SaveDraftState,
   TemplateSnapshot,
 } from "@/lib/contracts/types";
+import { generateContractPdf } from "@/lib/pdf/generate";
+import { uploadToPrivateS3, getPrivateDownloadUrl } from "@/lib/storage/s3";
+import { downloadSignedPdf, sendEnvelopeForSigning } from "@/lib/docusign/client";
 
 const NOT_AUTHORIZED = "You are not authorized to do that.";
 const SAVE_ERROR = "Something went wrong while saving. Try again.";
@@ -359,10 +362,45 @@ export async function createContractFormAction(
         contractTemplate: { clientRelationshipId },
         publishedAt: { not: null },
       },
-      select: { id: true },
+      include: {
+        contractTemplate: { select: { name: true, clientRelationshipId: true } },
+      },
     });
 
     if (!version) return;
+
+    // Validate required variables before generating the PDF.
+    const snapshot = version.snapshot as unknown as TemplateSnapshot | null;
+    if (snapshot) {
+      const missingRequired = snapshot.variables
+        .filter((v) => v.required && !fieldValues[v.key])
+        .map((v) => v.label || v.key);
+      if (missingRequired.length > 0) {
+        console.error("Missing required variables:", missingRequired);
+        return;
+      }
+    }
+
+    // Generate PDF.
+    let s3Key: string | undefined;
+    let s3Bucket: string | undefined;
+    if (snapshot && process.env.AWS_REGION && process.env.S3_PRIVATE_BUCKET) {
+      try {
+        const pdfBuffer = await generateContractPdf({
+          templateName: version.contractTemplate.name,
+          snapshot,
+          fieldValues,
+          signerEmail,
+        });
+        const contractId = `contract-${Date.now()}`;
+        const key = `contracts/${clientRelationshipId}/${contractId}.pdf`;
+        const result = await uploadToPrivateS3(key, pdfBuffer, "application/pdf");
+        s3Key = result.key;
+        s3Bucket = result.bucket;
+      } catch (pdfError: unknown) {
+        console.error("PDF generation/upload failed, creating record without PDF:", pdfError);
+      }
+    }
 
     await prisma.contract.create({
       data: {
@@ -374,6 +412,8 @@ export async function createContractFormAction(
             ? (fieldValues as Prisma.InputJsonValue)
             : undefined,
         status: "DRAFT",
+        s3Key,
+        s3Bucket,
       },
       select: { id: true },
     });
@@ -419,4 +459,86 @@ export async function publishContractTemplateVersionFormAction(
 
   revalidatePath(contractsPath(clientRelationshipId));
   revalidatePath(templatePath(clientRelationshipId, templateId));
+}
+
+export interface SendToDocuSignState {
+  status: "idle" | "error" | "success";
+  error?: string;
+}
+
+/**
+ * Sends a generated contract PDF to DocuSign for signing.
+ * Requires the contract to have an S3-stored PDF and status DRAFT or GENERATED.
+ */
+export async function sendContractToDocuSignAction(
+  clientRelationshipId: string,
+  contractId: string,
+  _prevState: SendToDocuSignState,
+  _formData: FormData,
+): Promise<SendToDocuSignState> {
+  const admin = await getAdminUser();
+  if (!admin) return { status: "error", error: "Not authorized." };
+
+  try {
+    const contract = await prisma.contract.findFirst({
+      where: { id: contractId, clientRelationshipId },
+      include: {
+        templateVersion: {
+          include: { contractTemplate: { select: { name: true } } },
+        },
+      },
+    });
+
+    if (!contract) return { status: "error", error: "Contract not found." };
+    if (contract.docusignEnvelopeId) {
+      return { status: "error", error: "Contract has already been sent to DocuSign." };
+    }
+    if (!contract.s3Key || !contract.s3Bucket) {
+      return {
+        status: "error",
+        error: "No PDF on file. Regenerate the contract first.",
+      };
+    }
+
+    // Download PDF from S3 via presigned URL then fetch it.
+    const presignedUrl = await getPrivateDownloadUrl(contract.s3Key);
+    const pdfResponse = await fetch(presignedUrl);
+    if (!pdfResponse.ok) {
+      return { status: "error", error: "Failed to retrieve contract PDF from storage." };
+    }
+    const pdfBuffer = Buffer.from(await pdfResponse.arrayBuffer());
+
+    const templateName =
+      contract.templateVersion?.contractTemplate?.name ?? "Contract";
+
+    const adminEmail = process.env.DOCUSIGN_ADMIN_EMAIL ?? "";
+    const adminName = process.env.DOCUSIGN_ADMIN_NAME ?? "Admin";
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
+    const webhookUrl = `${appUrl}/api/webhooks/docusign`;
+
+    const { envelopeId, status } = await sendEnvelopeForSigning({
+      pdfBuffer,
+      documentName: templateName,
+      signerEmail: contract.signerEmail ?? "",
+      signerName: contract.signerEmail ?? "",
+      adminEmail,
+      adminName,
+      webhookUrl,
+    });
+
+    await prisma.contract.update({
+      where: { id: contractId },
+      data: {
+        docusignEnvelopeId: envelopeId,
+        docusignStatus: status,
+        status: "SENT_FOR_SIGNING",
+      },
+    });
+
+    revalidatePath(contractsPath(clientRelationshipId));
+    return { status: "success" };
+  } catch (error: unknown) {
+    console.error("Failed to send contract to DocuSign", error);
+    return { status: "error", error: "Failed to send to DocuSign. Check server logs." };
+  }
 }

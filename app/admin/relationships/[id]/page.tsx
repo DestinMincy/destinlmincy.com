@@ -378,9 +378,13 @@ export default async function RelationshipDetailPage({
           </h2>
         </div>
         <div className="admin-work-links">
-          <Link href={`/admin/relationships/${id}/projects`}>
+          <Link href={`/admin/relationships/${id}/subscriptions`}>
             <span>Active subscriptions</span>
             <strong>{hubData.relationship._count.subscriptions}</strong>
+          </Link>
+          <Link href={`/admin/relationships/${id}/subscriptions/new`}>
+            <span>Add subscription</span>
+            <strong>+</strong>
           </Link>
         </div>
       </section>
