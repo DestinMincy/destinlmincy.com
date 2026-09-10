@@ -33,7 +33,7 @@ export default async function MilestonesPage({ params }: MilestonesPageProps) {
     notFound();
   }
 
-  const milestones = await listMilestones(id, projectId);
+  const milestones = await listMilestones(id, { projectId });
 
   return (
     <div className="container section section--tight admin-screen">

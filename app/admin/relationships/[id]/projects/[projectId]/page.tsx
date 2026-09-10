@@ -37,8 +37,8 @@ export default async function ProjectDetailPage({
   }
 
   const [milestones, deliverables] = await Promise.all([
-    listMilestones(id, projectId),
-    listDeliverables(id, projectId),
+    listMilestones(id, { projectId }),
+    listDeliverables(id, { projectId }),
   ]);
 
   return (

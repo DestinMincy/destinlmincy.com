@@ -35,7 +35,7 @@ export default async function MilestoneDetailPage({
     notFound();
   }
 
-  const milestone = await getMilestone(id, projectId, milestoneId);
+  const milestone = await getMilestone(milestoneId, id);
 
   if (!milestone) {
     notFound();

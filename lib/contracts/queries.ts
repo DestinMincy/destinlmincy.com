@@ -179,7 +179,7 @@ export async function getContractTemplateDraftSnapshot(
   const draftVersion = await prisma.contractTemplateVersion.findFirst({
     where: { contractTemplateId: templateId, publishedAt: null },
     orderBy: { versionNumber: "desc" },
-    select: { id: true, versionNumber: true },
+    select: { id: true, versionNumber: true, snapshot: true },
   });
 
   return { template, draftVersion };
