@@ -15,13 +15,14 @@ const revalidatePath = mock.fn<(path: string) => void>();
 const redirect = mock.fn<(url: string) => never>();
 
 const subscriptionReference = prismaModel("create", "updateMany");
+const clientRelationship = prismaModel("findUnique");
 
 neutraliseServerOnly();
 mockPackage("@/lib/auth/require-admin", { getAdminUser });
 mockPackage("next/cache", { revalidatePath });
 mockPackage("next/navigation", { redirect });
 mock.module("@/lib/db/client", {
-  namedExports: { prisma: { subscriptionReference } },
+  namedExports: { prisma: { subscriptionReference, clientRelationship } },
 });
 
 type Actions = typeof import(
@@ -48,7 +49,7 @@ before(async () => {
 });
 
 beforeEach(() => {
-  resetModels(subscriptionReference);
+  resetModels(subscriptionReference, clientRelationship);
   revalidatePath.mock.resetCalls();
   redirect.mock.resetCalls();
   getAdminUser.mock.resetCalls();
@@ -56,6 +57,7 @@ beforeEach(() => {
   getAdminUser.mock.mockImplementation(async () => ({ id: "admin-1" }));
   subscriptionReference.create.mock.mockImplementation(async () => ({ id: SUB_ID }));
   subscriptionReference.updateMany.mock.mockImplementation(async () => ({ count: 1 }));
+  clientRelationship.findUnique.mock.mockImplementation(async () => ({ id: REL_ID }));
   redirect.mock.mockImplementation((_url: string) => {
     throw new Error("REDIRECT");
   });
@@ -164,6 +166,18 @@ test("create: succeeds for MAINTENANCE/CANCELED with a valid date", async () => 
   assert.equal(args.data.serviceType, "MAINTENANCE");
   assert.equal(args.data.status, "CANCELED");
   assert.ok(args.data.currentPeriodEndsAt instanceof Date);
+});
+
+test("create: returns formError when relationship no longer exists", async () => {
+  clientRelationship.findUnique.mock.mockImplementation(async () => null);
+  const result = await createSubscriptionAction(
+    REL_ID,
+    IDLE_STATE,
+    makeForm({ serviceType: "HOSTING", status: "ACTIVE" }),
+  );
+  assert.equal(result.status, "error");
+  assert.ok(result.formError?.includes("relationship"));
+  assert.equal(subscriptionReference.create.mock.calls.length, 0);
 });
 
 test("create: returns formError when prisma throws", async () => {
