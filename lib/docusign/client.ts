@@ -28,13 +28,35 @@ export async function getDocuSignApiClient(): Promise<{
   const apiClient = new docusign.ApiClient();
   apiClient.setOAuthBasePath(config.oauthBasePath);
 
-  const response = await apiClient.requestJWTUserToken(
-    config.integrationKey,
-    config.impersonatedUserId,
-    ["signature", "impersonation"],
-    Buffer.from(config.privateKey),
-    3600,
-  );
+  let response: Awaited<ReturnType<typeof apiClient.requestJWTUserToken>>;
+  try {
+    response = await apiClient.requestJWTUserToken(
+      config.integrationKey,
+      config.impersonatedUserId,
+      ["signature", "impersonation"],
+      Buffer.from(config.privateKey),
+      3600,
+    );
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    const body = (err as { response?: { body?: string | { error?: string } } })
+      ?.response?.body;
+    const bodyStr =
+      typeof body === "string" ? body : body ? JSON.stringify(body) : "";
+    if (msg.includes("consent_required") || bodyStr.includes("consent_required")) {
+      const appUrl =
+        process.env.NEXT_PUBLIC_APP_URL ?? "https://destinlmincy.com";
+      const consentUrl =
+        `https://${config.oauthBasePath}/oauth/auth?response_type=code` +
+        `&scope=signature%20impersonation` +
+        `&client_id=${config.integrationKey}` +
+        `&redirect_uri=${encodeURIComponent(`${appUrl}/api/auth/callback`)}`;
+      throw new Error(
+        `DocuSign JWT consent required. Visit: ${consentUrl}`,
+      );
+    }
+    throw err;
+  }
 
   const accessToken = response.body.access_token;
   apiClient.addDefaultHeader("Authorization", `Bearer ${accessToken}`);
