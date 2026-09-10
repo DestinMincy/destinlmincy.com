@@ -24,9 +24,20 @@ export function getPostSlugs(): string[] {
     .map((file) => file.replace(/\.md$/, ""));
 }
 
+/**
+ * Post slugs arrive from the URL, so they are untrusted input. Only plain
+ * kebab/snake-case tokens are accepted: anything with a dot or separator
+ * could otherwise walk out of `content/blog` and read arbitrary markdown.
+ */
+function isSafeSlug(slug: string): boolean {
+  return /^[A-Za-z0-9_]+(?:-[A-Za-z0-9_]+)*$/.test(slug);
+}
+
 export async function getPostBySlug(
   slug: string,
 ): Promise<BlogPost | null> {
+  if (!isSafeSlug(slug)) return null;
+
   const fullPath = path.join(CONTENT_DIR, `${slug}.md`);
   if (!fs.existsSync(fullPath)) return null;
 

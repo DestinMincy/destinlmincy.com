@@ -8,7 +8,7 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "typecheck": "prisma generate && next typegen && tsc --noEmit",
-    "test": "tsx --test lib/client-work/validation.test.ts",
+    "test": "tsx --test --experimental-test-module-mocks \"__tests__/**/*.test.ts\" lib/client-work/validation.test.ts",
     "test:integration": "tsx --test lib/client-work/queries.integration.test.ts",
     "test:e2e": "playwright test tests/e2e/unit05.spec.ts",
     "db:generate": "prisma generate",
