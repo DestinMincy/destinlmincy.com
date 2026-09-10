@@ -31,15 +31,18 @@ export function SendToDocuSignButton({
 
   return (
     <form action={formAction}>
-      {state.status === "error" ? (
-        <p className="admin-form__error" style={{ marginBottom: 4 }}>
-          {state.error}
-        </p>
-      ) : null}
+      <div aria-live="polite">
+        {state.status === "error" ? (
+          <p className="admin-form__error" style={{ marginBottom: 4 }}>
+            {state.error}
+          </p>
+        ) : null}
+      </div>
       <button
         className="button button--secondary"
         type="submit"
         disabled={isPending}
+        aria-disabled={isPending}
         style={{ fontSize: "0.8rem", padding: "4px 10px" }}
       >
         {isPending ? "Sending…" : "Send for signing"}

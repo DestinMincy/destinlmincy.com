@@ -48,6 +48,7 @@ export function EditSubscriptionForm({
               id="status"
               name="status"
               defaultValue={defaultValues.status}
+              aria-describedby={state.errors.status ? "status-error" : undefined}
             >
               <option value="ACTIVE">Active</option>
               <option value="PAST_DUE">Past due</option>
@@ -55,6 +56,11 @@ export function EditSubscriptionForm({
               <option value="PAUSED">Paused</option>
               <option value="OVERRIDDEN">Admin override</option>
             </select>
+            {state.errors.status ? (
+              <span id="status-error" className="admin-form__error">
+                {state.errors.status}
+              </span>
+            ) : null}
           </div>
         </div>
 
@@ -95,7 +101,17 @@ export function EditSubscriptionForm({
             name="currentPeriodEndsAt"
             type="date"
             defaultValue={defaultValues.currentPeriodEndsAt}
+            aria-describedby={
+              state.errors.currentPeriodEndsAt
+                ? "currentPeriodEndsAt-error"
+                : undefined
+            }
           />
+          {state.errors.currentPeriodEndsAt ? (
+            <span id="currentPeriodEndsAt-error" className="admin-form__error">
+              {state.errors.currentPeriodEndsAt}
+            </span>
+          ) : null}
           <p className="field-hint">
             When canceled, access continues until this date. Set to override
             default billing behavior.
