@@ -24,6 +24,7 @@ export async function listMilestones(
     orderBy: [{ targetDate: "asc" }, { createdAt: "asc" }],
     include: {
       project: { select: { id: true, name: true } },
+      _count: { select: { deliverables: true } },
     },
   });
 }

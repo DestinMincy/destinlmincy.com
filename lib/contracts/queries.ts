@@ -12,6 +12,16 @@ export async function listContractTemplates(relationshipId: string) {
     orderBy: { updatedAt: "desc" },
     include: {
       _count: { select: { versions: true } },
+      versions: {
+        orderBy: { versionNumber: "desc" },
+        take: 1,
+        select: {
+          id: true,
+          versionNumber: true,
+          publishedAt: true,
+          createdAt: true,
+        },
+      },
     },
   });
 }
@@ -155,6 +165,26 @@ export async function archiveContractTemplate(
   });
 }
 
+export async function getContractTemplateDraftSnapshot(
+  clientRelationshipId: string,
+  templateId: string,
+) {
+  const template = await prisma.contractTemplate.findFirst({
+    where: { id: templateId, clientRelationshipId, status: "DRAFT" },
+    select: { id: true, name: true },
+  });
+
+  if (!template) return null;
+
+  const draftVersion = await prisma.contractTemplateVersion.findFirst({
+    where: { contractTemplateId: templateId, publishedAt: null },
+    orderBy: { versionNumber: "desc" },
+    select: { id: true, versionNumber: true },
+  });
+
+  return { template, draftVersion };
+}
+
 // ── Contracts ───────────────────────────────────────────────────────────────
 
 export interface CreateContractInput {
@@ -232,6 +262,10 @@ export async function updateContractStatus(
 export type ContractTemplateListItem = Awaited<
   ReturnType<typeof listContractTemplates>
 >[number];
+
+export type ContractTemplateDetail = NonNullable<
+  Awaited<ReturnType<typeof getContractTemplate>>
+>;
 
 export type ContractListItem = Awaited<
   ReturnType<typeof listContracts>
