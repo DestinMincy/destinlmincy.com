@@ -1,8 +1,19 @@
 import { prisma } from "@/lib/db/client";
+import { PAYMENT_GATE_SATISFIED_STATUSES } from "@/lib/payment-gates/types";
 
-export async function listPaymentGates(clientRelationshipId: string) {
+export interface ListPaymentGatesFilters {
+  projectId?: string;
+}
+
+export async function listPaymentGates(
+  clientRelationshipId: string,
+  filters?: ListPaymentGatesFilters,
+) {
   return prisma.paymentGate.findMany({
-    where: { clientRelationshipId },
+    where: {
+      clientRelationshipId,
+      ...(filters?.projectId ? { projectId: filters.projectId } : {}),
+    },
     orderBy: { createdAt: "desc" },
     include: {
       project: { select: { id: true, name: true } },
@@ -30,6 +41,30 @@ export async function listPendingPaymentGates(clientRelationshipId: string) {
   });
 }
 
+/**
+ * Gates that stop a project from starting: flagged `requiredBeforeWork` and
+ * not yet paid or waived.
+ */
+export async function listBlockingPaymentGates(
+  clientRelationshipId: string,
+  projectId: string,
+) {
+  return prisma.paymentGate.findMany({
+    where: {
+      clientRelationshipId,
+      projectId,
+      requiredBeforeWork: true,
+      status: { notIn: [...PAYMENT_GATE_SATISFIED_STATUSES] },
+    },
+    orderBy: { createdAt: "asc" },
+    select: { id: true, label: true, status: true, dueDate: true },
+  });
+}
+
 export type PaymentGateListItem = Awaited<
   ReturnType<typeof listPaymentGates>
 >[number];
+
+export type PaymentGateDetail = NonNullable<
+  Awaited<ReturnType<typeof getPaymentGate>>
+>;

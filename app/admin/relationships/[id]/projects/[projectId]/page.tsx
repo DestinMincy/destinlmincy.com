@@ -8,6 +8,14 @@ import { requireAdminForPage } from "@/lib/auth/require-admin";
 import { clientWorkDateFormatter } from "@/lib/client-work/format";
 import { getProject, getRelationshipIdentity } from "@/lib/client-work/queries";
 import { listDeliverables, listMilestones } from "@/lib/milestones/queries";
+import { listPaymentGates } from "@/lib/payment-gates/queries";
+import {
+  PAYMENT_GATE_STATUS_LABELS,
+  PAYMENT_GATE_STATUS_TONE,
+  formatPaymentGateAmount,
+  isPaymentGateOverdue,
+  isPaymentGateSatisfied,
+} from "@/lib/payment-gates/types";
 import {
   MILESTONE_STATUS_LABELS,
   MILESTONE_STATUS_TONE,
@@ -36,10 +44,16 @@ export default async function ProjectDetailPage({
     notFound();
   }
 
-  const [milestones, deliverables] = await Promise.all([
+  const [milestones, deliverables, paymentGates] = await Promise.all([
     listMilestones(id, { projectId }),
     listDeliverables(id, { projectId }),
+    listPaymentGates(id, { projectId }),
   ]);
+
+  const now = new Date();
+  const blockingGates = paymentGates.filter(
+    (gate) => gate.requiredBeforeWork && !isPaymentGateSatisfied(gate.status),
+  );
 
   return (
     <div className="container section section--tight admin-screen">
@@ -160,6 +174,98 @@ export default async function ProjectDetailPage({
           </section>
         </div>
       </div>
+
+      <section
+        className={`admin-panel${blockingGates.length > 0 ? " admin-panel--signal" : ""}`}
+        aria-labelledby="payments-heading"
+      >
+        <div className="admin-panel__head">
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
+            <h2 className="admin-panel__title" id="payments-heading">
+              Payments
+            </h2>
+            <Link
+              className="button button--secondary button--compact"
+              href={`/admin/relationships/${id}/payment-gates/new`}
+            >
+              Add payment gate
+            </Link>
+          </div>
+          {blockingGates.length > 0 ? (
+            <p className="admin-head__meta">
+              {blockingGates.length === 1
+                ? "1 required payment is unpaid. This project cannot start until it is paid or waived."
+                : `${blockingGates.length} required payments are unpaid. This project cannot start until they are paid or waived.`}
+            </p>
+          ) : null}
+        </div>
+
+        {paymentGates.length === 0 ? (
+          <p className="admin-empty__note">No payment gates on this project.</p>
+        ) : (
+          <div className="admin-table-wrap">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th scope="col">Label</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Amount</th>
+                  <th scope="col">Due</th>
+                  <th scope="col">Stripe</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paymentGates.map((gate) => {
+                  const amount = formatPaymentGateAmount(gate.amount, gate.currency);
+                  return (
+                    <tr key={gate.id}>
+                      <td>
+                        <Link
+                          href={`/admin/relationships/${id}/payment-gates/${gate.id}/edit`}
+                        >
+                          {gate.label}
+                        </Link>
+                        {gate.requiredBeforeWork ? (
+                          <span className="admin-table__sub">Required before work</span>
+                        ) : null}
+                      </td>
+                      <td>
+                        <StatusBadge
+                          status={gate.status}
+                          label={PAYMENT_GATE_STATUS_LABELS[gate.status]}
+                          tone={PAYMENT_GATE_STATUS_TONE[gate.status]}
+                        />
+                        {isPaymentGateOverdue(gate, now) ? (
+                          <span className="admin-table__sub">Overdue</span>
+                        ) : null}
+                      </td>
+                      <td>
+                        {amount ?? <span className="admin-table__none">Not set</span>}
+                      </td>
+                      <td>
+                        {gate.dueDate ? (
+                          clientWorkDateFormatter.format(gate.dueDate)
+                        ) : (
+                          <span className="admin-table__none">Not set</span>
+                        )}
+                      </td>
+                      <td>
+                        {gate.stripeUrl ? (
+                          <a href={gate.stripeUrl} target="_blank" rel="noreferrer">
+                            {gate.stripeId || "Open link"}
+                          </a>
+                        ) : (
+                          <span className="admin-table__none">Not attached</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
 
       <section className="admin-panel" aria-labelledby="milestones-heading">
         <div className="admin-panel__head">

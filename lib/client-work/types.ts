@@ -34,6 +34,19 @@ export const APPLICATION_SITE_STATUS_LABELS: Record<
 
 export const PROJECT_STATUS_VALUES: ProjectStatus[] = Object.values(WorkStatus);
 
+/**
+ * Statuses that mean work on the project has started. Moving a project into
+ * one of these is blocked while a required payment gate is unpaid.
+ */
+export const WORK_STARTED_PROJECT_STATUSES: readonly ProjectStatus[] = [
+  "ACTIVE",
+  "IN_PROGRESS",
+];
+
+export function projectStatusStartsWork(status: ProjectStatus): boolean {
+  return WORK_STARTED_PROJECT_STATUSES.includes(status);
+}
+
 export const PROJECT_STATUS_LABELS: Record<ProjectStatus, string> = {
   PLANNED: "Planned",
   ACTIVE: "Active",

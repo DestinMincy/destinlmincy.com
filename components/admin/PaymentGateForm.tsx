@@ -171,7 +171,7 @@ export function PaymentGateForm({
           error={state.errors.requiredBeforeWork}
         >
           {(control) => (
-            <label className="checkbox-label">
+            <label className="checkbox-field">
               <input
                 id={control.id}
                 name={control.name}

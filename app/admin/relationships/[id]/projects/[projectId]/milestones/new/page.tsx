@@ -7,7 +7,7 @@ import { requireAdminForPage } from "@/lib/auth/require-admin";
 import { getProject, getRelationshipIdentity } from "@/lib/client-work/queries";
 import { createMilestoneAction } from "@/lib/milestones/actions";
 import { EMPTY_MILESTONE_FORM_VALUES } from "@/lib/milestones/types";
-import { listPaymentGates } from "@/lib/payments/queries";
+import { listPaymentGates } from "@/lib/payment-gates/queries";
 
 export const metadata: Metadata = {
   title: "New milestone",

@@ -46,6 +46,14 @@ export interface PortalPaymentGate {
   id: string;
   label: string;
   status: string;
+  paymentType: string;
+  amount: string | null;
+  currency: string;
+  dueDate: Date | null;
+  requiredBeforeWork: boolean;
+  /** Stripe invoice or payment link URL. Only present while payment is open. */
+  payUrl: string | null;
+  projectName: string | null;
   createdAt: Date;
 }
 
@@ -59,13 +67,30 @@ export async function listPortalPaymentGates(
       id: true,
       label: true,
       status: true,
+      paymentType: true,
+      amount: true,
+      currency: true,
+      dueDate: true,
+      requiredBeforeWork: true,
+      stripeUrl: true,
       createdAt: true,
+      project: { select: { name: true } },
     },
   });
   return rows.map((r) => ({
     id: r.id,
     label: r.label,
     status: r.status,
+    paymentType: r.paymentType,
+    amount: r.amount === null ? null : r.amount.toString(),
+    currency: r.currency,
+    dueDate: r.dueDate,
+    requiredBeforeWork: r.requiredBeforeWork,
+    // A paid or waived gate keeps its URL in the admin record, but the client
+    // should not be handed a link to pay something already settled.
+    payUrl:
+      r.status === "PAID" || r.status === "WAIVED" ? null : r.stripeUrl,
+    projectName: r.project?.name ?? null,
     createdAt: r.createdAt,
   }));
 }

@@ -10,6 +10,9 @@ import { listPaymentGates } from "@/lib/payment-gates/queries";
 import {
   PAYMENT_GATE_STATUS_LABELS,
   PAYMENT_GATE_STATUS_TONE,
+  PAYMENT_GATE_TYPE_LABELS,
+  formatPaymentGateAmount,
+  isPaymentGateOverdue,
 } from "@/lib/payment-gates/types";
 
 export const metadata: Metadata = {
@@ -34,6 +37,8 @@ export default async function PaymentGatesPage({
   if (!relationship) {
     notFound();
   }
+
+  const now = new Date();
 
   return (
     <div className="container section section--tight admin-screen">
@@ -75,37 +80,80 @@ export default async function PaymentGatesPage({
               <tr>
                 <th scope="col">Label</th>
                 <th scope="col">Status</th>
+                <th scope="col">Type</th>
+                <th scope="col">Amount</th>
+                <th scope="col">Due</th>
                 <th scope="col">Project</th>
-                <th scope="col">Created</th>
-                <th scope="col">Updated</th>
+                <th scope="col">Stripe</th>
+                <th scope="col">
+                  <span className="visually-hidden">Actions</span>
+                </th>
               </tr>
             </thead>
             <tbody>
-              {paymentGates.map((gate) => (
-                <tr key={gate.id}>
-                  <td>{gate.label}</td>
-                  <td>
-                    <StatusBadge
-                      status={gate.status}
-                      label={PAYMENT_GATE_STATUS_LABELS[gate.status]}
-                      tone={PAYMENT_GATE_STATUS_TONE[gate.status]}
-                    />
-                  </td>
-                  <td>
-                    {gate.project ? (
+              {paymentGates.map((gate) => {
+                const overdue = isPaymentGateOverdue(gate, now);
+                const amount = formatPaymentGateAmount(gate.amount, gate.currency);
+                return (
+                  <tr key={gate.id}>
+                    <td>
+                      <strong>{gate.label}</strong>
+                      {gate.requiredBeforeWork ? (
+                        <p className="admin-table__sub">Required before work</p>
+                      ) : null}
+                    </td>
+                    <td>
+                      <StatusBadge
+                        status={gate.status}
+                        label={PAYMENT_GATE_STATUS_LABELS[gate.status]}
+                        tone={PAYMENT_GATE_STATUS_TONE[gate.status]}
+                      />
+                      {overdue ? (
+                        <p className="admin-table__sub">Overdue</p>
+                      ) : null}
+                    </td>
+                    <td>{PAYMENT_GATE_TYPE_LABELS[gate.paymentType]}</td>
+                    <td>
+                      {amount ?? <span className="admin-table__none">Not set</span>}
+                    </td>
+                    <td>
+                      {gate.dueDate ? (
+                        clientWorkDateFormatter.format(gate.dueDate)
+                      ) : (
+                        <span className="admin-table__none">Not set</span>
+                      )}
+                    </td>
+                    <td>
+                      {gate.project ? (
+                        <Link
+                          href={`/admin/relationships/${id}/projects/${gate.project.id}`}
+                        >
+                          {gate.project.name}
+                        </Link>
+                      ) : (
+                        <span className="admin-table__none">None</span>
+                      )}
+                    </td>
+                    <td>
+                      {gate.stripeUrl ? (
+                        <a href={gate.stripeUrl} target="_blank" rel="noreferrer">
+                          {gate.stripeId || "Open link"}
+                        </a>
+                      ) : (
+                        <span className="admin-table__none">Not attached</span>
+                      )}
+                    </td>
+                    <td className="admin-table__actions">
                       <Link
-                        href={`/admin/relationships/${id}/projects/${gate.project.id}`}
+                        className="button button--secondary button--compact"
+                        href={`/admin/relationships/${id}/payment-gates/${gate.id}/edit`}
                       >
-                        {gate.project.name}
+                        Edit
                       </Link>
-                    ) : (
-                      <span className="admin-table__none">None</span>
-                    )}
-                  </td>
-                  <td>{clientWorkDateFormatter.format(gate.createdAt)}</td>
-                  <td>{clientWorkDateFormatter.format(gate.updatedAt)}</td>
-                </tr>
-              ))}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
