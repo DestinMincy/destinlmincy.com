@@ -35,8 +35,10 @@ Project payments are custom contract-specific obligations. They are separate fro
 
 ## Verify When Done
 
-- [ ] Admin can attach a Stripe invoice/payment link to a contract.
-- [ ] Payment gate status is visible to admin.
-- [ ] Payment gate status is visible to the correct client.
-- [ ] Required unpaid gate prevents project from being marked ready to start.
-- [ ] Payment gate is not modeled as a subscription.
+- [x] Admin can attach a Stripe invoice/payment link to a payment gate, at creation or later through the edit page. Gates attach to the relationship and optionally a project; linking a gate to a specific contract record is not modeled in v1 (see progress tracker open questions).
+- [x] Payment gate status is visible to admin (list, project page, relationship hub action items).
+- [x] Payment gate status is visible to the correct client (portal payments page, membership-checked server-side; shows amount, due date, derived overdue, and the Stripe link while open).
+- [x] Required unpaid gate prevents project from moving into ACTIVE or IN_PROGRESS (`lib/client-work/project-writes.ts`, unit-tested).
+- [x] Payment gate is not modeled as a subscription (`PaymentGate` and `SubscriptionReference` are separate models).
+
+Live verification still required: paste a real Stripe invoice or payment link URL and confirm the client can open it from the portal.

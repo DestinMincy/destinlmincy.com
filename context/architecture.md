@@ -2,7 +2,7 @@
 
 ## Current State
 
-The repo contains the new Next.js App Router foundation under `app/`, `components/`, and `lib/`, staged alongside the legacy Eleventy 3.x source under `src/`. The data foundation uses Prisma with a Dockerized local Postgres service and an initial migration for the client relationship OS schema. The target production architecture remains a Next.js React application hosted on EC2 with RDS Postgres when deployment or client need justifies the cost.
+The repo is a Next.js App Router application under `app/`, `components/`, and `lib/`, with Prisma over Postgres (Docker locally, RDS when justified), private S3 for contract PDFs, DocuSign for signatures, Clerk for auth and subscription entitlements, and Stripe invoice/payment-link metadata for project payment gates. The legacy Eleventy source was removed in Unit 16. Production runs on EC2 behind Nginx under PM2; see `docs/deployment.md`.
 
 ## Target Stack
 
@@ -17,14 +17,14 @@ The repo contains the new Next.js App Router foundation under `app/`, `component
 | Signatures | DocuSign API | Signature workflow after app-owned contract generation |
 | Styling | Tailwind CSS plus CSS custom properties | Application styling while preserving brand tokens |
 | UI Components | Local components, likely shadcn/ui where useful | Accessible dashboard, editor, table, and form primitives |
-| Blog Content | MDX or Markdown files in repo | Versioned posts without a CMS dependency |
+| Blog Content | Markdown files in `content/blog/` | Versioned posts without a CMS dependency |
 | App Data | PostgreSQL | Client relationships, contracts, projects, payments, milestones |
 | Dev Database | Dockerized Postgres container | Local development without early RDS spend |
 | Production Database | RDS Postgres when justified | Durable managed database once deployment/client need exists |
 | Document Storage | Private S3 bucket | Generated and signed contract PDFs |
 | ORM | Prisma | Type-safe database access, migrations, and local seed workflow |
-| Web Server | Nginx or Caddy in front of Node | HTTPS termination/proxy on EC2 |
-| Process | systemd or PM2 | Keep Next.js server running after deploy/reboot |
+| Web Server | Nginx in front of Node | HTTPS termination/proxy on EC2 |
+| Process | PM2 | Keep Next.js server running after deploy/reboot |
 
 ## System Boundaries
 
@@ -41,7 +41,7 @@ The repo contains the new Next.js App Router foundation under `app/`, `component
 - `docker-compose.yml` - Dockerized local Postgres development service.
 - `public/` - Static assets that must be served directly.
 - `context/` - Product, architecture, workflow, and unit specs. Not runtime application code.
-- `src/` - Current Eleventy source. It remains legacy until migration starts.
+- `public/img/brand/` - Brand assets preserved from the retired Eleventy site (logo variants, banners, wallpapers, ELATUM lockup).
 
 ## Data Model Boundaries
 

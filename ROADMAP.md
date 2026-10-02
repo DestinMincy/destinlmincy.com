@@ -1,81 +1,39 @@
-# destinlmincy.com — Roadmap
+# destinlmincy.com Roadmap
 
-_Last updated: 2026-05-11_
+This file is the short public-facing view. The authoritative plan is `context/specs/00-build-plan.md`, and live status is in `context/progress-tracker.md`.
 
-## What this site is
+## What this is
 
-A small agency / personal site for **Destin L. Mincy**. The business sells AI Agents-as-a-Service (AaaS) to small businesses. The first product, **ELATUM**, is an AI agent for short-term rental owners. Additional agents will follow and be featured on this site.
+A Next.js application for Destin L. Mincy's software and AI agency. It serves the public marketing site and blog, and behind Clerk authentication it runs the agency: client relationships, applications and sites, projects, contract templates and generated contracts, DocuSign signing, Stripe payment gates, Clerk-managed hosting and maintenance subscriptions, milestones with client approvals, and link deliverables. One admin, many client relationships, each with one or more client users.
 
-The site itself is a marketing site. It is not a client portal, app, or product surface. ELATUM lives at its own subdomain (`elatum.ai`) and the main site funnels visitors there for that specific offer.
+## Delivered
 
-## Current state
+- Public site: home, about, services, work, contact, blog with RSS and sitemap.
+- Clerk auth with a server-side email allowlist for `/admin` and relationship membership checks for `/portal`.
+- Admin hub per client relationship: users, applications and sites, projects, contract templates (draft, published immutable versions, archive), generated contract PDFs in private S3, DocuSign send and webhook status tracking, payment gates, subscriptions, milestones, deliverables.
+- Client portal: contracts and signature status, payments with Stripe pay links, subscriptions with entitlement checks, projects and milestones, approve or request changes on milestones, link deliverables.
+- Payment gates can block a project from starting until a required payment is paid or waived.
+- EC2 deployment runbook with Nginx and PM2 configuration.
+- Legacy Eleventy site removed.
 
-- `index.html` — static "Coming Soon" page (dark sci-fi aesthetic, Orbitron/Rajdhani fonts, neural-network canvas)
-- `elatum/` — separate ELATUM landing page served at `elatum.ai`
-- `img/` — image assets
-- `PROJECT_PLAN.md` — **superseded by this doc; archive or delete**
-- No build step, no framework, no backend
+## Pending verification
 
-## Phase 1 — Marketing site MVP (target: 1–2 weeks)
+Code is complete for every planned unit. These need a live run with real credentials before launch:
 
-Replace "Coming Soon" with a five-page Eleventy-built static site.
+- DocuSign JWT consent, end-to-end signing, and Connect webhook delivery.
+- S3 IAM permissions for contract PDF upload and download.
+- Clerk Billing entitlement keys against real subscriptions.
+- Production migrations and environment variables on the EC2 host.
 
-**Pages**
-- `/` — Home
-- `/about/` — Founder story + positioning
-- `/services/` — What's offered, how engagement works
-- `/work/` — Case studies index
-  - `/work/elatum/` — Featured agent (links out to product subdomain)
-- `/contact/` — Formspree-backed contact form
+## Deferred by design
 
-**Stack**
-- Eleventy 3.x (static site generator)
-- Plain HTML/CSS/JS — no React, no app routes
-- Nunjucks templates with shared header/footer/canvas partials
-- Formspree (`mqenwlvv`) for the contact form
-- Hosting: S3 + CloudFront on existing AWS setup, current domain
+- Stripe API creation of invoices and payment links (manual attachment ships first).
+- Client user roles and permissions.
+- Multi-signer contracts.
+- Client-requested application or site registration.
+- File uploads for deliverables.
+- Messaging, support tickets, knowledge base.
+- CMS-backed blog.
+- Clerk organizations for multi-admin.
 
-**Definition of done**
-- All five pages live with real copy (no Lorem)
-- Contact form submits cleanly to Formspree and shows success/error states
-- Lighthouse mobile ≥ 90 across Performance, Accessibility, Best Practices, SEO
-- No console errors, no broken links, sitemap.xml + robots.txt published
-
-## Phase 2 — Blog (target: ~2 weeks after Phase 1 ships)
-
-- `/blog/` index with chronological post list
-- Markdown-based posts under `src/blog/`
-- RSS feed
-- Per-post Open Graph images (simple template)
-- Optional: tags, archive page
-
-## Phase 3 — TBD
-
-Open ideas, not commitments:
-- Additional agent product pages as new offerings ship
-- Lead magnets (templated agent playbook PDF, etc.)
-- Newsletter signup wired to existing tool
-- Analytics dashboard (Plausible or similar)
-- Client testimonials section once there are clients
-
-## What this site is **not** (and won't be in v1)
-
-These were in the old PROJECT_PLAN.md and are intentionally out of scope:
-
-- Auth / Cognito / sessions
-- Client portal or project dashboard
-- Quote/PDF generation
-- Repository browser
-- Admin CRUD
-- Postgres / Prisma / any database
-- Payment processing
-- AI chat embed on the site itself
-
-If any of these become real requirements later, they belong in a separate app, not in the marketing site repo.
-
-## Operating principles
-
-1. **Static first.** No server-rendered page goes in unless there's a concrete reason no static page can serve the use case.
-2. **Ship before polish.** Get five pages live, then iterate.
-3. **One thing per page.** Each page has one job and one primary CTA.
-4. **The site funnels to products and contact, not into a logged-in surface.**
+Client-generated contracts are intentionally never planned.
