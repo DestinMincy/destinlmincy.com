@@ -1,4 +1,27 @@
-import docusign from "docusign-esign";
+import { createRequire } from "node:module";
+
+import type docusign from "docusign-esign";
+
+type DocuSignSdk = typeof docusign;
+
+let sdk: DocuSignSdk | undefined;
+
+/**
+ * docusign-esign ships UMD wrappers with AMD `define()` calls that the
+ * bundler cannot parse, in the bundle and in externals tracing alike. The
+ * package is loaded here with a Node `require` created at runtime, invoked
+ * through `Reflect.apply` so the bundler does not rewrite the call, which
+ * keeps the package out of the build graph and lets Node resolve it from
+ * node_modules on the server. A plain `require("docusign-esign")` or a
+ * static import breaks `next build`.
+ */
+function loadDocuSign(): DocuSignSdk {
+  if (!sdk) {
+    const nodeRequire = createRequire(import.meta.url);
+    sdk = Reflect.apply(nodeRequire, undefined, ["docusign-esign"]) as DocuSignSdk;
+  }
+  return sdk;
+}
 
 function getDocuSignConfig() {
   const integrationKey = process.env.DOCUSIGN_INTEGRATION_KEY;
@@ -25,7 +48,7 @@ export async function getDocuSignApiClient(): Promise<{
 }> {
   const config = getDocuSignConfig();
 
-  const apiClient = new docusign.ApiClient();
+  const apiClient = new (loadDocuSign().ApiClient)();
   apiClient.setOAuthBasePath(config.oauthBasePath);
 
   let response: Awaited<ReturnType<typeof apiClient.requestJWTUserToken>>;
@@ -87,7 +110,7 @@ export async function sendEnvelopeForSigning(
   options: SendEnvelopeOptions,
 ): Promise<{ envelopeId: string; status: string }> {
   const { client, accountId } = await getDocuSignApiClient();
-  const envelopesApi = new docusign.EnvelopesApi(client);
+  const envelopesApi = new (loadDocuSign().EnvelopesApi)(client);
 
   const docBase64 = options.pdfBuffer.toString("base64");
 
@@ -178,7 +201,7 @@ export async function downloadSignedPdf(
   envelopeId: string,
 ): Promise<Buffer> {
   const { client, accountId } = await getDocuSignApiClient();
-  const envelopesApi = new docusign.EnvelopesApi(client);
+  const envelopesApi = new (loadDocuSign().EnvelopesApi)(client);
 
   const stream = await envelopesApi.getDocument(accountId, envelopeId, "combined", {});
   if (Buffer.isBuffer(stream)) return Buffer.from(stream);
