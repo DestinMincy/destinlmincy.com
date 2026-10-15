@@ -26,6 +26,16 @@ test("the envelope asks Connect to HMAC-sign every notification", () => {
   assert.equal(notification.url, OPTIONS.webhookUrl);
 });
 
+test("the envelope subject stays within DocuSign's 100-character limit", () => {
+  const subject = buildEnvelopeDefinition({
+    ...OPTIONS,
+    documentName: "A".repeat(200),
+  }).emailSubject;
+
+  assert.equal(subject?.length, 100);
+  assert.ok(subject?.startsWith("Please sign: "));
+});
+
 test("the envelope routes the client signer before the admin countersigner", () => {
   const signers = buildEnvelopeDefinition(OPTIONS).recipients?.signers ?? [];
 

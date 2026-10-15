@@ -156,7 +156,8 @@ export function buildEnvelopeDefinition(
   };
 
   return {
-    emailSubject: `Please sign: ${options.documentName}`,
+    // DocuSign rejects an envelope whose subject is longer than 100 characters.
+    emailSubject: `Please sign: ${options.documentName}`.slice(0, 100),
     documents: [document],
     recipients: {
       signers: [clientSigner, adminSigner],

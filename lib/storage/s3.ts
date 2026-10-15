@@ -1,4 +1,5 @@
 import {
+  DeleteObjectCommand,
   GetObjectCommand,
   PutObjectCommand,
   S3Client,
@@ -44,6 +45,17 @@ export async function uploadToPrivateS3(
   );
 
   return { bucket, key };
+}
+
+/**
+ * Deletes an object from the private S3 bucket. Used to remove a PDF that was
+ * uploaded for a database write that then failed.
+ */
+export async function deleteFromPrivateS3(key: string): Promise<void> {
+  const client = getS3Client();
+  const bucket = getPrivateBucket();
+
+  await client.send(new DeleteObjectCommand({ Bucket: bucket, Key: key }));
 }
 
 /**

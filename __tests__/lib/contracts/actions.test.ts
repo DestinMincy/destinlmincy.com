@@ -19,6 +19,7 @@ const uploadToPrivateS3 = mock.fn<
   (key: string, body: Buffer, contentType: string) => Promise<{ bucket: string; key: string }>
 >();
 const downloadFromPrivateS3 = mock.fn<(key: string) => Promise<Buffer>>();
+const deleteFromPrivateS3 = mock.fn<(key: string) => Promise<void>>(async () => undefined);
 const sendEnvelopeForSigning = mock.fn<(options: unknown) => Promise<unknown>>();
 const saveContractTemplateDraftSnapshot =
   mock.fn<(...args: unknown[]) => Promise<unknown>>();
@@ -35,7 +36,7 @@ mock.module("@/lib/db/client", {
 });
 mock.module("@/lib/pdf/generate", { namedExports: { generateContractPdf } });
 mock.module("@/lib/storage/s3", {
-  namedExports: { uploadToPrivateS3, downloadFromPrivateS3 },
+  namedExports: { uploadToPrivateS3, downloadFromPrivateS3, deleteFromPrivateS3 },
 });
 mock.module("@/lib/docusign/client", { namedExports: { sendEnvelopeForSigning } });
 mock.module("@/lib/contracts/queries", {
@@ -76,6 +77,7 @@ beforeEach(() => {
     redirect,
     generateContractPdf,
     uploadToPrivateS3,
+    deleteFromPrivateS3,
     saveContractTemplateDraftSnapshot,
   ]) {
     fn.mock.resetCalls();
@@ -215,6 +217,19 @@ test("an S3 upload failure returns an error and creates nothing", async () => {
   assert.match(state.error ?? "", /could not be stored in S3/);
   assert.deepEqual(state.values?.fields, { projectName: "Site rebuild" });
   assertNoContractCreated();
+});
+
+test("a failed contract insert removes the uploaded PDF instead of orphaning it", async () => {
+  contract.create.mock.mockImplementation(async () => {
+    throw new Error("connection reset");
+  });
+
+  const state = await quietly(() => generate());
+
+  assert.equal(state.status, "error");
+  const [uploadedKey] = uploadToPrivateS3.mock.calls[0]?.arguments ?? [];
+  assert.deepEqual(deleteFromPrivateS3.mock.calls[0]?.arguments, [uploadedKey]);
+  assert.equal(redirect.mock.callCount(), 0);
 });
 
 test("generation refuses a non-admin before reading anything", async () => {

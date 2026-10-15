@@ -18,7 +18,11 @@ import { saveContractTemplateDraftSnapshot } from "@/lib/contracts/queries";
 import { parseTemplateSnapshot } from "@/lib/contracts/template-validation";
 import { isValidEmail } from "@/lib/relationships/validation";
 import { generateContractPdf } from "@/lib/pdf/generate";
-import { downloadFromPrivateS3, uploadToPrivateS3 } from "@/lib/storage/s3";
+import {
+  deleteFromPrivateS3,
+  downloadFromPrivateS3,
+  uploadToPrivateS3,
+} from "@/lib/storage/s3";
 import { sendEnvelopeForSigning } from "@/lib/docusign/client";
 import { sendContractToDocuSign } from "@/lib/docusign/workflow";
 
@@ -469,7 +473,11 @@ export async function createContractFormAction(
       select: { id: true },
     });
   } catch (error: unknown) {
-    console.error("Failed to create contract record", error, stored);
+    console.error("Failed to create contract record", error);
+    // The PDF belongs to no contract now; remove it rather than orphan it.
+    await deleteFromPrivateS3(stored.key).catch((cleanupError: unknown) => {
+      console.error("Failed to remove orphaned contract PDF", stored.key, cleanupError);
+    });
     return fail(SAVE_ERROR);
   }
 

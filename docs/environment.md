@@ -64,7 +64,7 @@ The email must be the primary email of a Clerk user and verified in Clerk. Anyon
 | `AWS_ACCESS_KEY_ID` | Optional | Credentials for the bucket, read by the AWS SDK default credential chain | IAM user access key. Leave empty on EC2 with an instance role, or when an AWS profile provides credentials | empty |
 | `AWS_SECRET_ACCESS_KEY` | Optional | Same | Same | empty |
 
-The bucket must block all public access. The app writes with `ServerSideEncryption: AES256`. The credentials need `s3:PutObject` and `s3:GetObject` on the bucket. Generated PDFs land at `contracts/<relationshipId>/<uuid>.pdf`; signed PDFs at `contracts/<relationshipId>/signed-<envelopeId>.pdf`.
+The bucket must block all public access. The app writes with `ServerSideEncryption: AES256`. The credentials need `s3:PutObject`, `s3:GetObject`, and `s3:DeleteObject` on the bucket (delete removes a PDF whose contract record failed to save). Generated PDFs land at `contracts/<relationshipId>/<uuid>.pdf`; signed PDFs at `contracts/<relationshipId>/signed-<envelopeId>.pdf`.
 
 When either `AWS_REGION` or `S3_PRIVATE_BUCKET` is empty, contract generation shows an error and creates nothing, and the DocuSign webhook answers 503 for a completed envelope so DocuSign retries it later.
 

@@ -49,7 +49,7 @@ Production values:
 - **Database:** `DATABASE_URL` for the EC2 Docker Postgres or RDS (`sslmode=require` for RDS).
 - **Admin:** `ADMIN_EMAILS` with the real admin emails.
 - **DocuSign:** `DOCUSIGN_OAUTH_BASE_PATH=account.docusign.com`, production integration key, account, user, and RSA key, and JWT consent granted against `account.docusign.com`. `NEXT_PUBLIC_APP_URL=https://destinlmincy.com`; it is inlined at build time, so set it before `npm run build`. Set `DOCUSIGN_CONNECT_HMAC_KEY`: the webhook at `https://destinlmincy.com/api/webhooks/docusign` rejects every notification while it is empty.
-- **S3:** `AWS_REGION` and `S3_PRIVATE_BUCKET`. On EC2, prefer the instance role and leave `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` empty. The role needs `s3:GetObject` and `s3:PutObject` on the bucket. No public access.
+- **S3:** `AWS_REGION` and `S3_PRIVATE_BUCKET`. On EC2, prefer the instance role and leave `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` empty. The role needs `s3:GetObject`, `s3:PutObject`, and `s3:DeleteObject` on the bucket. No public access.
 - **Stripe:** no variables in v1.
 
 ---
