@@ -4,6 +4,18 @@
 
 - `app/layout.tsx` `icons.apple` still points at `/img/dlm-logo--hex.svg`. iOS Safari ignores SVG for `apple-touch-icon`, so home-screen installs fall back to a page screenshot instead of the logo. Fixing this needs a proper 180x180 (or larger square) PNG/ICO brand asset committed to `public/img/`. A candidate PNG (`DLM_Logo.png`) exists locally but is untracked and out of scope to commit as part of this fix, so this is deferred until a square PNG asset is deliberately added to the repo.
 
+- `app/admin/relationships/[id]/milestones/actions.ts` is unreferenced: no page imports it, and the live milestone pages use `lib/milestones/actions.ts`. It still calls `lib/milestones/queries.ts` `createMilestone`/`updateMilestone` without the concurrency token. Factory 002 did not port into it. Delete it or wire it up deliberately.
+- `app/portal/subscriptions/page.tsx` computes the Clerk Billing entitlement (`has({ feature: entitlementKey })`) but the result never changes the page: `hasActiveAccess` returns true for every `ACTIVE` record (`clerkEntitled || true`), and `CANCELED` access depends only on `currentPeriodEndsAt`. Entitlement keys are therefore not enforced in the portal yet. Found in factory 002; not changed (access-control behavior outside that job's ports).
+- `lib/docusign/client.ts` picks the REST base path from `DOCUSIGN_OAUTH_BASE_PATH` (`demo.docusign.net` or `www.docusign.net`). A production account whose Account Base URI is another host (for example `na3.docusign.net`) is not handled. Check before the live DocuSign pass.
+- `npm audit` reports 8 vulnerabilities (1 critical in `next` 16.0.0 to 16.3.7, highs in `sharp`, `fast-uri`, `source-map-js`) in the lockfile inherited from `claude/gifted-cerf-8z962j`. `npm audit fix` is available for most; not run in factory 002 (dependency upgrades were out of scope).
+
+## Factory 002 Consolidation Findings
+
+- **major — Functional Correctness**: the template detail and generate pages called `getContractTemplate(relationshipId, templateId)` against the signature `getContractTemplate(id, relationshipId)`, so both always returned 404. **Resolved:** call sites pass `(templateId, relationshipId)`.
+- **major — Test Infrastructure**: `__tests__/helpers/mock-package.ts` registered bare Windows paths with `mock.module`, which never match on win32, so 31 Clerk-mocked tests called the real Clerk `auth()`. **Resolved:** the helper also registers the file URLs.
+- **major — Security**: the DocuSign webhook skipped HMAC verification when `DOCUSIGN_CONNECT_HMAC_KEY` was unset. **Resolved:** fails closed; envelopes request `includeHMAC`.
+- **major — Data Integrity**: the DocuSign webhook marked contracts COMPLETE when signed-PDF archival failed or S3 was unconfigured; contract generation created rows without PDFs; DocuSign sends could race into duplicate envelopes; template drafts and milestones accepted unvalidated or stale writes, and milestone payment dependencies were unchecked. **Resolved:** ported from unit-06 hardening; see `context/progress-tracker.md`.
+
 ## Unit 04 Consolidated Review Findings
 
 - **critical — Data Integrity**: `app/admin/relationships/actions.ts:96-99` slug collision suffix could exceed the 64-char ceiling, corrupting suffixed slugs. **Resolved:** exported `SLUG_MAX_LENGTH` and reserved room for the suffix before slicing/lookup; collision now proven by exact `findUnique` per candidate.

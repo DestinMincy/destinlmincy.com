@@ -83,6 +83,8 @@ Update this file after every meaningful implementation change.
 - Fixed `next build`: `docusign-esign` ships AMD `define()` wrappers Turbopack cannot parse, including through `serverExternalPackages` tracing. `lib/docusign/client.ts` now loads the SDK with a runtime Node `require` invoked through `Reflect.apply`; the compiled chunk was inspected to confirm the real require survives and resolves from `node_modules`.
 - Implemented Unit 16 legacy cleanup: removed `.eleventy.js`, `src/`, root `index.html`, `DEPLOY_AWS.md`, the `legacy:*` and `clean` scripts, and the `@11ty/eleventy` and `rimraf` dependencies; preserved brand assets under `public/img/brand/`; rewrote `README.md` and `ROADMAP.md`; dropped `src` and `_site` from `tsconfig.json` excludes and `.gitignore`.
 - Verification at the end of this pass: `npm run typecheck` clean, `npm test` 191 passing, `npm run build` passing with every route listed.
+- Factory job 002 consolidated the branches on `factory/002-consolidate-feature-branches` (cut from `nextjs-application-overhaul` `699309f`): `--no-ff` merges of `factory/001-relationship-validation-tests` (`b6d0789`) and `origin/claude/gifted-cerf-8z962j` (`9f091b2`). gifted-cerf already contained `claude/project-summary-xtmKQ`, `feat/admin-ui-units-05-13`, `feat/backend-data-layer`, and `feat/portal-blog-units-12-14`. `unit-06-contract-template-editor` (`082ce97`) was not merged; its hardening was ported by behavior. The only conflict was `package.json` (gifted-cerf's file plus the factory/001 test).
+- Ported the unit-06 hardening (`493542f`, `f9d9445`, `e5a7027`, `082ce97`) onto gifted-cerf: DocuSign sends claim the contract first so concurrent sends create one envelope (`lib/docusign/workflow.ts`); the DocuSign webhook fails closed without a valid HMAC, envelopes request `includeHMAC`, and a contract becomes COMPLETE only after the signed PDF is in S3, with a `Contract.signedPdfArchiveClaimedAt` claim so concurrent completions upload once (`lib/docusign/completion.ts`, additive migration `add_contract_signed_pdf_archive_claim`); contract generation creates no row unless the PDF is stored and shows the admin every failure; template drafts are validated (`lib/contracts/template-validation.ts`) and saved with `ContractTemplate.updatedAt` as a concurrency token; milestone payment dependencies must be in the relationship and the milestone's project, and milestone updates carry `Milestone.updatedAt` as a concurrency token. Also fixed the template detail and generate pages (always 404 from swapped arguments) and the Windows test-mock helper. Every variable is in `.env.example` and `docs/environment.md`, which also holds the feature test checklist.
 
 ## In Progress
 
@@ -90,7 +92,7 @@ Update this file after every meaningful implementation change.
 
 ## Next Up
 
-- Manual verification against live services, then production deployment.
+- Manual verification against live services (follow the checklist in `docs/environment.md`), then production deployment.
 - After verification: decide whether Stripe API invoice/payment-link creation (deferred from Unit 09) is worth building, or whether manual attachment is enough for current volume.
 
 ## Open Questions
@@ -104,6 +106,16 @@ Update this file after every meaningful implementation change.
 - Open: payment gates attach to a relationship and optionally a project, not to a specific contract record. Spec 09 says "attach to the contract it belongs to". Decide whether a `contractId` on `PaymentGate` is needed once real contracts carry payment terms.
 - Open: `ProjectStatus` carries duplicate pairs from the worktree merge (ACTIVE/IN_PROGRESS, ON_HOLD/PAUSED, COMPLETE/COMPLETED). Both are treated as started/paused/finished everywhere they matter, but the enum should be collapsed with a migration before real data accumulates.
 - Open: `GEMINI.md` and `NORA_PROMPT_Example.md` at the repo root predate the Next.js app and are not referenced by anything. Delete or archive.
+- Open (factory 002): the contract editor has 5 block types (heading, paragraph, clause, variable, signature). Unit 06 specifies 8; table, fee or payment schedule, and milestone list are missing, although the Unit 06 line under Completed says all 8 exist.
+- Open (factory 002): neither admins nor clients can download contract PDFs; `getPrivateDownloadUrl` is unused, so stored PDFs are only visible in the S3 console. Unit 12 lists contracts in the portal.
+- Open (factory 002): there is no manual DocuSign status sync. A contract whose webhook deliveries all fail stays at Sent for signing until fixed by hand.
+- Open (factory 002): there are no DB-level immutability triggers for published template versions or generated contracts; immutability is enforced only in application code.
+- Open (factory 002): there is no local S3 emulator (MinIO); contract testing needs a real private bucket.
+- Open (factory 002): milestone approvals do not check `approvalRequired` or milestone status, and do not update the milestone status.
+- Open (factory 002): the signed PDF overwrites `Contract.s3Key`, so the generated PDF's key is no longer referenced (the object stays in S3).
+- Open (factory 002, deferred from unit-06 `493542f`): milestone payment dependency scope is enforced in application code only. A DB-level guarantee needs a relation from `Milestone.paymentDependencyId` to `PaymentGate` with a composite (gate, relationship, project) key, which the schema does not have.
+- Open (factory 002, deferred from unit-06 `082ce97`): a payment gate referenced by a milestone can still be moved to another project from the gate edit page, breaking the dependency scope after the fact. unit-06 blocked this with a trigger; here it needs either a trigger or a check in the gate update path.
+- Open (factory 002): contract variable blocks store the variable key as free text. Renaming or removing a variable in the editor leaves blocks pointing at the old key, which the PDF renders as `[key]`.
 
 ## Architecture Decisions
 
@@ -134,6 +146,7 @@ Update this file after every meaningful implementation change.
 - Canonical brand palette: Blue `#2675e9`, Gold `#ffd700`, Silver `#c0c0c0`.
 - Next.js will be staged alongside Eleventy during Unit 01; full Eleventy cleanup waits until Unit 16.
 - Public-site motion should reinforce the hex motif and orientation through restrained CSS-first treatments; dashboards stay motion-light and do not inherit marketing atmosphere.
+- `nextjs-application-overhaul` is the base and merge target for all unit and factory work until the owner merges it into `master`.
 
 ## Session Notes
 
@@ -172,6 +185,8 @@ Update this file after every meaningful implementation change.
 - Dependency security maintenance: refreshed the lockfile within existing semver ranges (Next 16.3.3, Prisma 7.10.0, and patched transitive dependencies) and pinned the Prisma config tree's `deepmerge-ts` override to 8.0.2. Local `npm audit` now reports zero vulnerabilities; the Dependabot alert count will update only after this branch is merged.
 - Units 06 through 15 were built across parallel worktrees (`claude/wt-frontend`, `claude/wt-backend`, `claude/wt-qa`) and merged into `claude/project-summary-xtmKQ`; Unit 09 completion, the build fix, and Unit 16 were done on `claude/gifted-cerf-8z962j`, which was rebased onto that tip because the branch had been cut from `master` (Unit 05 only).
 - `prisma generate` reads `DATABASE_URL` from `.env` (via `prisma.config.ts` and dotenv), while Next reads `.env.local`. Both need the variable locally; the README documents copying `.env.example` to both.
+- On Windows, `mock.module` only matches file URLs, not bare `D:\...` paths; `__tests__/helpers/mock-package.ts` registers both. Without it, 31 Clerk-mocked tests fail on win32.
+- Once the DocuSign webhook failed closed, a live test needs `DOCUSIGN_CONNECT_HMAC_KEY` set and a Connect secret key in DocuSign before any contract can complete. `docs/environment.md` makes it the first DocuSign step.
 - Manual verification required before launch (no code can check these):
   1. DocuSign JWT consent grant for `DOCUSIGN_IMPERSONATED_USER_ID`, then an end-to-end send: generate contract, send, confirm anchor tabs land on both signature lines, both parties sign, contract reaches COMPLETE and the signed PDF appears in S3.
   2. DocuSign Connect: register the webhook URL, set `DOCUSIGN_CONNECT_HMAC_KEY`, confirm the real payload shape matches the status mapping in the route handler.
