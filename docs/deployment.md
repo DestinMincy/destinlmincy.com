@@ -39,78 +39,18 @@ No port 3000 should be open to the internet; Nginx proxies to it internally.
 
 ## Required Environment Variables
 
-Set these in `/etc/environment` or in a `.env.production.local` file in the project root (never commit this file). PM2 can also load an env file via ecosystem config.
+The variable reference is `docs/environment.md`: every variable, the feature that needs it, where to get it, and the DocuSign and Clerk setup steps. Start from `.env.example`. This section only covers what differs in production.
 
-### Authentication (required)
+Put the values in `.env.production.local` in the project root (never commit it); Next.js reads it in production. The Prisma CLI does not: it reads `.env` or the shell, so `npm run db:deploy` needs `DATABASE_URL` from one of those (export it before running migrations, or keep a `.env` holding only `DATABASE_URL`).
 
-```
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_...
-CLERK_SECRET_KEY=sk_live_...
-NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
-NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
-```
+Production values:
 
-Get these from the Clerk dashboard under your production application.
-
-### Database (required)
-
-```
-DATABASE_URL=postgresql://user:password@host:5432/dbname?sslmode=require
-```
-
-For Docker Postgres on the same EC2 instance, this will be something like:
-`postgresql://dlm_app:password@localhost:5434/dlm_prod`
-
-For RDS, use the RDS endpoint and set `sslmode=require`.
-
-### Admin access (required)
-
-```
-ADMIN_EMAILS=destin@destinlmincy.com,another@example.com
-```
-
-Comma-separated list of Clerk user emails that get admin access. Checked server-side on every admin route.
-
-### DocuSign (optional, required for contract signing)
-
-```
-DOCUSIGN_INTEGRATION_KEY=
-DOCUSIGN_ACCOUNT_ID=
-# RSA private key content — paste the full PEM with newlines escaped as \n
-DOCUSIGN_PRIVATE_KEY=
-DOCUSIGN_IMPERSONATED_USER_ID=
-# Use account-d.docusign.com for sandbox, account.docusign.com for production
-DOCUSIGN_OAUTH_BASE_PATH=account.docusign.com
-DOCUSIGN_ADMIN_EMAIL=
-DOCUSIGN_ADMIN_NAME=
-NEXT_PUBLIC_APP_URL=https://destinlmincy.com
-# DocuSign Connect HMAC key (copy from Connect configuration page)
-DOCUSIGN_CONNECT_HMAC_KEY=
-```
-
-**JWT consent**: Before the first JWT token request succeeds, the impersonated user must grant consent. Visit:
-`https://account-d.docusign.com/oauth/auth?response_type=code&scope=signature%20impersonation&client_id=<DOCUSIGN_INTEGRATION_KEY>&redirect_uri=https://destinlmincy.com/api/auth/callback`
-(replace `account-d` with `account` for production). Accept the consent prompt once; subsequent JWT requests succeed without user interaction.
-
-**DocuSign Connect**: Register a Connect endpoint in the DocuSign admin console pointing to `https://destinlmincy.com/api/webhooks/docusign`. Enable HMAC Security and copy the generated key to `DOCUSIGN_CONNECT_HMAC_KEY`. When the key is set the webhook will reject unsigned requests.
-
-### Stripe (optional, required for payment links)
-
-```
-STRIPE_SECRET_KEY=sk_live_...
-STRIPE_WEBHOOK_SECRET=whsec_...
-```
-
-### AWS / S3 (optional, required for contract PDF storage)
-
-```
-AWS_ACCESS_KEY_ID=
-AWS_SECRET_ACCESS_KEY=
-AWS_REGION=us-east-1
-S3_PRIVATE_BUCKET=destinlmincy-contracts
-```
-
-The IAM user or role only needs `s3:GetObject`, `s3:PutObject`, and `s3:DeleteObject` on the contracts bucket. No public access.
+- **Clerk:** the production instance keys (`pk_live_...`, `sk_live_...`). Turn `force_organization_selection` off on the production instance too.
+- **Database:** `DATABASE_URL` for the EC2 Docker Postgres or RDS (`sslmode=require` for RDS).
+- **Admin:** `ADMIN_EMAILS` with the real admin emails.
+- **DocuSign:** `DOCUSIGN_OAUTH_BASE_PATH=account.docusign.com`, production integration key, account, user, and RSA key, and JWT consent granted against `account.docusign.com`. `NEXT_PUBLIC_APP_URL=https://destinlmincy.com`; it is inlined at build time, so set it before `npm run build`. Set `DOCUSIGN_CONNECT_HMAC_KEY`: the webhook at `https://destinlmincy.com/api/webhooks/docusign` rejects every notification while it is empty.
+- **S3:** `AWS_REGION` and `S3_PRIVATE_BUCKET`. On EC2, prefer the instance role and leave `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` empty. The role needs `s3:GetObject` and `s3:PutObject` on the bucket. No public access.
+- **Stripe:** no variables in v1.
 
 ---
 

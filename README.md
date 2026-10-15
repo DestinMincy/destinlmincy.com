@@ -31,7 +31,7 @@ npm run db:seed
 npm run dev                     # http://localhost:3000
 ```
 
-Fill in Clerk keys and `ADMIN_EMAILS` in `.env.local` before signing in. `ADMIN_EMAILS` is the only thing standing between a signed-in user and `/admin`, so never commit it. See `docs/data-foundation.md` for the database workflow and `.env.example` for every variable with notes on which unit needs it.
+Fill in Clerk keys and `ADMIN_EMAILS` in `.env.local` before signing in. `ADMIN_EMAILS` is the only thing standing between a signed-in user and `/admin`, so never commit it. See `docs/data-foundation.md` for the database workflow and `docs/environment.md` for every variable (what needs it, where to get it) and a feature-by-feature test checklist.
 
 ## Scripts
 
