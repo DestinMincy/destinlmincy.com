@@ -1,6 +1,7 @@
 import { createRequire } from "node:module";
 import path from "node:path";
 import { mock } from "node:test";
+import { pathToFileURL } from "node:url";
 
 const requireFromRoot = createRequire(path.join(process.cwd(), "package.json"));
 
@@ -28,9 +29,15 @@ export function mockPackage(
   }
 
   if (cjsEntry) {
-    entries.add(cjsEntry);
+    const resolved = [cjsEntry];
     if (cjsEntry.includes(`${path.sep}cjs${path.sep}`)) {
-      entries.add(cjsEntry.replace(`${path.sep}cjs${path.sep}`, `${path.sep}esm${path.sep}`));
+      resolved.push(cjsEntry.replace(`${path.sep}cjs${path.sep}`, `${path.sep}esm${path.sep}`));
+    }
+    // A bare Windows path (`D:\...`) is not a valid module specifier, so the
+    // registry key never matches there. Register the file URL as well.
+    for (const filePath of resolved) {
+      entries.add(filePath);
+      entries.add(pathToFileURL(filePath).href);
     }
   }
 
