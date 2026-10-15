@@ -13,7 +13,8 @@ import type {
 } from "@/lib/contracts/types";
 import { generateContractPdf } from "@/lib/pdf/generate";
 import { uploadToPrivateS3 } from "@/lib/storage/s3";
-import { downloadSignedPdf, sendEnvelopeForSigning } from "@/lib/docusign/client";
+import { sendEnvelopeForSigning } from "@/lib/docusign/client";
+import { sendContractToDocuSign } from "@/lib/docusign/workflow";
 import { downloadFromPrivateS3 } from "@/lib/storage/s3";
 
 const NOT_AUTHORIZED = "You are not authorized to do that.";
@@ -466,8 +467,9 @@ export interface SendToDocuSignState {
 }
 
 /**
- * Sends a generated contract PDF to DocuSign for signing.
- * Requires the contract to have an S3-stored PDF and status DRAFT or GENERATED.
+ * Sends a generated contract PDF to DocuSign for signing. The claim and send
+ * live in `sendContractToDocuSign`; this action checks the admin and the
+ * configuration, then maps the result to a message.
  */
 export async function sendContractToDocuSignAction(
   clientRelationshipId: string,
@@ -478,70 +480,44 @@ export async function sendContractToDocuSignAction(
   const admin = await getAdminUser();
   if (!admin) return { status: "error", error: "Not authorized." };
 
+  const adminEmail = process.env.DOCUSIGN_ADMIN_EMAIL?.trim() ?? "";
+  const adminName = process.env.DOCUSIGN_ADMIN_NAME?.trim() || "Admin";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/$/, "") ?? "";
+
+  if (!adminEmail) {
+    return { status: "error", error: "DOCUSIGN_ADMIN_EMAIL is not configured." };
+  }
+  if (!appUrl) {
+    return { status: "error", error: "NEXT_PUBLIC_APP_URL is not configured." };
+  }
+
   try {
-    const contract = await prisma.contract.findFirst({
-      where: { id: contractId, clientRelationshipId },
-      include: {
-        templateVersion: {
-          include: { contractTemplate: { select: { name: true } } },
-        },
-      },
+    const result = await sendContractToDocuSign(clientRelationshipId, contractId, {
+      createEnvelope: sendEnvelopeForSigning,
+      getPdf: downloadFromPrivateS3,
+      admin: { email: adminEmail, name: adminName },
+      webhookUrl: `${appUrl}/api/webhooks/docusign`,
     });
 
-    if (!contract) return { status: "error", error: "Contract not found." };
-    if (contract.docusignEnvelopeId) {
-      return { status: "error", error: "Contract has already been sent to DocuSign." };
+    switch (result.status) {
+      case "contract-missing":
+        return { status: "error", error: "Contract not found." };
+      case "already-sent":
+        return { status: "error", error: "Contract has already been sent to DocuSign." };
+      case "pdf-missing":
+        return {
+          status: "error",
+          error:
+            "No PDF on file. Check the AWS_REGION and S3_PRIVATE_BUCKET configuration and create the contract again.",
+        };
+      case "sent":
+        break;
     }
-    if (!contract.s3Key || !contract.s3Bucket) {
-      return {
-        status: "error",
-        error:
-          "No PDF on file — check AWS_REGION/S3_PRIVATE_BUCKET configuration and create the contract again.",
-      };
-    }
-
-    // Download PDF directly from S3.
-    const pdfBuffer = await downloadFromPrivateS3(contract.s3Key);
-
-    const templateName =
-      contract.templateVersion?.contractTemplate?.name ?? "Contract";
-
-    const adminEmail = process.env.DOCUSIGN_ADMIN_EMAIL ?? "";
-    const adminName = process.env.DOCUSIGN_ADMIN_NAME ?? "Admin";
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
-
-    if (!adminEmail) {
-      return { status: "error", error: "DOCUSIGN_ADMIN_EMAIL is not configured." };
-    }
-    if (!appUrl) {
-      return { status: "error", error: "NEXT_PUBLIC_APP_URL is not configured." };
-    }
-
-    const webhookUrl = `${appUrl}/api/webhooks/docusign`;
-
-    const { envelopeId, status } = await sendEnvelopeForSigning({
-      pdfBuffer,
-      documentName: templateName,
-      signerEmail: contract.signerEmail ?? "",
-      signerName: contract.signerEmail ?? "",
-      adminEmail,
-      adminName,
-      webhookUrl,
-    });
-
-    await prisma.contract.update({
-      where: { id: contractId },
-      data: {
-        docusignEnvelopeId: envelopeId,
-        docusignStatus: status,
-        status: "SENT_FOR_SIGNING",
-      },
-    });
-
-    revalidatePath(contractsPath(clientRelationshipId));
-    return { status: "success" };
   } catch (error: unknown) {
     console.error("Failed to send contract to DocuSign", error);
     return { status: "error", error: "Failed to send to DocuSign. Check server logs." };
   }
+
+  revalidatePath(contractsPath(clientRelationshipId));
+  return { status: "success" };
 }
