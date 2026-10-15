@@ -21,6 +21,8 @@ type SaveDraftAction = (
 
 interface ContractTemplateEditorProps {
   initialSnapshot: TemplateSnapshot;
+  /** The template's `updatedAt` when the page loaded (ISO string). */
+  concurrencyToken: string;
   action: SaveDraftAction;
 }
 
@@ -34,6 +36,7 @@ function generateId(): string {
  */
 export function ContractTemplateEditor({
   initialSnapshot,
+  concurrencyToken,
   action,
 }: ContractTemplateEditorProps) {
   const [blocks, setBlocks] = useState<TemplateBlock[]>(
@@ -122,6 +125,11 @@ export function ContractTemplateEditor({
         type="hidden"
         name="snapshot"
         value={JSON.stringify(snapshot)}
+      />
+      <input
+        type="hidden"
+        name="concurrencyToken"
+        value={saveState.concurrencyToken ?? concurrencyToken}
       />
 
       {saveState.error ? (

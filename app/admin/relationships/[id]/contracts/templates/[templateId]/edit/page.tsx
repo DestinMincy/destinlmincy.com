@@ -59,6 +59,7 @@ export default async function EditContractTemplatePage({
 
       <ContractTemplateEditor
         initialSnapshot={snapshot}
+        concurrencyToken={draft.template.updatedAt.toISOString()}
         action={saveContractTemplateDraftAction.bind(null, id, templateId)}
       />
     </div>

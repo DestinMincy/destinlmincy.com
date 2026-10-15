@@ -9,7 +9,7 @@
     "start": "next start",
     "typecheck": "prisma generate && next typegen && tsc --noEmit",
     "test": "tsx --test --experimental-test-module-mocks \"__tests__/**/*.test.ts\" lib/client-work/validation.test.ts lib/relationships/validation.test.ts",
-    "test:integration": "tsx --test lib/client-work/queries.integration.test.ts lib/docusign/workflow.integration.test.ts lib/docusign/completion.integration.test.ts",
+    "test:integration": "tsx --test lib/client-work/queries.integration.test.ts lib/docusign/workflow.integration.test.ts lib/docusign/completion.integration.test.ts lib/contracts/template-draft.integration.test.ts",
     "test:e2e": "playwright test tests/e2e/unit05.spec.ts",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",

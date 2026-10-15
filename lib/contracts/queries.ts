@@ -1,4 +1,6 @@
+import type { TemplateSnapshot } from "@/lib/contracts/types";
 import { prisma } from "@/lib/db/client";
+import type { Prisma } from "@/lib/generated/prisma/client";
 import type { ContractStatus } from "@/lib/generated/prisma/enums";
 
 // ── Contract Templates ──────────────────────────────────────────────────────
@@ -165,13 +167,70 @@ export async function archiveContractTemplate(
   });
 }
 
+export type SaveDraftSnapshotResult =
+  | { status: "saved"; concurrencyToken: string }
+  | { status: "stale" }
+  | { status: "draft-missing" };
+
+/**
+ * Saves the editor snapshot onto the template's unpublished version, but only
+ * if the template has not changed since the editor loaded it.
+ * `ContractTemplate.updatedAt` is the concurrency token: the conditional
+ * update both checks it and advances it, in the same transaction as the
+ * snapshot write, so a stale save never overwrites the draft.
+ */
+export async function saveContractTemplateDraftSnapshot(
+  clientRelationshipId: string,
+  templateId: string,
+  snapshot: TemplateSnapshot,
+  expectedUpdatedAt: Date,
+): Promise<SaveDraftSnapshotResult> {
+  const savedAt = new Date();
+  return prisma.$transaction(async (tx): Promise<SaveDraftSnapshotResult> => {
+    const claimed = await tx.contractTemplate.updateMany({
+      where: {
+        id: templateId,
+        clientRelationshipId,
+        status: "DRAFT",
+        updatedAt: expectedUpdatedAt,
+      },
+      data: { updatedAt: savedAt },
+    });
+    if (claimed.count === 0) {
+      const exists = await tx.contractTemplate.findFirst({
+        where: { id: templateId, clientRelationshipId, status: "DRAFT" },
+        select: { id: true },
+      });
+      return exists ? { status: "stale" } : { status: "draft-missing" };
+    }
+
+    const updated = await tx.contractTemplateVersion.updateMany({
+      where: { contractTemplateId: templateId, publishedAt: null },
+      data: { snapshot: snapshot as unknown as Prisma.InputJsonValue },
+    });
+    if (updated.count === 0) {
+      throw new DraftVersionMissingError();
+    }
+
+    return { status: "saved", concurrencyToken: savedAt.toISOString() };
+  }).catch((error: unknown): SaveDraftSnapshotResult => {
+    if (error instanceof DraftVersionMissingError) {
+      return { status: "draft-missing" };
+    }
+    throw error;
+  });
+}
+
+/** Rolls the token bump back when the template has no unpublished version. */
+class DraftVersionMissingError extends Error {}
+
 export async function getContractTemplateDraftSnapshot(
   clientRelationshipId: string,
   templateId: string,
 ) {
   const template = await prisma.contractTemplate.findFirst({
     where: { id: templateId, clientRelationshipId, status: "DRAFT" },
-    select: { id: true, name: true },
+    select: { id: true, name: true, updatedAt: true },
   });
 
   if (!template) return null;

@@ -14,13 +14,13 @@ import type {
   SaveDraftState,
   TemplateSnapshot,
 } from "@/lib/contracts/types";
+import { saveContractTemplateDraftSnapshot } from "@/lib/contracts/queries";
 import { parseTemplateSnapshot } from "@/lib/contracts/template-validation";
 import { isValidEmail } from "@/lib/relationships/validation";
 import { generateContractPdf } from "@/lib/pdf/generate";
-import { uploadToPrivateS3 } from "@/lib/storage/s3";
+import { downloadFromPrivateS3, uploadToPrivateS3 } from "@/lib/storage/s3";
 import { sendEnvelopeForSigning } from "@/lib/docusign/client";
 import { sendContractToDocuSign } from "@/lib/docusign/workflow";
-import { downloadFromPrivateS3 } from "@/lib/storage/s3";
 
 const NOT_AUTHORIZED = "You are not authorized to do that.";
 const SAVE_ERROR = "Something went wrong while saving. Try again.";
@@ -127,38 +127,58 @@ export async function saveContractTemplateDraftAction(
     return { status: "error", error: NOT_AUTHORIZED };
   }
 
-  const snapshotRaw = String(formData.get("snapshot") ?? "{}");
-  let snapshot: TemplateSnapshot;
+  const expectedUpdatedAt = parseConcurrencyToken(formData.get("concurrencyToken"));
+  if (!expectedUpdatedAt) {
+    return { status: "error", error: STALE_TEMPLATE };
+  }
+
+  let parsedJson: unknown;
   try {
-    snapshot = JSON.parse(snapshotRaw) as TemplateSnapshot;
+    parsedJson = JSON.parse(String(formData.get("snapshot") ?? ""));
   } catch {
     return { status: "error", error: "Invalid snapshot data." };
   }
 
-  try {
-    // Update the existing draft version (unpublished) for this template.
-    const updated = await prisma.contractTemplateVersion.updateMany({
-      where: {
-        contractTemplateId: templateId,
-        contractTemplate: { clientRelationshipId },
-        publishedAt: null,
-      },
-      data: { snapshot: snapshot as unknown as Prisma.InputJsonValue },
-    });
+  const parsed = parseTemplateSnapshot(parsedJson);
+  if (!parsed.ok) {
+    return { status: "error", error: parsed.error };
+  }
 
-    if (updated.count === 0) {
-      return {
-        status: "error",
-        error: "No draft version found. The template may have been published.",
-      };
-    }
+  let result: Awaited<ReturnType<typeof saveContractTemplateDraftSnapshot>>;
+  try {
+    result = await saveContractTemplateDraftSnapshot(
+      clientRelationshipId,
+      templateId,
+      parsed.snapshot,
+      expectedUpdatedAt,
+    );
   } catch (error: unknown) {
     console.error("Failed to save draft", error);
     return { status: "error", error: SAVE_ERROR };
   }
 
+  if (result.status === "stale") {
+    return { status: "error", error: STALE_TEMPLATE };
+  }
+  if (result.status === "draft-missing") {
+    return {
+      status: "error",
+      error: "No draft version found. The template may have been published.",
+    };
+  }
+
   revalidatePath(templatePath(clientRelationshipId, templateId));
-  return { status: "idle" };
+  return { status: "idle", concurrencyToken: result.concurrencyToken };
+}
+
+const STALE_TEMPLATE =
+  "This template changed after you opened it. Reload the page to get the latest draft, then save again.";
+
+/** Reads an ISO timestamp concurrency token from a form field. */
+function parseConcurrencyToken(value: FormDataEntryValue | null): Date | null {
+  if (typeof value !== "string" || !value.trim()) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
 }
 
 export interface PublishVersionState {
