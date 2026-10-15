@@ -61,6 +61,7 @@ Update this file after every meaningful implementation change.
 - Made project create/update writes serializable so an application/site cannot be archived between selection validation and persistence; added a concurrent archive/save integration regression test. Typecheck, unit tests, PostgreSQL integration, production build, and the uncommitted CodeRabbit review all pass. Committed-review findings were resolved by enforcing the create-time new-asset/attachment invariant inside the write boundary with an integration regression test, typing project application options from the shared generated status contract, and preventing Unit 05 E2E database setup unless destructive access is explicitly enabled for the exact `destinlmincy_test` database or `unit05_e2e` schema.
 - Unit 05 passed its final committed CodeRabbit review with zero findings and merged to `master` through PR #9 (`86cb7a2`).
 - Remediated Dependabot alert #131 by overriding Prisma's development-only transitive `mysql2` dependency from `3.15.3` to `3.24.3`. `npm audit` reports zero vulnerabilities; typecheck, unit tests, PostgreSQL integration, production build, and the safely skipped E2E gate pass.
+- Added unit coverage for relationship form validation and slug generation in `lib/relationships/validation.test.ts`, registered in `npm test`; resolves the deferred Unit 04 test gap in `context/current-issues.md`. No runtime behavior changed.
 
 ## In Progress
 
