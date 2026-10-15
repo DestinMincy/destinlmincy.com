@@ -111,7 +111,11 @@ export async function completeSignedContract(
 
     return { status: "completed", s3Key: stored.key };
   } catch (error: unknown) {
-    console.error("Failed to archive signed PDF", error);
+    // Message only: SDK errors can carry request headers (bearer tokens).
+    console.error(
+      "Failed to archive signed PDF",
+      error instanceof Error ? error.message : String(error),
+    );
     await prisma.contract
       .updateMany({
         where: { id: envelope.contractId, signedPdfArchiveClaimedAt: now },

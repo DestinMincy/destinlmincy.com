@@ -176,7 +176,7 @@ export async function saveContractTemplateDraftAction(
 }
 
 const STALE_TEMPLATE =
-  "This template changed after you opened it. Reload the page to get the latest draft, then save again.";
+  "This template changed after you opened it. Reloading discards your unsaved edits here, so copy anything you need, then reload and save again.";
 
 /** Reads an ISO timestamp concurrency token from a form field. */
 function parseConcurrencyToken(value: FormDataEntryValue | null): Date | null {
@@ -573,7 +573,11 @@ export async function sendContractToDocuSignAction(
         break;
     }
   } catch (error: unknown) {
-    console.error("Failed to send contract to DocuSign", error);
+    // Message only: docusign-esign errors can carry the Authorization header.
+    console.error(
+      "Failed to send contract to DocuSign",
+      error instanceof Error ? error.message : String(error),
+    );
     return { status: "error", error: "Failed to send to DocuSign. Check server logs." };
   }
 

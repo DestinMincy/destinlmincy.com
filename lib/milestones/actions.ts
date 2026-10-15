@@ -77,7 +77,7 @@ function parseMilestoneForm(formData: FormData): {
 const PAYMENT_DEPENDENCY_INVALID =
   "Choose a payment gate from this relationship and this milestone's project.";
 const STALE_MILESTONE =
-  "This milestone changed after you opened it. Reload the page to see the latest version, then save again.";
+  "This milestone changed after you opened it. Reloading discards your unsaved edits here, so copy anything you need, then reload and save again.";
 
 /** Maps a non-saved write result to the form state the page renders. */
 function writeFailure(

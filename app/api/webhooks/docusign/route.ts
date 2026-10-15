@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { prisma } from "@/lib/db/client";
 import { completeSignedContract } from "@/lib/docusign/completion";
+import type { ContractStatus } from "@/lib/generated/prisma/enums";
 
 // DocuSign sends Connect notifications as XML (multipart/form-data or application/xml).
 // We parse the relevant fields from the JSON-formatted Connect message if configured,
@@ -147,11 +148,8 @@ export async function POST(req: NextRequest) {
 
   const newStatus = mapDocuSignStatus(dsStatus);
   if (!newStatus) {
-    // Intermediate status we don't map — update docusignStatus only.
-    await prisma.contract.update({
-      where: { id: contract.id },
-      data: { docusignStatus: dsStatus },
-    });
+    // Intermediate status we don't map: update docusignStatus only.
+    await updateUnlessTerminal(contract.id, { docusignStatus: dsStatus });
     return NextResponse.json({ ok: true });
   }
 
@@ -186,10 +184,33 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  await prisma.contract.update({
-    where: { id: contract.id },
-    data: { status: newStatus, docusignStatus: dsStatus },
+  await updateUnlessTerminal(contract.id, {
+    status: newStatus,
+    docusignStatus: dsStatus,
   });
 
   return NextResponse.json({ ok: true });
+}
+
+const TERMINAL_STATUSES = ["COMPLETE", "VOIDED"] as const;
+
+/**
+ * The terminal-state check above is a read; a concurrent completion can
+ * commit between it and this write. Re-checking in the write's `where` keeps
+ * a late "sent"/"delivered" notification from walking a COMPLETE contract
+ * back. A row that became terminal raises P2025, which is acknowledged.
+ */
+async function updateUnlessTerminal(
+  contractId: string,
+  data: { status?: ContractStatus; docusignStatus: string },
+): Promise<void> {
+  try {
+    await prisma.contract.update({
+      where: { id: contractId, status: { notIn: [...TERMINAL_STATUSES] } },
+      data,
+    });
+  } catch (error: unknown) {
+    if ((error as { code?: unknown })?.code === "P2025") return;
+    throw error;
+  }
 }

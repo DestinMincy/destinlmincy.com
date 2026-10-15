@@ -681,7 +681,10 @@ for (const [dsStatus, expected] of MAPPED_STATUSES) {
       return;
     }
     assert.equal(contract.update.mock.callCount(), 1);
-    assert.deepEqual(argsOf(contract.update).where, { id: "contract-1" });
+    assert.deepEqual(argsOf(contract.update).where, {
+      id: "contract-1",
+      status: { notIn: ["COMPLETE", "VOIDED"] },
+    });
     assert.equal(updateData().status, expected);
     assert.equal(updateData().docusignStatus, dsStatus);
   });
@@ -796,6 +799,22 @@ test("does not re-archive when DocuSign replays a completion", async () => {
   assert.equal(uploadToPrivateS3.mock.callCount(), 0);
   assert.equal(contract.update.mock.callCount(), 0);
   assert.equal(contract.updateMany.mock.callCount(), 0);
+});
+
+test("a status write re-checks the terminal state, so a late notification cannot regress COMPLETE", async () => {
+  // The read saw SENT_FOR_SIGNING, but a concurrent completion committed
+  // before this write: Prisma reports the guarded row as not found.
+  knownContract();
+  contract.update.mock.mockImplementation(async () => {
+    throw Object.assign(new Error("Record to update not found."), { code: "P2025" });
+  });
+
+  const response = await POST(connectXml("env-123", "delivered"));
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(argsOf(contract.update).where.status, {
+    notIn: ["COMPLETE", "VOIDED"],
+  });
 });
 
 // ── Archiving the signed PDF on completion ───────────────────────────────────

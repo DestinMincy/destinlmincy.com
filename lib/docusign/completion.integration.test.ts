@@ -142,3 +142,21 @@ test("without S3 configuration nothing is claimed or completed", async () => {
   assert.equal(stored.status, "SENT_FOR_SIGNING");
   assert.equal(stored.signedPdfArchiveClaimedAt, null);
 });
+
+test("a guarded status write on a completed contract is reported as P2025", async () => {
+  // The webhook relies on this to drop a late "delivered" notification that
+  // raced a completion (app/api/webhooks/docusign/route.ts updateUnlessTerminal).
+  const { contract } = await sentContract("terminal");
+  await prisma.contract.update({ where: { id: contract.id }, data: { status: "COMPLETE" } });
+
+  await assert.rejects(
+    prisma.contract.update({
+      where: { id: contract.id, status: { notIn: ["COMPLETE", "VOIDED"] } },
+      data: { status: "SENT_FOR_SIGNING", docusignStatus: "delivered" },
+    }),
+    (error: unknown) => (error as { code?: unknown }).code === "P2025",
+  );
+
+  const stored = await prisma.contract.findUniqueOrThrow({ where: { id: contract.id } });
+  assert.equal(stored.status, "COMPLETE");
+});
