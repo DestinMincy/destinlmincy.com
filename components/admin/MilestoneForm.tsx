@@ -27,6 +27,8 @@ interface MilestoneFormProps {
   initialValues: MilestoneFormValues;
   paymentGates: PaymentGateOption[];
   submitLabel: string;
+  /** The milestone's `updatedAt` when the edit page loaded (ISO string). */
+  concurrencyToken?: string;
 }
 
 export function MilestoneForm({
@@ -34,6 +36,7 @@ export function MilestoneForm({
   initialValues,
   paymentGates,
   submitLabel,
+  concurrencyToken,
 }: MilestoneFormProps) {
   const [state, formAction, isPending] = useActionState(action, {
     status: "idle",
@@ -45,6 +48,9 @@ export function MilestoneForm({
 
   return (
     <form className="admin-form" action={formAction} noValidate>
+      {concurrencyToken ? (
+        <input type="hidden" name="concurrencyToken" value={concurrencyToken} />
+      ) : null}
       {state.formError ? (
         <p className="form-error" role="alert">
           {state.formError}

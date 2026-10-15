@@ -5,9 +5,15 @@ import { redirect } from "next/navigation";
 
 import { getAdminUser } from "@/lib/auth/require-admin";
 import { prisma } from "@/lib/db/client";
+import {
+  createMilestone,
+  updateMilestone,
+  type MilestoneWriteResult,
+} from "@/lib/milestones/queries";
 import type {
   DeliverableFormState,
   MilestoneFormState,
+  MilestoneFormValues,
   MilestoneStatus,
 } from "@/lib/milestones/types";
 import { MILESTONE_STATUS_VALUES } from "@/lib/milestones/types";
@@ -30,7 +36,7 @@ function deliverablesPath(
 }
 
 function parseMilestoneForm(formData: FormData): {
-  values: import("@/lib/milestones/types").MilestoneFormValues;
+  values: MilestoneFormValues;
   errors: Partial<Record<"title" | "status" | "targetDate", string>>;
 } {
   const title = String(formData.get("title") ?? "").trim();
@@ -68,6 +74,55 @@ function parseMilestoneForm(formData: FormData): {
   };
 }
 
+const PAYMENT_DEPENDENCY_INVALID =
+  "Choose a payment gate from this relationship and this milestone's project.";
+const STALE_MILESTONE =
+  "This milestone changed after you opened it. Reload the page to see the latest version, then save again.";
+
+/** Maps a non-saved write result to the form state the page renders. */
+function writeFailure(
+  result: Exclude<MilestoneWriteResult, { status: "saved" }>,
+  values: MilestoneFormValues,
+): MilestoneFormState {
+  switch (result.status) {
+    case "payment-dependency-invalid":
+      return {
+        status: "error",
+        values,
+        errors: { paymentDependencyId: PAYMENT_DEPENDENCY_INVALID },
+      };
+    case "stale":
+      return { status: "error", values, errors: {}, formError: STALE_MILESTONE };
+    case "project-missing":
+      return {
+        status: "error",
+        values,
+        errors: {},
+        formError: "That project no longer exists.",
+      };
+    case "milestone-missing":
+      return {
+        status: "error",
+        values,
+        errors: {},
+        formError: "That milestone no longer exists.",
+      };
+  }
+}
+
+function milestoneData(values: MilestoneFormValues) {
+  return {
+    title: values.title,
+    status: values.status,
+    targetDate: values.targetDate
+      ? new Date(values.targetDate + "T00:00:00Z")
+      : null,
+    clientFacingUpdate: values.clientFacingUpdate || null,
+    paymentDependencyId: values.paymentDependencyId || null,
+    approvalRequired: values.approvalRequired,
+  };
+}
+
 export async function createMilestoneAction(
   clientRelationshipId: string,
   projectId: string,
@@ -86,34 +141,12 @@ export async function createMilestoneAction(
   }
 
   try {
-    const project = await prisma.project.findFirst({
-      where: { id: projectId, clientRelationshipId },
-      select: { id: true },
+    const result = await createMilestone({
+      clientRelationshipId,
+      projectId,
+      ...milestoneData(values),
     });
-    if (!project) {
-      return {
-        status: "error",
-        values,
-        errors: {},
-        formError: "That project no longer exists.",
-      };
-    }
-
-    await prisma.milestone.create({
-      data: {
-        clientRelationshipId,
-        projectId,
-        title: values.title,
-        status: values.status,
-        targetDate: values.targetDate
-          ? new Date(values.targetDate + "T00:00:00Z")
-          : null,
-        clientFacingUpdate: values.clientFacingUpdate || null,
-        paymentDependencyId: values.paymentDependencyId || null,
-        approvalRequired: values.approvalRequired,
-      },
-      select: { id: true },
-    });
+    if (result.status !== "saved") return writeFailure(result, values);
   } catch (error: unknown) {
     console.error("Failed to create milestone", error);
     return { status: "error", values, errors: {}, formError: SAVE_ERROR };
@@ -141,29 +174,20 @@ export async function updateMilestoneAction(
     return { status: "error", values, errors };
   }
 
-  try {
-    const result = await prisma.milestone.updateMany({
-      where: { id: milestoneId, clientRelationshipId },
-      data: {
-        title: values.title,
-        status: values.status,
-        targetDate: values.targetDate
-          ? new Date(values.targetDate + "T00:00:00Z")
-          : null,
-        clientFacingUpdate: values.clientFacingUpdate || null,
-        paymentDependencyId: values.paymentDependencyId || null,
-        approvalRequired: values.approvalRequired,
-      },
-    });
+  const tokenRaw = String(formData.get("concurrencyToken") ?? "").trim();
+  const expectedUpdatedAt = tokenRaw ? new Date(tokenRaw) : null;
+  if (!expectedUpdatedAt || Number.isNaN(expectedUpdatedAt.getTime())) {
+    return { status: "error", values, errors: {}, formError: STALE_MILESTONE };
+  }
 
-    if (result.count === 0) {
-      return {
-        status: "error",
-        values,
-        errors: {},
-        formError: "That milestone no longer exists.",
-      };
-    }
+  try {
+    const result = await updateMilestone(
+      milestoneId,
+      clientRelationshipId,
+      milestoneData(values),
+      { projectId, expectedUpdatedAt },
+    );
+    if (result.status !== "saved") return writeFailure(result, values);
   } catch (error: unknown) {
     console.error("Failed to update milestone", error);
     return { status: "error", values, errors: {}, formError: SAVE_ERROR };

@@ -6,9 +6,19 @@ import { argsOf, prismaModel, resetModels } from "@/__tests__/helpers/prisma-moc
 const milestone = prismaModel("findMany", "findFirst", "create", "updateMany");
 const milestoneApproval = prismaModel("create");
 const deliverable = prismaModel("findMany", "create", "updateMany");
+const project = prismaModel("findFirst");
+const paymentGate = prismaModel("findFirst");
+
+/** Milestone writes run inside a transaction; the mock passes the same models. */
+const tx = { milestone, project, paymentGate };
+const $transaction = mock.fn<
+  (run: (client: typeof tx) => Promise<unknown>) => Promise<unknown>
+>(async (run) => run(tx));
 
 mock.module("@/lib/db/client", {
-  namedExports: { prisma: { milestone, milestoneApproval, deliverable } },
+  namedExports: {
+    prisma: { $transaction, milestone, milestoneApproval, deliverable, project, paymentGate },
+  },
 });
 
 type Queries = typeof import("@/lib/milestones/queries");
@@ -30,7 +40,10 @@ before(async () => {
 });
 
 beforeEach(() => {
-  resetModels(milestone, milestoneApproval, deliverable);
+  resetModels(milestone, milestoneApproval, deliverable, project, paymentGate);
+  $transaction.mock.resetCalls();
+  project.findFirst.mock.mockImplementation(async () => ({ id: "proj-1" }));
+  paymentGate.findFirst.mock.mockImplementation(async () => ({ projectId: "proj-1" }));
 });
 
 // ── Milestones ───────────────────────────────────────────────────────────────
@@ -51,7 +64,11 @@ test("createMilestone with approvalRequired=true persists the flag", async () =>
     approvalRequired: true,
   });
 
-  assert.deepEqual(created, { id: "ms-new" });
+  assert.deepEqual(created, { status: "saved", id: "ms-new" });
+  assert.deepEqual(argsOf(paymentGate.findFirst).where, {
+    id: "gate-1",
+    clientRelationshipId: "rel-1",
+  });
 
   assert.deepEqual(argsOf(milestone.create).data, {
     clientRelationshipId: "rel-1",
@@ -90,6 +107,48 @@ test("listMilestones scopes to the relationship and can filter by project", asyn
     clientRelationshipId: "rel-1",
     projectId: "proj-1",
   });
+});
+
+test("createMilestone rejects a payment gate from another project and writes nothing", async () => {
+  paymentGate.findFirst.mock.mockImplementation(async () => ({ projectId: "proj-2" }));
+
+  const result = await createMilestone({
+    clientRelationshipId: "rel-1",
+    projectId: "proj-1",
+    title: "Launch",
+    paymentDependencyId: "gate-other-project",
+  });
+
+  assert.deepEqual(result, { status: "payment-dependency-invalid" });
+  assert.equal(milestone.create.mock.callCount(), 0);
+});
+
+test("createMilestone rejects a payment gate outside the relationship", async () => {
+  paymentGate.findFirst.mock.mockImplementation(async () => null);
+
+  const result = await createMilestone({
+    clientRelationshipId: "rel-1",
+    projectId: "proj-1",
+    title: "Launch",
+    paymentDependencyId: "gate-other-relationship",
+  });
+
+  assert.deepEqual(result, { status: "payment-dependency-invalid" });
+  assert.equal(milestone.create.mock.callCount(), 0);
+});
+
+test("createMilestone accepts a relationship-level gate with no project", async () => {
+  paymentGate.findFirst.mock.mockImplementation(async () => ({ projectId: null }));
+  milestone.create.mock.mockImplementation(async () => ({ id: "ms-new" }));
+
+  const result = await createMilestone({
+    clientRelationshipId: "rel-1",
+    projectId: "proj-1",
+    title: "Launch",
+    paymentDependencyId: "gate-relationship",
+  });
+
+  assert.deepEqual(result, { status: "saved", id: "ms-new" });
 });
 
 // ── Milestone approvals ──────────────────────────────────────────────────────

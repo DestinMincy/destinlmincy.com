@@ -78,6 +78,7 @@ export default async function EditMilestonePage({
           initialValues={initialValues}
           paymentGates={paymentGates}
           submitLabel="Save changes"
+          concurrencyToken={milestone.updatedAt.toISOString()}
         />
       </div>
     </div>

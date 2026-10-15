@@ -51,35 +51,144 @@ export interface CreateMilestoneInput {
   approvalRequired?: boolean;
 }
 
-export async function createMilestone(data: CreateMilestoneInput) {
-  return prisma.milestone.create({
-    data: {
-      clientRelationshipId: data.clientRelationshipId,
-      projectId: data.projectId,
-      title: data.title,
-      status: data.status ?? "PLANNED",
-      targetDate: data.targetDate ?? null,
-      clientFacingUpdate: data.clientFacingUpdate ?? null,
-      paymentDependencyId: data.paymentDependencyId ?? null,
-      approvalRequired: data.approvalRequired ?? false,
-    },
-    select: { id: true },
+export type MilestoneWriteResult =
+  | { status: "saved"; id: string }
+  | { status: "project-missing" }
+  | { status: "milestone-missing" }
+  /** `paymentDependencyId` is outside the relationship or the milestone's project. */
+  | { status: "payment-dependency-invalid" }
+  /** The milestone changed after the caller read it. Nothing was written. */
+  | { status: "stale" };
+
+type MilestoneWriteClient = Pick<typeof prisma, "paymentGate">;
+
+/**
+ * A payment dependency must be a gate in the same relationship. When the gate
+ * belongs to a project, that project must be the milestone's project.
+ */
+async function isPaymentDependencyInScope(
+  client: MilestoneWriteClient,
+  relationshipId: string,
+  projectId: string,
+  paymentGateId: string,
+): Promise<boolean> {
+  const gate = await client.paymentGate.findFirst({
+    where: { id: paymentGateId, clientRelationshipId: relationshipId },
+    select: { projectId: true },
   });
+  return gate !== null && (gate.projectId === null || gate.projectId === projectId);
+}
+
+/**
+ * Serializable, so a payment gate cannot move to another project between the
+ * scope check and the milestone write.
+ */
+const SERIALIZABLE = { isolationLevel: "Serializable" } as const;
+
+export async function createMilestone(
+  data: CreateMilestoneInput,
+): Promise<MilestoneWriteResult> {
+  return prisma.$transaction(async (tx): Promise<MilestoneWriteResult> => {
+    const project = await tx.project.findFirst({
+      where: { id: data.projectId, clientRelationshipId: data.clientRelationshipId },
+      select: { id: true },
+    });
+    if (!project) return { status: "project-missing" };
+
+    if (
+      data.paymentDependencyId &&
+      !(await isPaymentDependencyInScope(
+        tx,
+        data.clientRelationshipId,
+        data.projectId,
+        data.paymentDependencyId,
+      ))
+    ) {
+      return { status: "payment-dependency-invalid" };
+    }
+
+    const created = await tx.milestone.create({
+      data: {
+        clientRelationshipId: data.clientRelationshipId,
+        projectId: data.projectId,
+        title: data.title,
+        status: data.status ?? "PLANNED",
+        targetDate: data.targetDate ?? null,
+        clientFacingUpdate: data.clientFacingUpdate ?? null,
+        paymentDependencyId: data.paymentDependencyId ?? null,
+        approvalRequired: data.approvalRequired ?? false,
+      },
+      select: { id: true },
+    });
+    return { status: "saved", id: created.id };
+  }, SERIALIZABLE);
 }
 
 export type UpdateMilestoneInput = Partial<
   Omit<CreateMilestoneInput, "clientRelationshipId">
 >;
 
+export interface UpdateMilestoneOptions {
+  /** Restricts the update to a milestone under this project. */
+  projectId?: string;
+  /**
+   * Optimistic-concurrency token: the milestone's `updatedAt` as the caller
+   * read it. When given, a milestone changed since then is not overwritten.
+   */
+  expectedUpdatedAt?: Date;
+}
+
 export async function updateMilestone(
   id: string,
   relationshipId: string,
   data: UpdateMilestoneInput,
-) {
-  return prisma.milestone.updateMany({
-    where: { id, clientRelationshipId: relationshipId },
-    data,
-  });
+  options: UpdateMilestoneOptions = {},
+): Promise<MilestoneWriteResult> {
+  return prisma.$transaction(async (tx): Promise<MilestoneWriteResult> => {
+    const current = await tx.milestone.findFirst({
+      where: {
+        id,
+        clientRelationshipId: relationshipId,
+        ...(options.projectId ? { projectId: options.projectId } : {}),
+      },
+      select: { projectId: true, updatedAt: true },
+    });
+    if (!current) return { status: "milestone-missing" };
+
+    if (
+      options.expectedUpdatedAt &&
+      current.updatedAt.getTime() !== options.expectedUpdatedAt.getTime()
+    ) {
+      return { status: "stale" };
+    }
+
+    const projectId = data.projectId ?? current.projectId;
+    if (
+      data.paymentDependencyId &&
+      !(await isPaymentDependencyInScope(
+        tx,
+        relationshipId,
+        projectId,
+        data.paymentDependencyId,
+      ))
+    ) {
+      return { status: "payment-dependency-invalid" };
+    }
+
+    const updated = await tx.milestone.updateMany({
+      where: {
+        id,
+        clientRelationshipId: relationshipId,
+        ...(options.expectedUpdatedAt
+          ? { updatedAt: options.expectedUpdatedAt }
+          : {}),
+      },
+      data,
+    });
+    if (updated.count === 0) return { status: "stale" };
+
+    return { status: "saved", id };
+  }, SERIALIZABLE);
 }
 
 // ── Milestone Approvals ──────────────────────────────────────────────────────
