@@ -28,7 +28,7 @@ Cleanup should reduce confusion without destroying useful assets or copy. The ol
 
 ## Verify When Done
 
-- [ ] `npm run build` passes for the Next.js app.
-- [ ] No Eleventy commands remain as primary scripts.
-- [ ] README and roadmap describe the current architecture.
-- [ ] Useful assets were preserved.
+- [x] `npm run build` passes for the Next.js app (required fixing the `docusign-esign` bundling failure first).
+- [x] No Eleventy commands remain in `package.json`; `@11ty/eleventy` and `rimraf` were uninstalled, `.eleventy.js`, `src/`, root `index.html`, and `DEPLOY_AWS.md` were removed.
+- [x] README and roadmap describe the current architecture; `docs/deployment.md` is the deployment guide.
+- [x] Useful assets were preserved under `public/img/brand/` (logo PNG/SVG variants, banners, wallpapers, ELATUM lockup, apple touch icon). Duplicates already in `public/img/` were dropped. Legacy color tokens stay recorded in `context/ui-context.md`.

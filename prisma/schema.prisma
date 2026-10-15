@@ -71,10 +71,46 @@ enum ApplicationSiteStatus {
 
 enum ProjectStatus {
   PLANNED
+  ACTIVE
+  ON_HOLD
+  COMPLETE
   IN_PROGRESS
   PAUSED
   COMPLETED
   ARCHIVED
+}
+
+enum ContractStatus {
+  DRAFT
+  GENERATED
+  SENT_FOR_SIGNING
+  CLIENT_SIGNED
+  COMPLETE
+  VOIDED
+}
+
+enum PaymentGateType {
+  FULL_UPFRONT
+  DEPOSIT
+  MILESTONE_PAYMENT
+  OTHER
+}
+
+enum MilestoneApprovalAction {
+  APPROVED
+  CHANGES_REQUESTED
+}
+
+enum DeliverableType {
+  LINK
+  DOCUMENT
+  VIDEO
+  OTHER
+}
+
+enum DeliverableVisibility {
+  CLIENT
+  ADMIN_ONLY
 }
 
 model ClientRelationship {
@@ -98,6 +134,7 @@ model ClientRelationship {
   subscriptions     SubscriptionReference[]
   milestones        Milestone[]
   deliverables      Deliverable[]
+  contracts         Contract[]
 
   @@map("client_relationships")
 }
@@ -132,6 +169,8 @@ model ApplicationSite {
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
 
+  archivedAt DateTime?
+
   clientRelationship ClientRelationship      @relation(fields: [clientRelationshipId], references: [id], onDelete: Cascade)
   projects           Project[]
   subscriptions      SubscriptionReference[]
@@ -154,6 +193,10 @@ model Project {
   targetDate           DateTime?
   createdAt            DateTime      @default(now())
   updatedAt            DateTime      @updatedAt
+
+  startDate               DateTime?
+  clientFacingDescription String?
+  archivedAt              DateTime?
 
   clientRelationship ClientRelationship      @relation(fields: [clientRelationshipId], references: [id], onDelete: Cascade)
   applicationSite    ApplicationSite?        @relation(fields: [applicationSiteId, clientRelationshipId], references: [id, clientRelationshipId], onDelete: Restrict)
@@ -188,10 +231,14 @@ model ContractTemplateVersion {
   contractTemplateId String
   versionNumber      Int
   snapshot           Json?
+  blocks             Json?
+  variables          Json?
   publishedAt        DateTime?
+  archivedAt         DateTime?
   createdAt          DateTime  @default(now())
 
-  contractTemplate ContractTemplate @relation(fields: [contractTemplateId], references: [id], onDelete: Cascade)
+  contractTemplate   ContractTemplate @relation(fields: [contractTemplateId], references: [id], onDelete: Cascade)
+  generatedContracts Contract[]
 
   @@unique([contractTemplateId, versionNumber])
   @@map("contract_template_versions")
@@ -203,6 +250,13 @@ model PaymentGate {
   projectId            String?
   label                String
   status               PaymentGateStatus @default(PENDING)
+  paymentType          PaymentGateType   @default(FULL_UPFRONT)
+  amount               Decimal?          @db.Decimal(12, 2)
+  currency             String            @default("USD")
+  dueDate              DateTime?
+  requiredBeforeWork   Boolean           @default(false)
+  stripeUrl            String?
+  stripeId             String?
   createdAt            DateTime          @default(now())
   updatedAt            DateTime          @updatedAt
 
@@ -248,9 +302,14 @@ model Milestone {
   createdAt            DateTime        @default(now())
   updatedAt            DateTime        @updatedAt
 
-  clientRelationship ClientRelationship @relation(fields: [clientRelationshipId], references: [id], onDelete: Cascade)
-  project            Project            @relation(fields: [projectId, clientRelationshipId], references: [id, clientRelationshipId], onDelete: Cascade)
+  clientFacingUpdate  String?
+  paymentDependencyId String?
+  approvalRequired    Boolean @default(false)
+
+  clientRelationship ClientRelationship  @relation(fields: [clientRelationshipId], references: [id], onDelete: Cascade)
+  project            Project             @relation(fields: [projectId, clientRelationshipId], references: [id, clientRelationshipId], onDelete: Cascade)
   deliverables       Deliverable[]
+  approvals          MilestoneApproval[]
 
   @@unique([id, clientRelationshipId])
   @@index([clientRelationshipId])
@@ -259,14 +318,17 @@ model Milestone {
 }
 
 model Deliverable {
-  id                   String   @id @default(cuid())
+  id                   String                @id @default(cuid())
   clientRelationshipId String
   projectId            String?
   milestoneId          String?
   label                String
   url                  String?
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  type                 DeliverableType       @default(LINK)
+  notes                String?
+  visibility           DeliverableVisibility @default(CLIENT)
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
 
   clientRelationship ClientRelationship @relation(fields: [clientRelationshipId], references: [id], onDelete: Cascade)
   project            Project?           @relation(fields: [projectId, clientRelationshipId], references: [id, clientRelationshipId], onDelete: Restrict)
@@ -276,4 +338,45 @@ model Deliverable {
   @@index([projectId])
   @@index([milestoneId])
   @@map("deliverables")
+}
+
+model MilestoneApproval {
+  id                   String                  @id @default(cuid())
+  milestoneId          String
+  clientRelationshipId String
+  actorClerkUserId     String
+  actorName            String?
+  action               MilestoneApprovalAction
+  note                 String?
+  createdAt            DateTime                @default(now())
+
+  milestone Milestone @relation(fields: [milestoneId, clientRelationshipId], references: [id, clientRelationshipId], onDelete: Cascade)
+
+  @@index([milestoneId])
+  @@map("milestone_approvals")
+}
+
+model Contract {
+  id                        String         @id @default(cuid())
+  clientRelationshipId      String
+  projectId                 String?
+  contractTemplateVersionId String?
+  fieldValues               Json?
+  status                    ContractStatus @default(DRAFT)
+  signerClerkUserId         String?
+  signerEmail               String?
+  docusignEnvelopeId        String?
+  docusignStatus            String?
+  s3Key                     String?
+  s3Bucket                  String?
+  createdAt                 DateTime       @default(now())
+  updatedAt                 DateTime       @updatedAt
+
+  clientRelationship ClientRelationship       @relation(fields: [clientRelationshipId], references: [id], onDelete: Cascade)
+  templateVersion    ContractTemplateVersion? @relation(fields: [contractTemplateVersionId], references: [id])
+
+  @@unique([id, clientRelationshipId])
+  @@index([clientRelationshipId])
+  @@index([contractTemplateVersionId])
+  @@map("contracts")
 }

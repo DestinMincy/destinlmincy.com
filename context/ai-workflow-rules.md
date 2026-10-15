@@ -41,9 +41,7 @@ Split an implementation step if it combines:
 ## Protected / Legacy Areas
 
 - Preserve unrelated uncommitted user changes.
-- Treat `src/` as legacy Eleventy source until the migration unit explicitly replaces it.
-- During Unit 01, stage Next.js alongside Eleventy. Do not delete Eleventy source while establishing the foundation.
-- Treat `_site/` as generated output.
+- The legacy Eleventy source (`src/`, `.eleventy.js`, root `index.html`) was removed in Unit 16. Do not reintroduce Eleventy paths or scripts; brand assets from it live under `public/img/brand/`.
 - Do not modify contract, payment, subscription, or access-control behavior outside the active unit spec.
 
 ## Keeping Docs In Sync

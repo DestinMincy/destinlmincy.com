@@ -1,15 +1,16 @@
 import { auth } from "@clerk/nextjs/server";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { findClientMembershipByClerkUserId } from "@/lib/auth/client-membership";
-import { clientWorkDateFormatter } from "@/lib/client-work/format";
-import { getClientVisibleWork } from "@/lib/client-work/queries";
 import {
-  APPLICATION_SITE_TYPE_LABELS,
-  PROJECT_STATUS_LABELS,
-} from "@/lib/client-work/types";
-import { site } from "@/lib/site";
+  getPortalActionItems,
+  listPortalContracts,
+  listPortalPaymentGates,
+  listPortalProjects,
+  listPortalSubscriptions,
+} from "@/lib/portal/queries";
 
 export const metadata: Metadata = {
   title: "Client Portal",
@@ -19,98 +20,88 @@ export default async function PortalPage() {
   const { userId } = await auth();
 
   if (!userId) {
-    redirect("/sign-in");
+    redirect("/sign-in?redirect_url=/portal");
   }
 
   const membership = await findClientMembershipByClerkUserId(userId);
 
   if (!membership) {
-    return (
-      <div className="container section section--tight narrow">
-        <p className="eyebrow">Client Portal</p>
-        <h1>No client relationship on file</h1>
-        <p className="lead">
-          This account isn&apos;t linked to a client relationship yet. Email{" "}
-          <a href={`mailto:${site.email}`}>{site.email}</a> and we will get
-          you connected.
-        </p>
-      </div>
-    );
+    return null; // layout handles the no-membership state
   }
 
-  const { applications, projects } = await getClientVisibleWork(
-    membership.clientRelationshipId,
-  );
+  const { clientRelationshipId, clientRelationshipName } = membership;
+
+  const [actionItems, contracts, payments, subscriptions, projects] =
+    await Promise.all([
+      getPortalActionItems(clientRelationshipId),
+      listPortalContracts(clientRelationshipId),
+      listPortalPaymentGates(clientRelationshipId),
+      listPortalSubscriptions(clientRelationshipId),
+      listPortalProjects(clientRelationshipId),
+    ]);
+
+  const hasPendingPayments = actionItems.pendingPayments > 0;
+  const hasActionItems = hasPendingPayments;
 
   return (
     <div className="container section section--tight admin-screen">
-      <p className="eyebrow">Client Portal</p>
-      <h1>{membership.clientRelationshipName}</h1>
-      <p className="lead">Your active applications, sites, and project work.</p>
+      <header className="admin-head">
+        <div>
+          <p className="eyebrow">Overview</p>
+          <h1 className="admin-title">Welcome back</h1>
+          <p className="admin-head__meta">{clientRelationshipName}</p>
+        </div>
+      </header>
 
-      <section className="admin-panel" aria-labelledby="portal-applications-heading">
-        <h2 className="admin-panel__title" id="portal-applications-heading">
-          Applications and sites
-        </h2>
-        {applications.length === 0 ? (
-          <p className="admin-empty__note">No active applications or sites.</p>
-        ) : (
+      {hasActionItems ? (
+        <section
+          className="admin-panel portal-action-panel"
+          aria-labelledby="portal-actions-heading"
+        >
+          <h2 className="admin-panel__title" id="portal-actions-heading">
+            Needs your attention
+          </h2>
           <ul className="portal-work-list">
-            {applications.map((application) => (
-              <li key={application.id}>
+            {hasPendingPayments ? (
+              <li>
                 <div>
-                  <strong>{application.name}</strong>
-                  <span>{APPLICATION_SITE_TYPE_LABELS[application.type]}</span>
+                  <strong>Payment required</strong>
+                  <span>
+                    {actionItems.pendingPayments === 1
+                      ? "1 payment is waiting"
+                      : `${actionItems.pendingPayments} payments are waiting`}
+                  </span>
                 </div>
-                {application.productionUrl ? (
-                  <a
-                    href={application.productionUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Open site
-                  </a>
-                ) : null}
+                <Link
+                  href="/portal/payments"
+                  className="button button--primary button--compact"
+                >
+                  View payments
+                </Link>
               </li>
-            ))}
+            ) : null}
           </ul>
-        )}
-      </section>
+        </section>
+      ) : null}
 
-      <section className="admin-panel" aria-labelledby="portal-projects-heading">
-        <h2 className="admin-panel__title" id="portal-projects-heading">
-          Projects
-        </h2>
-        {projects.length === 0 ? (
-          <p className="admin-empty__note">No active projects.</p>
-        ) : (
-          <ul className="portal-work-list">
-            {projects.map((project) => (
-              <li key={project.id}>
-                <div>
-                  <strong>{project.name}</strong>
-                  <span>
-                    {PROJECT_STATUS_LABELS[project.status]}
-                    {project.applicationSite
-                      ? ` | ${project.applicationSite.name}`
-                      : project.createsNewAsset
-                        ? " | New asset"
-                        : ""}
-                  </span>
-                  {project.clientDescription ? (
-                    <p>{project.clientDescription}</p>
-                  ) : null}
-                </div>
-                {project.targetDate ? (
-                  <span>
-                    Target {clientWorkDateFormatter.format(project.targetDate)}
-                  </span>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      <div className="portal-stat-grid">
+        <Link href="/portal/contracts" className="portal-stat">
+          <span className="portal-stat__count">{contracts.length}</span>
+          <span className="portal-stat__label">Contracts</span>
+        </Link>
+        <Link href="/portal/payments" className="portal-stat">
+          <span className="portal-stat__count">{payments.length}</span>
+          <span className="portal-stat__label">Payments</span>
+        </Link>
+        <Link href="/portal/subscriptions" className="portal-stat">
+          <span className="portal-stat__count">{subscriptions.length}</span>
+          <span className="portal-stat__label">Subscriptions</span>
+        </Link>
+        <Link href="/portal/projects" className="portal-stat">
+          <span className="portal-stat__count">{projects.length}</span>
+          <span className="portal-stat__label">Projects</span>
+        </Link>
+      </div>
     </div>
   );
 }

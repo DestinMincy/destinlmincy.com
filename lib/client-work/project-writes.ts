@@ -1,6 +1,8 @@
 import type { Prisma } from "@/lib/generated/prisma/client";
 import type { ProjectStatus } from "@/lib/generated/prisma/enums";
+import { projectStatusStartsWork } from "@/lib/client-work/types";
 import { prisma } from "@/lib/db/client";
+import { PAYMENT_GATE_SATISFIED_STATUSES } from "@/lib/payment-gates/types";
 
 export interface ProjectWriteInput {
   applicationSiteId: string;
@@ -18,7 +20,8 @@ export type ProjectWriteResult =
   | "relationship-missing"
   | "project-missing"
   | "invalid-asset-selection"
-  | "application-not-selectable";
+  | "application-not-selectable"
+  | "payment-gate-blocked";
 
 async function applicationSiteIsSelectable(
   transaction: Prisma.TransactionClient,
@@ -45,6 +48,35 @@ async function applicationSiteIsSelectable(
   });
 
   return Boolean(application);
+}
+
+/**
+ * A project cannot move from a not-started status into a started one while a
+ * gate flagged `requiredBeforeWork` is still unpaid and not waived. Projects
+ * that are already running are not pulled back by a gate added later; admin
+ * sees that on the project page instead.
+ */
+async function startIsBlockedByPaymentGate(
+  transaction: Prisma.TransactionClient,
+  clientRelationshipId: string,
+  projectId: string,
+  currentStatus: ProjectStatus,
+  nextStatus: ProjectStatus,
+): Promise<boolean> {
+  if (!projectStatusStartsWork(nextStatus)) return false;
+  if (projectStatusStartsWork(currentStatus)) return false;
+
+  const blocking = await transaction.paymentGate.findFirst({
+    where: {
+      clientRelationshipId,
+      projectId,
+      requiredBeforeWork: true,
+      status: { notIn: [...PAYMENT_GATE_SATISFIED_STATUSES] },
+    },
+    select: { id: true },
+  });
+
+  return Boolean(blocking);
 }
 
 export async function createProjectForRelationship(
@@ -106,11 +138,23 @@ export async function updateProjectForRelationship(
     async (transaction) => {
       const existing = await transaction.project.findFirst({
         where: { id: projectId, clientRelationshipId },
-        select: { id: true, applicationSiteId: true },
+        select: { id: true, applicationSiteId: true, status: true },
       });
 
       if (!existing) {
         return "project-missing";
+      }
+
+      if (
+        await startIsBlockedByPaymentGate(
+          transaction,
+          clientRelationshipId,
+          projectId,
+          existing.status,
+          input.status,
+        )
+      ) {
+        return "payment-gate-blocked";
       }
 
       if (

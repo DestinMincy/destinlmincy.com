@@ -4,11 +4,16 @@ Update this file after every meaningful implementation change.
 
 ## Current Phase
 
-- Post-Unit 05 dependency security maintenance.
+- Code complete for Units 01 through 16. Live verification pass against real DocuSign, S3, Clerk Billing, Stripe, and production Postgres credentials.
 
 ## Current Goal
 
-- Merge the scoped `mysql2` advisory remediation before beginning Unit 06.
+- Run the manual verification list in Session Notes, fix what it surfaces, then deploy per `docs/deployment.md`.
+
+## What Is Complete
+
+- Units 01 through 16. Every planned unit in `context/specs/00-build-plan.md` is implemented and the detailed record is under Completed below.
+- Stripe API invoice/payment-link creation stays deferred by design (project overview, Deferred list). Manual attachment with the fields needed for later automation is in place.
 
 ## Completed
 
@@ -63,23 +68,42 @@ Update this file after every meaningful implementation change.
 - Remediated Dependabot alert #131 by overriding Prisma's development-only transitive `mysql2` dependency from `3.15.3` to `3.24.3`. `npm audit` reports zero vulnerabilities; typecheck, unit tests, PostgreSQL integration, production build, and the safely skipped E2E gate pass.
 - Added unit coverage for relationship form validation and slug generation in `lib/relationships/validation.test.ts`, registered in `npm test`; resolves the deferred Unit 04 test gap in `context/current-issues.md`. No runtime behavior changed.
 
+- Implemented backend data layer for Units 05-11: extended Prisma schema with ApplicationSiteType (already existed), ProjectStatus (added ACTIVE, ON_HOLD, COMPLETE), ContractStatus, PaymentGateType, MilestoneApprovalAction, DeliverableType, DeliverableVisibility enums; added Contract and MilestoneApproval models; extended ApplicationSite (archivedAt), Project (startDate, clientFacingDescription, archivedAt), ContractTemplateVersion (blocks, variables, archivedAt), PaymentGate (paymentType, amount, currency, dueDate, requiredBeforeWork, stripeUrl, stripeId), Milestone (clientFacingUpdate, paymentDependencyId, approvalRequired), Deliverable (type, notes, visibility); created query files in lib/applications/, lib/projects/, lib/contracts/, lib/payments/, lib/milestones/; created server action files for applications, projects, contracts, payment gates, milestones under app/admin/relationships/[id]/; created lib/portal/actions.ts for client approval flow.
+
+- Implemented Unit 06 contract template editor: block-based templates (heading, paragraph, clause, variable, table, fee schedule, milestone list, signature placeholder), draft/publish/archive lifecycle, immutable published versions, new draft versions started from a published version.
+- Implemented Unit 07 contract generation and storage: `@react-pdf/renderer` document in `lib/pdf/contract-pdf.tsx` with client and admin signature anchor strings, generated PDFs uploaded to the private S3 bucket (`lib/storage/s3.ts`, AES256 SSE) with database metadata pointing at the object.
+- Implemented Unit 08 DocuSign flow: JWT user-token auth with a `consent_required` error path, envelope creation with client signer plus admin countersignature via anchor tabs, Connect webhook at `app/api/webhooks/docusign/route.ts` with HMAC verification and status mapping, and signed PDF archival to S3 on completion.
+- Implemented Unit 09 Stripe payment gates: `PaymentGate` model (type, amount, currency, due date, required-before-work flag, Stripe URL and ID, status PENDING/ATTACHED/PAID/WAIVED), admin create and edit with boundary validation (https-only Stripe URL, project must belong to the relationship, ATTACHED requires a URL), portal payments page with amount, due date, derived overdue state, and the Stripe link while open, and a start gate that blocks a project from moving into ACTIVE or IN_PROGRESS while a required gate is unpaid and not waived. Dead duplicate payment modules from the parallel worktree merge were removed.
+- Implemented Unit 10 Clerk subscriptions: `SubscriptionReference` records per relationship (hosting or maintenance, optionally tied to an application/site or project), portal entitlement checks through Clerk Billing `has({ feature })`, and CANCELED grace through the current period end.
+- Implemented Unit 11 milestones and deliverables: milestones with target dates, status, client-facing updates, approval requirement, approval records with actor and timestamp, and link deliverables with visibility filtering.
+- Implemented Unit 12 client portal v1: contracts and signature status, payments, subscriptions, projects and milestones, approve or request changes on milestones, link deliverables, all behind Clerk auth plus active `ClientUser` membership checks.
+- Implemented Unit 13 admin client hub: relationship overview with action items (pending payment gates, overdue milestones), project status summary, and section links for users, applications/sites, projects, contracts, payment gates, subscriptions, milestones, deliverables.
+- Implemented Unit 14 blog: Markdown posts in `content/blog/`, index and post routes, RSS feed, sitemap, Open Graph metadata.
+- Implemented Unit 15 EC2 deployment: `docs/deployment.md` runbook with Nginx config, PM2 ecosystem, environment variables, migration and rollback steps, and DNS cutover from the retired static site. `.env.example` documents every variable.
+- Fixed `next build`: `docusign-esign` ships AMD `define()` wrappers Turbopack cannot parse, including through `serverExternalPackages` tracing. `lib/docusign/client.ts` now loads the SDK with a runtime Node `require` invoked through `Reflect.apply`; the compiled chunk was inspected to confirm the real require survives and resolves from `node_modules`.
+- Implemented Unit 16 legacy cleanup: removed `.eleventy.js`, `src/`, root `index.html`, `DEPLOY_AWS.md`, the `legacy:*` and `clean` scripts, and the `@11ty/eleventy` and `rimraf` dependencies; preserved brand assets under `public/img/brand/`; rewrote `README.md` and `ROADMAP.md`; dropped `src` and `_site` from `tsconfig.json` excludes and `.gitignore`.
+- Verification at the end of this pass: `npm run typecheck` clean, `npm test` 191 passing, `npm run build` passing with every route listed.
+
 ## In Progress
 
-- Final review and merge of `codex/fix-mysql2-advisory`.
+- Nothing in code. Manual verification pass is next (see Session Notes).
 
 ## Next Up
 
-- Begin Unit 06: contract template editor per `context/specs/06-contract-template-editor.md`.
+- Manual verification against live services, then production deployment.
+- After verification: decide whether Stripe API invoice/payment-link creation (deferred from Unit 09) is worth building, or whether manual attachment is enough for current volume.
 
 ## Open Questions
 
-- Blog content format: Markdown or MDX.
-- PDF generation engine for contracts: browser rendering, React PDF, or document-generation library.
-- DocuSign integration mode and auth flow.
-- Clerk subscription plan names/pricing.
-- Exact Stripe metadata fields needed for manual payment-link/invoice attachment.
-- Reverse proxy choice for EC2: Nginx or Caddy.
-- Process manager choice: systemd or PM2.
+- Resolved: blog content format is Markdown (`content/blog/*.md`, gray-matter plus remark).
+- Resolved: PDF engine is `@react-pdf/renderer`.
+- Resolved: DocuSign uses JWT user-token auth with an impersonated user and Connect webhooks for status.
+- Resolved: reverse proxy is Nginx, process manager is PM2.
+- Resolved: payment gates store `stripeUrl` and `stripeId` (invoice `in_...` or payment link `plink_...`) for later API automation.
+- Open: Clerk Billing plan names, pricing, and the exact entitlement keys. The portal reads `entitlementKey` from each subscription record; real keys must be set during verification.
+- Open: payment gates attach to a relationship and optionally a project, not to a specific contract record. Spec 09 says "attach to the contract it belongs to". Decide whether a `contractId` on `PaymentGate` is needed once real contracts carry payment terms.
+- Open: `ProjectStatus` carries duplicate pairs from the worktree merge (ACTIVE/IN_PROGRESS, ON_HOLD/PAUSED, COMPLETE/COMPLETED). Both are treated as started/paused/finished everywhere they matter, but the enum should be collapsed with a migration before real data accumulates.
+- Open: `GEMINI.md` and `NORA_PROMPT_Example.md` at the repo root predate the Next.js app and are not referenced by anything. Delete or archive.
 
 ## Architecture Decisions
 
@@ -146,3 +170,12 @@ Update this file after every meaningful implementation change.
 - Addressed twelfth-pass findings on commit `ec320bc`: extracted shared `relationshipDateFormatter` into `lib/relationships/format.ts`, added enum-order dependency comment in `queries.ts`, consolidated duplicate entries in `context/current-issues.md`. Final review queued.
 - Addressed follow-up CodeRabbit findings: attach/remove actions now invalidate the relationships list as well as detail pages; lifecycle database failures retain the validated submitted lifecycle while invalid raw values remain untyped and fall back to the current value in the control; the attach email input remounts only after action-state changes so successful attaches clear it and errors retain it. Also replaced the Prisma create/update union cast with one shared writable-fields type and added CSS fallbacks for table `color-mix()` rules.
 - Dependency security maintenance: refreshed the lockfile within existing semver ranges (Next 16.3.3, Prisma 7.10.0, and patched transitive dependencies) and pinned the Prisma config tree's `deepmerge-ts` override to 8.0.2. Local `npm audit` now reports zero vulnerabilities; the Dependabot alert count will update only after this branch is merged.
+- Units 06 through 15 were built across parallel worktrees (`claude/wt-frontend`, `claude/wt-backend`, `claude/wt-qa`) and merged into `claude/project-summary-xtmKQ`; Unit 09 completion, the build fix, and Unit 16 were done on `claude/gifted-cerf-8z962j`, which was rebased onto that tip because the branch had been cut from `master` (Unit 05 only).
+- `prisma generate` reads `DATABASE_URL` from `.env` (via `prisma.config.ts` and dotenv), while Next reads `.env.local`. Both need the variable locally; the README documents copying `.env.example` to both.
+- Manual verification required before launch (no code can check these):
+  1. DocuSign JWT consent grant for `DOCUSIGN_IMPERSONATED_USER_ID`, then an end-to-end send: generate contract, send, confirm anchor tabs land on both signature lines, both parties sign, contract reaches COMPLETE and the signed PDF appears in S3.
+  2. DocuSign Connect: register the webhook URL, set `DOCUSIGN_CONNECT_HMAC_KEY`, confirm the real payload shape matches the status mapping in the route handler.
+  3. S3 IAM: PutObject and GetObject on `S3_PRIVATE_BUCKET` with AES256 server-side encryption, Block Public Access on.
+  4. Clerk Billing: portal subscription page with real entitlement keys, one active and one expired or canceled user.
+  5. Stripe: paste a real invoice or payment-link URL into a gate, confirm the client sees and can open it, mark PAID, confirm the project can then start.
+  6. Production: `npm run db:deploy` against the production Postgres, every variable in `.env.example` populated, `force_organization_selection` disabled on the production Clerk instance.

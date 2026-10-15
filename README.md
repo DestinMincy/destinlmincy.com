@@ -1,76 +1,74 @@
 # destinlmincy.com
 
-Marketing site for Destin L. Mincy — AI Agents-as-a-Service for small businesses. Featured product: **ELATUM**, the AI co-host for short-term rentals.
+Public site, blog, admin client hub, and client portal for Destin L. Mincy's software and AI agency. The application is a client relationship operating system: marketing and blog on the front, Clerk-authenticated admin and client surfaces behind it.
 
-See `ROADMAP.md` for current scope and what's intentionally out.
+The product and architecture are documented under `context/`. Start with `context/project-overview.md`, then `context/architecture.md`. Unit specs live in `context/specs/`. The current state of the build is tracked in `context/progress-tracker.md`.
 
 ## Stack
 
-- [Eleventy 3.x](https://www.11ty.dev/) — static site generator
-- Nunjucks templates, plain CSS, no client-side framework
-- [Formspree](https://formspree.io/) for the contact form (form ID `mqenwlvv`)
-- Hosting: AWS S3 + CloudFront
+| Layer | Technology |
+| --- | --- |
+| Framework | Next.js App Router, React, TypeScript (strict) |
+| Auth | Clerk (sessions, sign-in, email-allowlist admin gate, Billing entitlements) |
+| Data | PostgreSQL via Prisma (Docker locally, RDS when justified) |
+| Documents | `@react-pdf/renderer` for contract PDFs, private S3 for storage |
+| Signatures | DocuSign (JWT auth, anchor tabs, Connect webhook) |
+| Payments | Stripe invoices and payment links, attached manually to payment gates |
+| Blog | Markdown files under `content/blog/` |
+| Runtime | Node.js on EC2 behind Nginx, managed by PM2 |
 
 ## Local development
 
+Requirements: Node.js 22, Docker.
+
 ```bash
 npm install
-npm start
-# → http://localhost:8080
+cp .env.example .env.local
+cp .env.example .env            # Prisma CLI reads .env
+docker compose up -d            # Postgres on 127.0.0.1:5434
+npm run db:migrate
+npm run db:seed
+npm run dev                     # http://localhost:3000
 ```
 
-## Build
+Fill in Clerk keys and `ADMIN_EMAILS` in `.env.local` before signing in. `ADMIN_EMAILS` is the only thing standing between a signed-in user and `/admin`, so never commit it. See `docs/data-foundation.md` for the database workflow and `.env.example` for every variable with notes on which unit needs it.
 
-```bash
-npm run build
-# → outputs to _site/
-```
+## Scripts
 
-## Deploy (AWS)
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Next.js dev server |
+| `npm run build` | `prisma generate` then `next build` |
+| `npm run start` | Production server |
+| `npm run typecheck` | Prisma client, Next route types, `tsc --noEmit` |
+| `npm test` | Unit tests (`node:test` via `tsx`, mocked Prisma) |
+| `npm run test:integration` | Postgres-backed query tests (needs `DATABASE_URL`) |
+| `npm run test:e2e` | Playwright end-to-end suite |
+| `npm run db:migrate` | Create and apply a development migration |
+| `npm run db:deploy` | Apply committed migrations (production) |
+| `npm run db:seed` | Deterministic local seed data |
+| `npm run db:studio` | Prisma Studio |
 
-The `deploy` script syncs `_site/` to S3 and invalidates the CloudFront distribution.
+## Repository layout
 
-1. Edit `package.json` and replace `YOUR_BUCKET_NAME` and `YOUR_DISTRIBUTION_ID`.
-2. Configure AWS credentials locally (`aws configure` or env vars).
-3. Run:
+- `app/` routes, layouts, route handlers (`/`, `/blog`, `/portal`, `/admin`, `/api/webhooks/docusign`)
+- `components/` shared UI and admin form components
+- `lib/` server utilities: auth, contracts, DocuSign, PDF, storage, payment gates, milestones, portal queries
+- `prisma/` schema, migrations, seed
+- `content/blog/` blog posts
+- `public/` fonts, images, preserved brand assets under `public/img/brand/`
+- `context/` product, architecture, workflow, design rules, unit specs
+- `docs/` data foundation and EC2 deployment runbook
+- `__tests__/` unit tests, `tests/e2e/` Playwright
 
-```bash
-npm run deploy
-```
+## Deployment
 
-You can also wire this to GitHub Actions later — see `.github/workflows/deploy.yml` (TBD).
+The production runbook is `docs/deployment.md`: EC2 instance setup, Nginx and PM2 configuration, environment variables, migrations, rollback, and the DNS cutover from the retired static site.
 
-## Structure
+## History
 
-```
-src/
-  _data/site.json         ← site-wide variables
-  _includes/
-    layouts/base.njk      ← outer HTML shell
-    partials/             ← header, footer
-  styles/main.css         ← all styles
-  scripts/                ← canvas animation, etc.
-  img/                    ← static images
-  index.njk               ← home
-  about.njk
-  services.njk
-  contact.njk
-  work/
-    index.njk             ← case studies list
-    elatum.njk            ← ELATUM case study (links out to product subdomain)
-  robots.txt
-  sitemap.njk
-```
+The site began as an Eleventy static site deployed to S3 and CloudFront. That source was removed in Unit 16 once the Next.js routes replaced it. Brand assets from the old site were kept under `public/img/brand/`.
 
-## Assets to migrate from the current `index.html`
+## License
 
-Pull these out of the existing static page and drop into the new structure:
-
-- The neural-network canvas script → `src/scripts/neural-canvas.js`
-- Site styles (Orbitron/Rajdhani, color tokens, hex badge) → `src/styles/main.css`
-- Logo SVG → `src/img/logo.svg`
-- Favicon → `src/img/favicon.svg`
-
-## What this site is not
-
-A client portal. A web app. A backend. See `ROADMAP.md`.
+See `LICENSE` and `COMMONS_CLAUSE`.
