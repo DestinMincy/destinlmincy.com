@@ -90,4 +90,23 @@ export const EMPTY_CREATE_TEMPLATE_VALUES = { name: "" } as const;
 export interface SaveDraftState {
   status: "idle" | "error";
   error?: string;
+  /**
+   * The template's `updatedAt` after a successful save. The editor submits it
+   * with the next save so its own saves are never treated as stale.
+   */
+  concurrencyToken?: string;
+}
+
+export interface GenerateContractFormValues {
+  versionId: string;
+  signerEmail: string;
+  /** Contract variable values keyed by variable key. */
+  fields: Record<string, string>;
+}
+
+/** State type for the generate-contract server action and its form. */
+export interface GenerateContractState {
+  status: "idle" | "error";
+  error?: string;
+  values?: GenerateContractFormValues;
 }

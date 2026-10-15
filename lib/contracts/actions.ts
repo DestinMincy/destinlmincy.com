@@ -1,5 +1,7 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
+
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -8,9 +10,12 @@ import { prisma } from "@/lib/db/client";
 import { Prisma } from "@/lib/generated/prisma/client";
 import type {
   CreateTemplateFormState,
+  GenerateContractState,
   SaveDraftState,
   TemplateSnapshot,
 } from "@/lib/contracts/types";
+import { parseTemplateSnapshot } from "@/lib/contracts/template-validation";
+import { isValidEmail } from "@/lib/relationships/validation";
 import { generateContractPdf } from "@/lib/pdf/generate";
 import { uploadToPrivateS3 } from "@/lib/storage/s3";
 import { sendEnvelopeForSigning } from "@/lib/docusign/client";
@@ -325,101 +330,127 @@ export async function startNewDraftVersionAction(
 }
 
 /**
- * Form-safe server action for generating a Contract from a published template
- * version. Reads versionId, signerEmail, and contract variable fields from
- * formData, then generates a PDF, stores it in S3, creates the Contract record,
- * and redirects to the contracts list.
+ * Generates a contract from a published template version. A `Contract` row is
+ * created only after the PDF is rendered and stored in private S3; every
+ * failure before that returns an error state for the generate page instead.
  */
 export async function createContractFormAction(
   clientRelationshipId: string,
   templateId: string,
+  _prevState: GenerateContractState,
   formData: FormData,
-): Promise<void> {
-  const admin = await getAdminUser();
-  if (!admin) return;
-
+): Promise<GenerateContractState> {
   const versionId = String(formData.get("versionId") ?? "").trim();
   const signerEmail = String(formData.get("signerEmail") ?? "")
     .trim()
     .toLowerCase();
 
-  if (!versionId || !signerEmail) return;
-
-  // Collect variable overrides (fields prefixed with "var_").
-  const fieldValues: Record<string, string> = {};
+  // Collect variable values (fields prefixed with "var_").
+  const fields: Record<string, string> = {};
   for (const [key, value] of formData.entries()) {
     if (key.startsWith("var_")) {
-      fieldValues[key.slice(4)] = String(value);
+      fields[key.slice(4)] = String(value).trim();
     }
   }
+  const values = { versionId, signerEmail, fields };
+  const fail = (error: string): GenerateContractState => ({
+    status: "error",
+    error,
+    values,
+  });
 
+  const admin = await getAdminUser();
+  if (!admin) return fail(NOT_AUTHORIZED);
+
+  if (!versionId) return fail("Choose a published template version.");
+  if (!signerEmail) return fail("Signer email is required.");
+  if (!isValidEmail(signerEmail)) return fail("Enter a valid signer email.");
+
+  let version: { snapshot: unknown; contractTemplate: { name: string } } | null;
   try {
-    // Verify the version belongs to this template and relationship.
-    const version = await prisma.contractTemplateVersion.findFirst({
+    version = await prisma.contractTemplateVersion.findFirst({
       where: {
         id: versionId,
         contractTemplateId: templateId,
         contractTemplate: { clientRelationshipId },
         publishedAt: { not: null },
       },
-      include: {
-        contractTemplate: { select: { name: true, clientRelationshipId: true } },
+      select: {
+        snapshot: true,
+        contractTemplate: { select: { name: true } },
       },
     });
+  } catch (error: unknown) {
+    console.error("Failed to load template version", error);
+    return fail(SAVE_ERROR);
+  }
+  if (!version) return fail("That template version is not published.");
 
-    if (!version) return;
+  const parsed = parseTemplateSnapshot(version.snapshot);
+  if (!parsed.ok) {
+    return fail(`This template version cannot be used: ${parsed.error}`);
+  }
+  const snapshot = parsed.snapshot;
 
-    // Validate required variables before generating the PDF.
-    const snapshot = version.snapshot as unknown as TemplateSnapshot | null;
-    if (snapshot) {
-      const missingRequired = snapshot.variables
-        .filter((v) => v.required && !fieldValues[v.key])
-        .map((v) => v.label || v.key);
-      if (missingRequired.length > 0) {
-        console.error("Missing required variables:", missingRequired);
-        return;
-      }
-    }
+  const missingRequired = snapshot.variables
+    .filter((variable) => variable.required && !fields[variable.key])
+    .map((variable) => variable.label || variable.key);
+  if (missingRequired.length > 0) {
+    return fail(`Fill in the required fields: ${missingRequired.join(", ")}.`);
+  }
 
-    // Generate PDF.
-    let s3Key: string | undefined;
-    let s3Bucket: string | undefined;
-    if (snapshot && process.env.AWS_REGION && process.env.S3_PRIVATE_BUCKET) {
-      try {
-        const pdfBuffer = await generateContractPdf({
-          templateName: version.contractTemplate.name,
-          snapshot,
-          fieldValues,
-          signerEmail,
-        });
-        const contractId = `contract-${Date.now()}`;
-        const key = `contracts/${clientRelationshipId}/${contractId}.pdf`;
-        const result = await uploadToPrivateS3(key, pdfBuffer, "application/pdf");
-        s3Key = result.key;
-        s3Bucket = result.bucket;
-      } catch (pdfError: unknown) {
-        console.error("PDF generation/upload failed, creating record without PDF:", pdfError);
-      }
-    }
+  if (!process.env.AWS_REGION?.trim() || !process.env.S3_PRIVATE_BUCKET?.trim()) {
+    return fail(
+      "PDF storage is not configured. Set AWS_REGION and S3_PRIVATE_BUCKET, then generate the contract again.",
+    );
+  }
 
+  let pdfBuffer: Buffer;
+  try {
+    pdfBuffer = await generateContractPdf({
+      templateName: version.contractTemplate.name,
+      snapshot,
+      fieldValues: fields,
+      signerEmail,
+    });
+  } catch (error: unknown) {
+    console.error("Contract PDF render failed", error);
+    return fail("The contract PDF could not be generated. No contract was created.");
+  }
+
+  let stored: { bucket: string; key: string };
+  try {
+    stored = await uploadToPrivateS3(
+      `contracts/${clientRelationshipId}/${randomUUID()}.pdf`,
+      pdfBuffer,
+      "application/pdf",
+    );
+  } catch (error: unknown) {
+    console.error("Contract PDF upload failed", error);
+    return fail(
+      "The contract PDF could not be stored in S3. Check the bucket and AWS credentials. No contract was created.",
+    );
+  }
+
+  try {
     await prisma.contract.create({
       data: {
         clientRelationshipId,
         contractTemplateVersionId: versionId,
         signerEmail,
         fieldValues:
-          Object.keys(fieldValues).length > 0
-            ? (fieldValues as Prisma.InputJsonValue)
+          Object.keys(fields).length > 0
+            ? (fields as Prisma.InputJsonValue)
             : undefined,
         status: "DRAFT",
-        s3Key,
-        s3Bucket,
+        s3Key: stored.key,
+        s3Bucket: stored.bucket,
       },
       select: { id: true },
     });
   } catch (error: unknown) {
-    console.error("Failed to generate contract", error);
-    return;
+    console.error("Failed to create contract record", error, stored);
+    return fail(SAVE_ERROR);
   }
 
   revalidatePath(contractsPath(clientRelationshipId));

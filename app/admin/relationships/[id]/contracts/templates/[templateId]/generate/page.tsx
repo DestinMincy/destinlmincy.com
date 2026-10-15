@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { GenerateContractForm } from "@/components/admin/GenerateContractForm";
 import { requireAdminForPage } from "@/lib/auth/require-admin";
 import { getRelationshipIdentity } from "@/lib/client-work/queries";
 import { createContractFormAction } from "@/lib/contracts/actions";
 import { getContractTemplate } from "@/lib/contracts/queries";
-import type { TemplateSnapshot, TemplateVariable } from "@/lib/contracts/types";
+import { parseTemplateSnapshot } from "@/lib/contracts/template-validation";
+import type { TemplateVariable } from "@/lib/contracts/types";
 
 export const metadata: Metadata = {
   title: "Generate contract",
@@ -24,7 +26,7 @@ export default async function GenerateContractPage({
   const { id, templateId } = await params;
   const [relationship, template] = await Promise.all([
     getRelationshipIdentity(id),
-    getContractTemplate(id, templateId),
+    getContractTemplate(templateId, id),
   ]);
 
   if (!relationship || !template) {
@@ -62,16 +64,13 @@ export default async function GenerateContractPage({
   const publishedVersions = template.versions.filter((v) => v.publishedAt);
   const latestVersion = publishedVersions[0];
 
-  // Extract custom variables from the latest published version snapshot.
-  let customVariables: TemplateVariable[] = [];
-  if (
-    latestVersion?.snapshot != null &&
-    typeof latestVersion.snapshot === "object" &&
-    !Array.isArray(latestVersion.snapshot)
-  ) {
-    const snap = latestVersion.snapshot as unknown as TemplateSnapshot;
-    customVariables = snap.variables ?? [];
-  }
+  // Custom variables come from the latest published version snapshot.
+  const parsedSnapshot = latestVersion
+    ? parseTemplateSnapshot(latestVersion.snapshot)
+    : null;
+  const customVariables: TemplateVariable[] = parsedSnapshot?.ok
+    ? parsedSnapshot.snapshot.variables
+    : [];
 
   return (
     <div className="container section section--tight narrow admin-screen">
@@ -97,74 +96,15 @@ export default async function GenerateContractPage({
       </div>
 
       <div className="admin-panel">
-        <form
-          className="admin-form"
+        <GenerateContractForm
           action={createContractFormAction.bind(null, id, templateId)}
-          noValidate
-        >
-          <div className="admin-form__row">
-            <div className="field">
-              <label htmlFor="versionId">Version</label>
-              <select id="versionId" name="versionId">
-                {publishedVersions.map((version) => (
-                  <option key={version.id} value={version.id}>
-                    v{version.versionNumber}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="field">
-              <label htmlFor="signerEmail">Signer email (required)</label>
-              <input
-                id="signerEmail"
-                name="signerEmail"
-                type="email"
-                required
-                placeholder="client@example.com"
-              />
-            </div>
-          </div>
-
-          {customVariables.length > 0 ? (
-            <fieldset className="admin-panel">
-              <legend className="admin-panel__title">
-                Contract variables
-              </legend>
-              <div className="admin-form">
-                {customVariables.map((variable) => (
-                  <div className="field" key={variable.key}>
-                    <label htmlFor={`var-${variable.key}`}>
-                      {variable.label || variable.key}
-                      {variable.required ? " (required)" : " (optional)"}
-                    </label>
-                    <input
-                      id={`var-${variable.key}`}
-                      name={`var_${variable.key}`}
-                      type="text"
-                      required={variable.required}
-                    />
-                  </div>
-                ))}
-              </div>
-            </fieldset>
-          ) : null}
-
-          <div className="button-row">
-            <button
-              className="button button--primary"
-              type="submit"
-            >
-              Generate contract
-            </button>
-            <Link
-              className="button button--secondary"
-              href={`/admin/relationships/${id}/contracts/templates/${templateId}`}
-            >
-              Cancel
-            </Link>
-          </div>
-        </form>
+          versions={publishedVersions.map((version) => ({
+            id: version.id,
+            versionNumber: version.versionNumber,
+          }))}
+          variables={customVariables}
+          cancelHref={`/admin/relationships/${id}/contracts/templates/${templateId}`}
+        />
       </div>
     </div>
   );

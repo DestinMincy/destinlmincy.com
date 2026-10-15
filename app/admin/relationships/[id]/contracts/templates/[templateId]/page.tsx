@@ -34,7 +34,7 @@ export default async function ContractTemplatePage({
   const { id, templateId } = await params;
   const [relationship, template] = await Promise.all([
     getRelationshipIdentity(id),
-    getContractTemplate(id, templateId),
+    getContractTemplate(templateId, id),
   ]);
 
   if (!relationship || !template) {
