@@ -9,10 +9,13 @@ import { argsOf, prismaModel, resetModels } from "@/__tests__/helpers/prisma-moc
 /**
  * The Connect webhook is unauthenticated and fed by DocuSign in two different
  * encodings, so the parsing, status mapping and archival branches are all
- * exercised through the real `POST` handler. Only the outbound edges — Prisma,
- * the DocuSign download and the S3 upload — are stubbed.
+ * exercised through the real `POST` handler. Only the outbound edges (Prisma,
+ * the DocuSign download and the S3 upload) are stubbed.
+ *
+ * HMAC verification fails closed, so every request is signed with `TEST_KEY`
+ * unless a test says otherwise.
  */
-const contract = prismaModel("findFirst", "update");
+const contract = prismaModel("findFirst", "update", "updateMany", "findUnique");
 
 const downloadSignedPdf = mock.fn<(envelopeId: string) => Promise<Buffer>>(
   async () => Buffer.from("signed-pdf"),
@@ -30,8 +33,10 @@ type Route = typeof import("@/app/api/webhooks/docusign/route");
 let POST: Route["POST"];
 
 const ENDPOINT = "https://destinlmincy.com/api/webhooks/docusign";
-const AWS_REGION = process.env.AWS_REGION;
-const HMAC_KEY = process.env.DOCUSIGN_CONNECT_HMAC_KEY;
+const HMAC_HEADER = "x-docusign-signature-1";
+const TEST_KEY = "test-key";
+const TEST_REGION = "us-east-2";
+const TEST_BUCKET = "contracts-bucket";
 
 before(async () => {
   ({ POST } = await import("@/app/api/webhooks/docusign/route"));
@@ -39,6 +44,7 @@ before(async () => {
 
 beforeEach(() => {
   resetModels(contract);
+  contract.updateMany.mock.mockImplementation(async () => ({ count: 1 }));
 
   downloadSignedPdf.mock.resetCalls();
   downloadSignedPdf.mock.mockImplementation(async () => Buffer.from("signed-pdf"));
@@ -48,15 +54,22 @@ beforeEach(() => {
     key: "k",
   }));
 
-  if (AWS_REGION === undefined) delete process.env.AWS_REGION;
-  else process.env.AWS_REGION = AWS_REGION;
-
-  if (HMAC_KEY === undefined) delete process.env.DOCUSIGN_CONNECT_HMAC_KEY;
-  else process.env.DOCUSIGN_CONNECT_HMAC_KEY = HMAC_KEY;
+  process.env.DOCUSIGN_CONNECT_HMAC_KEY = TEST_KEY;
+  process.env.AWS_REGION = TEST_REGION;
+  process.env.S3_PRIVATE_BUCKET = TEST_BUCKET;
 });
 
 // ── Fixtures ─────────────────────────────────────────────────────────────────
 
+/** The signature DocuSign would send for this exact body under this key. */
+function sign(rawBody: string, key = TEST_KEY): string {
+  return crypto.createHmac("sha256", key).update(rawBody).digest("base64");
+}
+
+/**
+ * A request signed with `TEST_KEY`, unless `headers` sets the signature
+ * header itself.
+ */
 function request(
   body: string,
   contentType: string,
@@ -64,7 +77,16 @@ function request(
 ): NextRequest {
   return new Request(ENDPOINT, {
     method: "POST",
-    headers: { "content-type": contentType, ...headers },
+    headers: { "content-type": contentType, [HMAC_HEADER]: sign(body), ...headers },
+    body,
+  }) as unknown as NextRequest;
+}
+
+/** A request with no signature header at all. */
+function unsignedRequest(body: string, contentType: string): NextRequest {
+  return new Request(ENDPOINT, {
+    method: "POST",
+    headers: { "content-type": contentType },
     body,
   }) as unknown as NextRequest;
 }
@@ -73,13 +95,17 @@ function xmlRequest(body: string): NextRequest {
   return request(body, "text/xml");
 }
 
-function connectXml(envelopeId: string, status: string): NextRequest {
-  return xmlRequest(
+function connectXmlBody(envelopeId: string, status: string): string {
+  return (
     `<?xml version="1.0" encoding="utf-8"?>` +
-      `<DocuSignEnvelopeInformation><EnvelopeStatus>` +
-      `<EnvelopeID>${envelopeId}</EnvelopeID><Status>${status}</Status>` +
-      `</EnvelopeStatus></DocuSignEnvelopeInformation>`,
+    `<DocuSignEnvelopeInformation><EnvelopeStatus>` +
+    `<EnvelopeID>${envelopeId}</EnvelopeID><Status>${status}</Status>` +
+    `</EnvelopeStatus></DocuSignEnvelopeInformation>`
   );
+}
+
+function connectXml(envelopeId: string, status: string): NextRequest {
+  return xmlRequest(connectXmlBody(envelopeId, status));
 }
 
 function jsonRequest(body: unknown): NextRequest {
@@ -92,7 +118,6 @@ function knownContract(overrides: Record<string, unknown> = {}) {
     id: "contract-1",
     clientRelationshipId: "rel-1",
     status: "SENT_FOR_SIGNING",
-    s3Bucket: "contracts-bucket",
     ...overrides,
   }));
 }
@@ -106,15 +131,31 @@ function updateData(call = 0): Record<string, unknown> {
   return argsOf(contract.update, call).data;
 }
 
-// ── HMAC verification ────────────────────────────────────────────────────────
-
-const HMAC_HEADER = "x-docusign-signature-1";
-const TEST_KEY = "test-key";
-
-/** The signature DocuSign would send for this exact body under this key. */
-function sign(rawBody: string, key = TEST_KEY): string {
-  return crypto.createHmac("sha256", key).update(rawBody).digest("base64");
+/**
+ * The `data` of the completion write. Completion goes through `updateMany`:
+ * call 0 takes the archive claim, call 1 writes COMPLETE (or releases).
+ */
+function completionData(): Record<string, unknown> {
+  return argsOf(contract.updateMany, 1).data;
 }
+
+/** The contract status the handler wrote, through either write path. */
+function writtenStatus(): unknown {
+  return contract.update.mock.callCount() > 0
+    ? updateData().status
+    : completionData().status;
+}
+
+/** No write may mark the contract COMPLETE. */
+function assertNotCompleted(): void {
+  assert.equal(contract.update.mock.callCount(), 0);
+  for (const call of contract.updateMany.mock.calls) {
+    const args = (call.arguments[0] ?? {}) as { data?: Record<string, unknown> };
+    assert.notEqual(args.data?.status, "COMPLETE");
+  }
+}
+
+// ── HMAC verification ────────────────────────────────────────────────────────
 
 /** A request carrying `signature` in the DocuSign Connect HMAC header. */
 function signedRequest(
@@ -140,12 +181,13 @@ function assertNothingProcessed(): void {
     "a rejected webhook must never reach the database",
   );
   assert.equal(contract.update.mock.callCount(), 0);
+  assert.equal(contract.updateMany.mock.callCount(), 0);
+  assert.equal(contract.findUnique.mock.callCount(), 0);
   assert.equal(downloadSignedPdf.mock.callCount(), 0);
   assert.equal(uploadToPrivateS3.mock.callCount(), 0);
 }
 
 test("accepts a JSON notification carrying a correctly computed HMAC signature", async () => {
-  process.env.DOCUSIGN_CONNECT_HMAC_KEY = TEST_KEY;
   knownContract();
 
   const body = JSON.stringify({ EnvelopeID: "env-signed", Status: "Sent" });
@@ -160,7 +202,6 @@ test("accepts a JSON notification carrying a correctly computed HMAC signature",
 });
 
 test("accepts an XML Connect notification carrying a correctly computed HMAC signature", async () => {
-  process.env.DOCUSIGN_CONNECT_HMAC_KEY = TEST_KEY;
   knownContract();
 
   const body =
@@ -174,11 +215,10 @@ test("accepts an XML Connect notification carrying a correctly computed HMAC sig
   assert.deepEqual(argsOf(contract.findFirst).where, {
     docusignEnvelopeId: "env-xml-signed",
   });
-  assert.equal(updateData().status, "COMPLETE");
+  assert.equal(completionData().status, "COMPLETE");
 });
 
 test("rejects a tampered signature with 401", async () => {
-  process.env.DOCUSIGN_CONNECT_HMAC_KEY = TEST_KEY;
   knownContract();
 
   const body = JSON.stringify({ EnvelopeID: "env-signed", Status: "completed" });
@@ -190,7 +230,6 @@ test("rejects a tampered signature with 401", async () => {
 });
 
 test("rejects a signature computed over a different body", async () => {
-  process.env.DOCUSIGN_CONNECT_HMAC_KEY = TEST_KEY;
   knownContract();
 
   const sent = JSON.stringify({ EnvelopeID: "env-signed", Status: "completed" });
@@ -205,7 +244,6 @@ test("rejects a signature computed over a different body", async () => {
 });
 
 test("rejects a signature computed with the wrong key", async () => {
-  process.env.DOCUSIGN_CONNECT_HMAC_KEY = TEST_KEY;
   knownContract();
 
   const body = JSON.stringify({ EnvelopeID: "env-signed", Status: "completed" });
@@ -216,10 +254,11 @@ test("rejects a signature computed with the wrong key", async () => {
 });
 
 test("rejects a request with no signature header when an HMAC key is configured", async () => {
-  process.env.DOCUSIGN_CONNECT_HMAC_KEY = TEST_KEY;
   knownContract();
 
-  const response = await POST(connectXml("env-signed", "completed"));
+  const response = await POST(
+    unsignedRequest(connectXmlBody("env-signed", "completed"), "text/xml"),
+  );
 
   assert.equal(response.status, 401);
   assert.deepEqual(await bodyOf(response), { error: "Invalid signature" });
@@ -227,7 +266,6 @@ test("rejects a request with no signature header when an HMAC key is configured"
 });
 
 test("rejects an empty signature header when an HMAC key is configured", async () => {
-  process.env.DOCUSIGN_CONNECT_HMAC_KEY = TEST_KEY;
   knownContract();
 
   const body = JSON.stringify({ EnvelopeID: "env-signed", Status: "completed" });
@@ -238,7 +276,6 @@ test("rejects an empty signature header when an HMAC key is configured", async (
 });
 
 test("rejects a signature whose decoded length does not match the digest", async () => {
-  process.env.DOCUSIGN_CONNECT_HMAC_KEY = TEST_KEY;
   knownContract();
 
   const body = JSON.stringify({ EnvelopeID: "env-signed", Status: "completed" });
@@ -255,7 +292,6 @@ test("rejects a signature whose decoded length does not match the digest", async
 });
 
 test("rejects a signature that is not valid base64", async () => {
-  process.env.DOCUSIGN_CONNECT_HMAC_KEY = TEST_KEY;
   knownContract();
 
   const body = JSON.stringify({ EnvelopeID: "env-signed", Status: "completed" });
@@ -266,51 +302,51 @@ test("rejects a signature that is not valid base64", async () => {
 });
 
 test("verifies the signature before parsing the body", async () => {
-  process.env.DOCUSIGN_CONNECT_HMAC_KEY = TEST_KEY;
-
   // Malformed JSON would be a 400 on its own; the signature gate comes first,
   // so an unsigned request must not reveal anything about the body.
-  const response = await POST(request("{not-json", "application/json"));
+  const response = await POST(unsignedRequest("{not-json", "application/json"));
 
   assert.equal(response.status, 401);
   assert.deepEqual(await bodyOf(response), { error: "Invalid signature" });
 });
 
-test("skips verification entirely when no HMAC key is configured", async () => {
+test("fails closed when no HMAC key is configured, even for a request that carries a signature", async () => {
   delete process.env.DOCUSIGN_CONNECT_HMAC_KEY;
   knownContract();
 
   const body = JSON.stringify({ EnvelopeID: "env-unsigned", Status: "completed" });
-  const response = await POST(signedRequest(body, "obviously-wrong"));
+  const response = await POST(signedRequest(body, sign(body)));
 
   assert.equal(
     response.status,
-    200,
-    "an unconfigured HMAC key must stay permissive rather than reject traffic",
+    401,
+    "an unconfigured HMAC key must reject traffic rather than stay permissive",
   );
-  assert.deepEqual(argsOf(contract.findFirst).where, {
-    docusignEnvelopeId: "env-unsigned",
-  });
+  assertNothingProcessed();
 });
 
-test("accepts an unsigned request when no HMAC key is configured", async () => {
+test("rejects an unsigned request when no HMAC key is configured", async () => {
   delete process.env.DOCUSIGN_CONNECT_HMAC_KEY;
   knownContract();
 
-  const response = await POST(connectXml("env-unsigned", "Sent"));
+  const response = await POST(
+    unsignedRequest(connectXmlBody("env-unsigned", "Sent"), "text/xml"),
+  );
 
-  assert.equal(response.status, 200);
-  assert.equal(updateData().status, "SENT_FOR_SIGNING");
+  assert.equal(response.status, 401);
+  assertNothingProcessed();
 });
 
 test("treats an empty HMAC key as no key at all", async () => {
   process.env.DOCUSIGN_CONNECT_HMAC_KEY = "";
   knownContract();
 
-  const response = await POST(connectXml("env-unsigned", "Sent"));
+  // A digest computed under the empty key must not slip through.
+  const body = JSON.stringify({ EnvelopeID: "env-unsigned", Status: "Sent" });
+  const response = await POST(signedRequest(body, sign(body, "")));
 
-  assert.equal(response.status, 200);
-  assert.equal(contract.findFirst.mock.callCount(), 1);
+  assert.equal(response.status, 401);
+  assertNothingProcessed();
 });
 
 // ── XML parsing ──────────────────────────────────────────────────────────────
@@ -339,7 +375,7 @@ test("matches Connect XML tags regardless of case", async () => {
   assert.deepEqual(argsOf(contract.findFirst).where, {
     docusignEnvelopeId: "env-9",
   });
-  assert.equal(updateData().status, "COMPLETE");
+  assert.equal(writtenStatus(), "COMPLETE");
 });
 
 test("acknowledges an XML body with no envelope data without touching the database", async () => {
@@ -453,7 +489,7 @@ test("parses XML delivered under a non-JSON content type", async () => {
   assert.deepEqual(argsOf(contract.findFirst).where, {
     docusignEnvelopeId: "env-multipart",
   });
-  assert.equal(updateData().status, "COMPLETE");
+  assert.equal(writtenStatus(), "COMPLETE");
 });
 
 // ── JSON parsing ─────────────────────────────────────────────────────────────
@@ -496,7 +532,7 @@ test("prefers the PascalCase fields when a payload carries both spellings", asyn
   assert.deepEqual(argsOf(contract.findFirst).where, {
     docusignEnvelopeId: "env-pascal",
   });
-  assert.equal(updateData().status, "COMPLETE");
+  assert.equal(writtenStatus(), "COMPLETE");
 });
 
 test("reads the nested data/envelopeSummary shape of the modern Connect JSON", async () => {
@@ -516,8 +552,8 @@ test("reads the nested data/envelopeSummary shape of the modern Connect JSON", a
   assert.deepEqual(argsOf(contract.findFirst).where, {
     docusignEnvelopeId: "env-nested",
   });
-  assert.equal(updateData().status, "COMPLETE");
-  assert.equal(updateData().docusignStatus, "completed");
+  assert.equal(completionData().status, "COMPLETE");
+  assert.equal(completionData().docusignStatus, "completed");
 });
 
 test("acknowledges a nested payload with no envelopeSummary", async () => {
@@ -633,11 +669,17 @@ const MAPPED_STATUSES: [docusign: string, contractStatus: string][] = [
 
 for (const [dsStatus, expected] of MAPPED_STATUSES) {
   test(`maps the DocuSign status "${dsStatus}" to ${expected}`, async () => {
-    // No bucket, so completion takes the plain status-update path.
-    knownContract({ s3Bucket: null });
+    knownContract();
 
     await POST(connectXml("env-1", dsStatus));
 
+    if (expected === "COMPLETE") {
+      // Completion is written by the archive step, after the upload.
+      assert.equal(contract.update.mock.callCount(), 0);
+      assert.equal(completionData().status, expected);
+      assert.equal(completionData().docusignStatus, dsStatus);
+      return;
+    }
     assert.equal(contract.update.mock.callCount(), 1);
     assert.deepEqual(argsOf(contract.update).where, { id: "contract-1" });
     assert.equal(updateData().status, expected);
@@ -681,12 +723,12 @@ test("acknowledges and ignores an envelope with no matching contract", async () 
     0,
     "an unknown envelope must never write to a contract",
   );
+  assert.equal(contract.updateMany.mock.callCount(), 0);
   assert.equal(downloadSignedPdf.mock.callCount(), 0);
   assert.equal(uploadToPrivateS3.mock.callCount(), 0);
 });
 
 test("does not archive a PDF for an unknown completed envelope", async () => {
-  process.env.AWS_REGION = "us-east-2";
   contract.findFirst.mock.mockImplementation(async () => null);
 
   await POST(jsonRequest({ EnvelopeID: "env-unknown", Status: "completed" }));
@@ -703,7 +745,6 @@ test("reads only the contract fields the handler needs", async () => {
     id: true,
     clientRelationshipId: true,
     status: true,
-    s3Bucket: true,
   });
 });
 
@@ -731,6 +772,7 @@ test("ignores a webhook for a contract already marked VOIDED", async () => {
   assert.equal(response.status, 200);
   assert.deepEqual(await bodyOf(response), { ok: true });
   assert.equal(contract.update.mock.callCount(), 0);
+  assert.equal(contract.updateMany.mock.callCount(), 0);
 });
 
 test("does not record an intermediate status against a terminal contract", async () => {
@@ -742,7 +784,6 @@ test("does not record an intermediate status against a terminal contract", async
 });
 
 test("does not re-archive when DocuSign replays a completion", async () => {
-  process.env.AWS_REGION = "us-east-2";
   knownContract({ status: "COMPLETE" });
 
   await POST(connectXml("env-123", "completed"));
@@ -754,17 +795,33 @@ test("does not re-archive when DocuSign replays a completion", async () => {
   );
   assert.equal(uploadToPrivateS3.mock.callCount(), 0);
   assert.equal(contract.update.mock.callCount(), 0);
+  assert.equal(contract.updateMany.mock.callCount(), 0);
 });
 
 // ── Archiving the signed PDF on completion ───────────────────────────────────
 
-test("archives the signed PDF to S3 when an envelope completes", async () => {
-  process.env.AWS_REGION = "us-east-2";
+/** Silences the expected `console.error` from a failed archive. */
+async function withQuietErrors<T>(run: () => Promise<T>): Promise<T> {
+  const consoleError = mock.method(console, "error", () => undefined);
+  try {
+    return await run();
+  } finally {
+    consoleError.mock.restore();
+  }
+}
+
+test("archives the signed PDF to S3 before marking the contract COMPLETE", async () => {
   knownContract();
 
   const response = await POST(connectXml("env-123", "Completed"));
 
+  assert.equal(response.status, 200);
   assert.deepEqual(await bodyOf(response), { ok: true });
+
+  const claim = argsOf(contract.updateMany, 0);
+  assert.equal(claim.where.id, "contract-1");
+  assert.equal(claim.where.docusignEnvelopeId, "env-123");
+  assert.ok(claim.data.signedPdfArchiveClaimedAt instanceof Date);
 
   assert.equal(downloadSignedPdf.mock.callCount(), 1);
   assert.deepEqual(downloadSignedPdf.mock.calls[0]?.arguments, ["env-123"]);
@@ -774,92 +831,131 @@ test("archives the signed PDF to S3 when an envelope completes", async () => {
   assert.deepEqual(body, Buffer.from("signed-pdf"));
   assert.equal(contentType, "application/pdf");
 
-  assert.deepEqual(updateData(), {
+  assert.deepEqual(completionData(), {
     status: "COMPLETE",
     docusignStatus: "Completed",
-    s3Key: "contracts/rel-1/signed-env-123.pdf",
+    s3Key: "k",
+    s3Bucket: "contracts-bucket",
+    signedPdfArchiveClaimedAt: null,
   });
+  assert.equal(contract.update.mock.callCount(), 0);
 });
 
-test("still marks the contract COMPLETE when archival fails", async () => {
-  process.env.AWS_REGION = "us-east-2";
+test("does not mark the contract COMPLETE when the signed PDF download fails", async () => {
   knownContract();
   downloadSignedPdf.mock.mockImplementation(async () => {
     throw new Error("DocuSign download failed");
   });
 
-  const consoleError = mock.method(console, "error", () => undefined);
+  const response = await withQuietErrors(() =>
+    POST(connectXml("env-123", "completed")),
+  );
 
-  try {
-    const response = await POST(connectXml("env-123", "completed"));
-
-    assert.deepEqual(await bodyOf(response), { ok: true });
-    assert.equal(uploadToPrivateS3.mock.callCount(), 0);
-    assert.deepEqual(updateData(), {
-      status: "COMPLETE",
-      docusignStatus: "completed",
-    });
-    assert.equal(
-      updateData().s3Key,
-      undefined,
-      "a failed archival must not point the contract at a missing object",
-    );
-    assert.equal(consoleError.mock.callCount(), 1);
-  } finally {
-    consoleError.mock.restore();
-  }
+  assert.equal(response.status, 500, "a non-2xx answer makes Connect retry");
+  assert.equal(uploadToPrivateS3.mock.callCount(), 0);
+  assertNotCompleted();
+  assert.deepEqual(
+    completionData(),
+    { signedPdfArchiveClaimedAt: null },
+    "a failed archive must release its claim so a retry can run",
+  );
 });
 
-test("still marks the contract COMPLETE when the S3 upload fails", async () => {
-  process.env.AWS_REGION = "us-east-2";
+test("does not mark the contract COMPLETE when the S3 upload fails", async () => {
   knownContract();
   uploadToPrivateS3.mock.mockImplementation(async () => {
     throw new Error("access denied");
   });
 
-  const consoleError = mock.method(console, "error", () => undefined);
+  const response = await withQuietErrors(() =>
+    POST(connectXml("env-123", "completed")),
+  );
 
-  try {
-    await POST(connectXml("env-123", "completed"));
-
-    assert.deepEqual(updateData(), {
-      status: "COMPLETE",
-      docusignStatus: "completed",
-    });
-  } finally {
-    consoleError.mock.restore();
-  }
+  assert.equal(response.status, 500);
+  assertNotCompleted();
+  assert.deepEqual(completionData(), { signedPdfArchiveClaimedAt: null });
 });
 
-test("skips archival when AWS_REGION is not configured", async () => {
+test("refuses to complete when AWS_REGION is not configured", async () => {
   delete process.env.AWS_REGION;
   knownContract();
 
-  await POST(connectXml("env-123", "completed"));
+  const response = await POST(connectXml("env-123", "completed"));
 
+  assert.equal(response.status, 503);
   assert.equal(downloadSignedPdf.mock.callCount(), 0);
   assert.equal(uploadToPrivateS3.mock.callCount(), 0);
-  assert.deepEqual(updateData(), {
-    status: "COMPLETE",
-    docusignStatus: "completed",
-  });
+  assert.equal(contract.updateMany.mock.callCount(), 0);
+  assertNotCompleted();
 });
 
-test("skips archival when the contract has no S3 bucket", async () => {
-  process.env.AWS_REGION = "us-east-2";
+test("refuses to complete when S3_PRIVATE_BUCKET is not configured", async () => {
+  delete process.env.S3_PRIVATE_BUCKET;
+  knownContract();
+
+  const response = await POST(connectXml("env-123", "completed"));
+
+  assert.equal(response.status, 503);
+  assert.equal(downloadSignedPdf.mock.callCount(), 0);
+  assert.equal(contract.updateMany.mock.callCount(), 0);
+  assertNotCompleted();
+});
+
+test("archives into the configured bucket even when the contract has no stored bucket", async () => {
   knownContract({ s3Bucket: null });
 
-  await POST(connectXml("env-123", "completed"));
+  const response = await POST(connectXml("env-123", "completed"));
 
-  assert.equal(downloadSignedPdf.mock.callCount(), 0);
-  assert.deepEqual(updateData(), {
-    status: "COMPLETE",
-    docusignStatus: "completed",
+  assert.equal(response.status, 200);
+  assert.equal(downloadSignedPdf.mock.callCount(), 1);
+  assert.equal(completionData().status, "COMPLETE");
+  assert.equal(completionData().s3Bucket, "contracts-bucket");
+});
+
+test("a replay after a failed archive completes the contract", async () => {
+  knownContract();
+  downloadSignedPdf.mock.mockImplementation(async () => {
+    throw new Error("DocuSign download failed");
   });
+
+  const failed = await withQuietErrors(() => POST(connectXml("env-123", "completed")));
+  assert.equal(failed.status, 500);
+
+  downloadSignedPdf.mock.mockImplementation(async () => Buffer.from("signed-pdf"));
+  contract.updateMany.mock.resetCalls();
+
+  const replayed = await POST(connectXml("env-123", "completed"));
+
+  assert.equal(replayed.status, 200);
+  assert.equal(completionData().status, "COMPLETE");
+});
+
+test("answers 409 while another delivery holds the archive claim", async () => {
+  knownContract();
+  contract.updateMany.mock.mockImplementation(async () => ({ count: 0 }));
+  contract.findUnique.mock.mockImplementation(async () => ({
+    status: "SENT_FOR_SIGNING",
+  }));
+
+  const response = await POST(connectXml("env-123", "completed"));
+
+  assert.equal(response.status, 409);
+  assert.equal(downloadSignedPdf.mock.callCount(), 0);
+  assert.equal(uploadToPrivateS3.mock.callCount(), 0);
+});
+
+test("acknowledges a completion that a concurrent delivery already finished", async () => {
+  knownContract();
+  contract.updateMany.mock.mockImplementation(async () => ({ count: 0 }));
+  contract.findUnique.mock.mockImplementation(async () => ({ status: "COMPLETE" }));
+
+  const response = await POST(connectXml("env-123", "completed"));
+
+  assert.equal(response.status, 200);
+  assert.equal(downloadSignedPdf.mock.callCount(), 0);
 });
 
 test("never archives for a non-completed status", async () => {
-  process.env.AWS_REGION = "us-east-2";
   knownContract();
 
   await POST(connectXml("env-123", "delivered"));

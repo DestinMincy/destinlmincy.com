@@ -3,8 +3,7 @@ import crypto from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 
 import { prisma } from "@/lib/db/client";
-import { downloadSignedPdf } from "@/lib/docusign/client";
-import { uploadToPrivateS3 } from "@/lib/storage/s3";
+import { completeSignedContract } from "@/lib/docusign/completion";
 
 // DocuSign sends Connect notifications as XML (multipart/form-data or application/xml).
 // We parse the relevant fields from the JSON-formatted Connect message if configured,
@@ -16,12 +15,12 @@ interface DocuSignConnectEvent {
 }
 
 /**
- * Verify the DocuSign Connect HMAC-SHA256 signature when a key is configured.
- * Returns true if the key is not configured (permissive) or the signature matches.
+ * Verify the DocuSign Connect HMAC-SHA256 signature. Fails closed: with no
+ * key configured, or no signature on the request, nothing is accepted.
  */
 async function verifyHmac(rawBody: string, signature: string | null): Promise<boolean> {
   const key = process.env.DOCUSIGN_CONNECT_HMAC_KEY;
-  if (!key) return true; // HMAC not configured — skip verification
+  if (!key) return false;
   if (!signature) return false;
   const expected = crypto
     .createHmac("sha256", key)
@@ -133,7 +132,7 @@ export async function POST(req: NextRequest) {
 
   const contract = await prisma.contract.findFirst({
     where: { docusignEnvelopeId: envelopeId },
-    select: { id: true, clientRelationshipId: true, status: true, s3Bucket: true },
+    select: { id: true, clientRelationshipId: true, status: true },
   });
 
   if (!contract) {
@@ -156,34 +155,41 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true });
   }
 
-  // When the envelope completes (both parties signed), download and archive the signed PDF.
-  if (newStatus === "COMPLETE" && process.env.AWS_REGION && contract.s3Bucket) {
-    try {
-      const signedPdf = await downloadSignedPdf(envelopeId);
-      const signedKey = `contracts/${contract.clientRelationshipId}/signed-${envelopeId}.pdf`;
-      await uploadToPrivateS3(signedKey, signedPdf, "application/pdf");
-      await prisma.contract.update({
-        where: { id: contract.id },
-        data: {
-          status: "COMPLETE",
-          docusignStatus: dsStatus,
-          s3Key: signedKey,
-        },
-      });
-    } catch (err: unknown) {
-      console.error("Failed to archive signed PDF", err);
-      // Still update status even if archival fails.
-      await prisma.contract.update({
-        where: { id: contract.id },
-        data: { status: "COMPLETE", docusignStatus: dsStatus },
-      });
-    }
-  } else {
-    await prisma.contract.update({
-      where: { id: contract.id },
-      data: { status: newStatus, docusignStatus: dsStatus },
+  if (newStatus === "COMPLETE") {
+    // COMPLETE is written only after the signed PDF is in S3. Every other
+    // outcome answers non-2xx so DocuSign Connect redelivers the notification.
+    const result = await completeSignedContract({
+      contractId: contract.id,
+      clientRelationshipId: contract.clientRelationshipId,
+      envelopeId,
+      docusignStatus: dsStatus,
     });
+    switch (result.status) {
+      case "completed":
+      case "already-complete":
+        return NextResponse.json({ ok: true });
+      case "in-progress":
+        return NextResponse.json(
+          { error: "Signed PDF archival already in progress" },
+          { status: 409 },
+        );
+      case "storage-not-configured":
+        return NextResponse.json(
+          { error: "Signed PDF storage is not configured" },
+          { status: 503 },
+        );
+      case "archive-failed":
+        return NextResponse.json(
+          { error: "Signed PDF archival failed" },
+          { status: 500 },
+        );
+    }
   }
+
+  await prisma.contract.update({
+    where: { id: contract.id },
+    data: { status: newStatus, docusignStatus: dsStatus },
+  });
 
   return NextResponse.json({ ok: true });
 }

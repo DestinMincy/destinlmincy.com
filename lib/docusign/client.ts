@@ -103,15 +103,13 @@ export interface SendEnvelopeOptions {
 }
 
 /**
- * Creates a DocuSign envelope with one client signer plus admin countersignature.
- * Returns the envelope ID and current status.
+ * Builds the envelope: one client signer plus admin countersignature, with a
+ * Connect notification back to `webhookUrl`. Connect signs each notification
+ * (`includeHMAC`), because the webhook rejects unsigned requests.
  */
-export async function sendEnvelopeForSigning(
+export function buildEnvelopeDefinition(
   options: SendEnvelopeOptions,
-): Promise<{ envelopeId: string; status: string }> {
-  const { client, accountId } = await getDocuSignApiClient();
-  const envelopesApi = new (loadDocuSign().EnvelopesApi)(client);
-
+): docusign.EnvelopeDefinition {
   const docBase64 = options.pdfBuffer.toString("base64");
 
   const document: docusign.Document = {
@@ -157,7 +155,7 @@ export async function sendEnvelopeForSigning(
     },
   };
 
-  const envelopeDefinition: docusign.EnvelopeDefinition = {
+  return {
     emailSubject: `Please sign: ${options.documentName}`,
     documents: [document],
     recipients: {
@@ -168,6 +166,7 @@ export async function sendEnvelopeForSigning(
       url: options.webhookUrl,
       loggingEnabled: "true",
       requireAcknowledgment: "true",
+      includeHMAC: "true",
       envelopeEvents: [
         { envelopeEventStatusCode: "sent" },
         { envelopeEventStatusCode: "delivered" },
@@ -183,9 +182,20 @@ export async function sendEnvelopeForSigning(
       ] as docusign.RecipientEvent[],
     },
   };
+}
+
+/**
+ * Creates a DocuSign envelope from `buildEnvelopeDefinition`.
+ * Returns the envelope ID and current status.
+ */
+export async function sendEnvelopeForSigning(
+  options: SendEnvelopeOptions,
+): Promise<{ envelopeId: string; status: string }> {
+  const { client, accountId } = await getDocuSignApiClient();
+  const envelopesApi = new (loadDocuSign().EnvelopesApi)(client);
 
   const result = await envelopesApi.createEnvelope(accountId, {
-    envelopeDefinition,
+    envelopeDefinition: buildEnvelopeDefinition(options),
   });
 
   return {

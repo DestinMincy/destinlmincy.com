@@ -369,6 +369,9 @@ model Contract {
   docusignStatus            String?
   s3Key                     String?
   s3Bucket                  String?
+  /// Set while one webhook delivery archives the signed PDF, so a concurrent
+  /// completion notification for the same envelope does not upload it again.
+  signedPdfArchiveClaimedAt DateTime?
   createdAt                 DateTime       @default(now())
   updatedAt                 DateTime       @updatedAt
 
