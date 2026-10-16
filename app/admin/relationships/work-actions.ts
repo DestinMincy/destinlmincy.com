@@ -297,6 +297,17 @@ export async function updateProjectAction(
         },
       };
     }
+
+    if (result === "payment-gate-blocked") {
+      return {
+        status: "error",
+        values,
+        errors: {
+          status:
+            "A required payment gate on this project is still unpaid. Mark it paid or waived before starting work.",
+        },
+      };
+    }
   } catch (error: unknown) {
     console.error("Failed to update project", error);
     return { status: "error", values, errors: {}, formError: SAVE_ERROR };

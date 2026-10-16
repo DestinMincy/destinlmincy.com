@@ -48,7 +48,7 @@ Canonical brand colors:
 | Brand gold | `--brand-gold` | `#ffd700` |
 | Brand silver | `--brand-silver` | `#c0c0c0` |
 
-Legacy source tokens from `src/styles/main.css`:
+Legacy source tokens, recorded here from the retired Eleventy stylesheet (`src/styles/main.css`, removed in Unit 16):
 
 | Role | CSS Variable | Value |
 | --- | --- | --- |
