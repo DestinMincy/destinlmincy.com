@@ -1,12 +1,14 @@
+import { Show, UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 
-import { navItems } from "@/lib/site";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { clerkAppearance } from "@/lib/auth/clerk-appearance";
+import { navItems } from "@/lib/site";
 
 /**
- * Renders the site header with branding, theme toggle, and primary navigation.
- *
- * @returns The site header component.
+ * Renders the site header with branding, primary navigation, the account
+ * entry point (sign in for visitors, portal link and user menu for signed-in
+ * users), and the theme toggle.
  */
 export function SiteHeader() {
   return (
@@ -31,6 +33,28 @@ export function SiteHeader() {
             </Link>
           ))}
         </nav>
+
+        <div className="site-header__account">
+          <Show
+            when="signed-in"
+            fallback={
+              <Link
+                className="button button--secondary button--compact"
+                href="/sign-in"
+              >
+                Client sign in
+              </Link>
+            }
+          >
+            <Link
+              className="button button--secondary button--compact"
+              href="/portal"
+            >
+              Portal
+            </Link>
+            <UserButton appearance={clerkAppearance} />
+          </Show>
+        </div>
 
         <ThemeToggle />
       </div>

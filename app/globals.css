@@ -198,10 +198,16 @@ main {
 
 .site-header__inner {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto 1fr auto auto;
   gap: 20px;
   align-items: center;
   min-height: 76px;
+}
+
+.site-header__account {
+  display: flex;
+  gap: 12px;
+  align-items: center;
 }
 
 .brand,
@@ -1374,6 +1380,13 @@ textarea:focus {
     grid-row: 2;
     justify-content: flex-start;
     order: 3;
+  }
+
+  .site-header__account {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    justify-self: start;
+    padding-bottom: 8px;
   }
 
   .hero-section,
