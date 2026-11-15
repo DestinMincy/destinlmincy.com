@@ -815,6 +815,26 @@ textarea:focus {
   font-size: 0.95rem;
 }
 
+.site-footer__meta p {
+  margin: 0;
+}
+
+.site-footer__legal {
+  display: flex;
+  gap: 14px;
+  margin-top: 6px;
+}
+
+.site-footer__legal a {
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.site-footer__legal a:hover {
+  color: var(--text);
+}
+
 .site-footer__nav {
   display: flex;
   flex-wrap: wrap;

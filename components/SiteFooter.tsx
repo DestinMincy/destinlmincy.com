@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { navItems, site } from "@/lib/site";
+import { legalItems, navItems, site } from "@/lib/site";
 
 /**
  * Renders the site footer with branding, navigation, and contact information.
@@ -32,9 +32,18 @@ export function SiteFooter() {
           ))}
         </nav>
 
-        <p className="site-footer__meta">
-          <a href={`mailto:${site.email}`}>{site.email}</a>
-        </p>
+        <div className="site-footer__meta">
+          <p>
+            <a href={`mailto:${site.email}`}>{site.email}</a>
+          </p>
+          <nav className="site-footer__legal" aria-label="Legal">
+            {legalItems.map((item) => (
+              <Link key={item.href} href={item.href}>
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
       </div>
     </footer>
   );

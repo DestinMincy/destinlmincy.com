@@ -26,6 +26,11 @@ export const navItems = [
   { href: "/contact", label: "Contact" },
 ] as const;
 
+export const legalItems = [
+  { href: "/privacy", label: "Privacy" },
+  { href: "/terms", label: "Terms" },
+] as const;
+
 export const topicOptions = [
   { value: "agent-build", label: "A new AI agent build" },
   { value: "agent-ops", label: "Ongoing agent ops" },
